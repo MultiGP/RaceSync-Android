@@ -35,7 +35,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.multigp.racesync.ui.theme.multiGPRed
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -116,7 +118,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
             modifier = modifier
                 .clickable {}
                 .padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = multiGPRed,
             style = MaterialTheme.typography.titleSmall,
             text = stringResource(R.string.login_forgot_password)
         )
@@ -124,7 +126,7 @@ fun LoginForm(modifier: Modifier = Modifier) {
             modifier = modifier
                 .clickable {}
                 .padding(top = 16.dp),
-            color = MaterialTheme.colorScheme.primary,
+            color = multiGPRed,
             style = MaterialTheme.typography.titleSmall,
             text = stringResource(R.string.login_create_account)
         )
@@ -181,11 +183,13 @@ fun Footer(modifier: Modifier = Modifier) {
                 modifier = modifier,
                 color = Color.Gray,
                 style = MaterialTheme.typography.bodyMedium,
-                text = stringResource(R.string.footer_powered_by)
+                text = stringResource(R.string.footer_powered_by),
+                fontSize = 8.sp
+
             )
-            Spacer(modifier = modifier.height(16.dp))
+            Spacer(modifier = modifier.height(10.dp))
             Image(
-                modifier = modifier.width(120.dp),
+                modifier = modifier.width(80.dp),
                 painter = painterResource(id = R.drawable.logo_powered_by),
                 contentDescription = null,
                 contentScale = ContentScale.Crop
