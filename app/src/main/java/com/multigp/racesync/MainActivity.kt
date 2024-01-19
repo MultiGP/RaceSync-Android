@@ -3,7 +3,6 @@ package com.multigp.racesync
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.annotation.StringRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -17,25 +16,25 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.multigp.racesync.composables.CustomTextField
+import com.multigp.racesync.composables.PasswordTextField
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.ui.theme.multiGPRed
 
@@ -100,19 +99,23 @@ fun LoginForm(modifier: Modifier = Modifier) {
             text = stringResource(R.string.login_title),
             style = MaterialTheme.typography.bodyMedium
         )
-        LoginTextField(
+        CustomTextField(
             modifier = modifier
                 .fillMaxWidth()
                 .height(56.dp),
             placeholder = R.string.login_email_placeholder,
-            icon = Icons.Default.Email
+            icon = Icons.Default.Email,
+            imeAction = ImeAction.Next,
+            keyboardType = KeyboardType.Email
         )
-        LoginTextField(
+        PasswordTextField(
             modifier = modifier
                 .fillMaxWidth()
                 .height(56.dp),
             placeholder = R.string.login_password_placeholder,
-            icon = Icons.Default.Lock
+            icon = Icons.Default.Lock,
+            imeAction = ImeAction.Done,
+            keyboardType = KeyboardType.Password
         )
         Text(
             modifier = modifier
@@ -142,32 +145,6 @@ fun LoginForm(modifier: Modifier = Modifier) {
             )
         }
     }
-}
-
-@Composable
-fun LoginTextField(
-    @StringRes placeholder: Int,
-    icon: ImageVector,
-    modifier: Modifier = Modifier
-) {
-    TextField(
-        modifier = modifier,
-        value = "",
-        onValueChange = {},
-        leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
-        },
-        colors = TextFieldDefaults.colors(
-            unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-            focusedContainerColor = MaterialTheme.colorScheme.surface
-        ),
-        placeholder = {
-            Text(stringResource(id = placeholder))
-        },
-    )
 }
 
 
