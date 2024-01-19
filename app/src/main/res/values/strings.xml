@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">RaceSync</string>
+    <string name="login_title">Login with MultiGP</string>
+    <string name="login_email_placeholder">Email</string>
+    <string name="login_password_placeholder">Password</string>
+    <string name="login_forgot_password">Forgot your password?</string>
+    <string name="login_create_account">Create an account?</string>
+    <string name="login_btn_login">Login</string>
+    <string name="login_term_of_use">By tapping \"Login\" you will accept our Terms of Use.</string>
+    <string name="footer_powered_by">POWERED BY</string>
 </resources>
