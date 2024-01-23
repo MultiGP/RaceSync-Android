@@ -31,19 +31,20 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
 fun PasswordTextField(
+    password: String,
     @StringRes placeholder: Int,
     icon: ImageVector,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Password,
     imeAction: ImeAction = ImeAction.Default,
+    onPasswordChanged: (String) -> Unit = {}
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
-    var password by remember { mutableStateOf("") }
 
     TextField(
         modifier = modifier,
         value = password,
-        onValueChange = { password = it },
+        onValueChange = onPasswordChanged,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.surface,
             focusedContainerColor = MaterialTheme.colorScheme.surface
@@ -90,7 +91,7 @@ fun PasswordTextFieldPreview() {
             modifier = Modifier,
             contentAlignment = Alignment.Center
         ) {
-            PasswordTextField(R.string.login_password_placeholder, Icons.Default.Lock)
+            PasswordTextField("", R.string.login_password_placeholder, Icons.Default.Lock)
         }
     }
 }

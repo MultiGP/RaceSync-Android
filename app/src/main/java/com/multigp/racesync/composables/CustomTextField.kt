@@ -11,10 +11,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -27,18 +23,18 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
 fun CustomTextField(
+    text: String,
     @StringRes placeholder: Int,
     icon: ImageVector,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
-    imeAction: ImeAction = ImeAction.Default
+    imeAction: ImeAction = ImeAction.Default,
+    onTextChanged: (String) -> Unit = {},
 ) {
-    var text by remember { mutableStateOf("") }
-
     TextField(
         modifier = modifier,
         value = text,
-        onValueChange = { text = it },
+        onValueChange = onTextChanged,
         leadingIcon = {
             Icon(
                 imageVector = icon,
@@ -67,7 +63,11 @@ fun CustomTextField() {
             modifier = Modifier,
             contentAlignment = Alignment.Center
         ) {
-            CustomTextField(R.string.login_email_placeholder, Icons.Default.Email)
+            CustomTextField(
+                "farooq.zaman@me.com",
+                R.string.login_email_placeholder,
+                Icons.Default.Email
+            )
         }
     }
 }
