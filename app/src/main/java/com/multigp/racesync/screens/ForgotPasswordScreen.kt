@@ -1,28 +1,29 @@
 package com.multigp.racesync.screens
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.Text
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.multigp.racesync.composables.OnboardingTopBar
+import com.multigp.racesync.composables.RSWebView
+
 
 @Composable
-fun ForgotPasswordScreen(modifier: Modifier = Modifier) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
+fun ForgotPasswordScreen(
+    modifier: Modifier = Modifier,
+    onClickBack: () -> Unit = {}
+) {
+    OnboardingTopBar(
+        title = "Recover Password",
+        modifier = modifier,
+        onClickLeftIcon = onClickBack
     ) {
-        Text(text = "Forgot Password Screen here")
+        RSWebView(
+            modifier = modifier
+                .fillMaxSize()
+                .padding(paddingValues = it),
+            url = "https://www.multigp.com/initiatepasswordreset/"
+        )
     }
 }
 
-@Preview(device = "id:Nexus One")
-@Composable
-fun ForgotPasswordScreenPreview() {
-    RaceSyncTheme {
-        ForgotPasswordScreen()
-    }
-}

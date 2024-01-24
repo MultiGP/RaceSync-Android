@@ -31,10 +31,18 @@ fun NavGraph(
             )
         }
         composable(route = Registration.route) {
-            RegistrationScreen()
+            RegistrationScreen(
+                onClickBack = {
+                    navController.popBackStack()
+                }
+            )
         }
         composable(route = ForgotPassword.route) {
-            ForgotPasswordScreen()
+            ForgotPasswordScreen(
+                onClickBack = {
+                    navController.popBackStack()
+                }
+            )
         }
     }
 }
