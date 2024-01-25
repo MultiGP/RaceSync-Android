@@ -8,4 +8,9 @@
     <string name="login_btn_login">Login</string>
     <string name="login_term_of_use">By tapping \"Login\" you will accept our Terms of Use.</string>
     <string name="footer_powered_by">POWERED BY</string>
+    <string name="title_activity_landing">LandingActivity</string>
+    <string name="tab_title_joined_races">Joined</string>
+    <string name="tab_title_nearby_races">Nearby</string>
+    <string name="tab_title_chapters">Chapters</string>
+
 </resources>

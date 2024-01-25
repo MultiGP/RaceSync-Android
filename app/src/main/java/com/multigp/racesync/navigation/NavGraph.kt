@@ -1,20 +1,24 @@
 package com.multigp.racesync.navigation
 
+import android.content.Intent
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.multigp.racesync.screens.ForgotPasswordScreen
-import com.multigp.racesync.screens.LoginScreen
-import com.multigp.racesync.screens.RegistrationScreen
+import com.multigp.racesync.LandingActivity
+import com.multigp.racesync.screens.onboarding.ForgotPasswordScreen
+import com.multigp.racesync.screens.onboarding.LoginScreen
+import com.multigp.racesync.screens.onboarding.RegistrationScreen
 
 @Composable
 fun NavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
     NavHost(
         navController = navController,
         startDestination = Login.route,
@@ -22,6 +26,9 @@ fun NavGraph(
     ) {
         composable(route = Login.route) {
             LoginScreen(
+                onClickLogin = {
+                    context.startActivity(Intent(context, LandingActivity::class.java))
+                },
                 onClickRecoverPassword = {
                     navController.navigateSingleTopTo(ForgotPassword.route)
                 },

@@ -1,4 +1,4 @@
-package com.multigp.racesync.screens
+package com.multigp.racesync.screens.onboarding
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding

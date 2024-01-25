@@ -12,7 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import com.multigp.racesync.navigation.NavGraph
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
-class MainActivity : ComponentActivity() {
+class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

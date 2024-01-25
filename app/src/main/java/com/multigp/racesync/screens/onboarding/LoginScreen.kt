@@ -1,4 +1,4 @@
-package com.multigp.racesync.screens
+package com.multigp.racesync.screens.onboarding
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
@@ -46,7 +46,8 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     viewModel: LoginViewModel = viewModel(),
     onClickRegisterAccount: () -> Unit = {},
-    onClickRecoverPassword: () -> Unit = {}
+    onClickRecoverPassword: () -> Unit = {},
+    onClickLogin: () -> Unit = {}
 ) {
     val loginUiState by viewModel.uiState.collectAsState()
     Surface(
@@ -70,6 +71,7 @@ fun LoginScreen(
                 onEmailChanged = { viewModel.onEmailChanged(it) },
                 onPasswordChanged = { viewModel.onPasswordChanged(it) },
                 modifier = modifier,
+                onClickLogin = onClickLogin,
                 onClickRegisterAccount = onClickRegisterAccount,
                 onClickRecoverPassword = onClickRecoverPassword
             )
@@ -95,6 +97,7 @@ fun LoginForm(
     modifier: Modifier = Modifier,
     onEmailChanged: (String) -> Unit = {},
     onPasswordChanged: (String) -> Unit = {},
+    onClickLogin: () -> Unit = {},
     onClickRegisterAccount: () -> Unit = {},
     onClickRecoverPassword: () -> Unit = {}
 ) {
@@ -155,7 +158,7 @@ fun LoginForm(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            onClick = {}
+            onClick = onClickLogin
         ) {
             Text(
                 style = MaterialTheme.typography.titleMedium,
