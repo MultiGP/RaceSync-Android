@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
-import com.multigp.racesync.navigation.NavGraph
+import com.multigp.racesync.navigation.OnboardingNavGraph
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 class OnboardingActivity : ComponentActivity() {
@@ -30,7 +30,7 @@ fun RaceSyncApp() {
             modifier = Modifier.fillMaxSize(),
             color = MaterialTheme.colorScheme.background
         ) {
-            NavGraph(navController = navController)
+            OnboardingNavGraph(navController = navController)
         }
     }
 }

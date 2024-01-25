@@ -1,10 +1,14 @@
 package com.multigp.racesync.navigation
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -32,6 +36,7 @@ fun LandingTopBar(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
+    onMenuClicked: () -> Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface
@@ -39,14 +44,24 @@ fun LandingTopBar(
         Column(
             modifier = modifier.fillMaxWidth()
         ) {
-            Image(
-                modifier = modifier
-                    .height(48.dp)
-                    .align(Alignment.CenterHorizontally),
-                painter = painterResource(id = R.drawable.racesync_logo),
-                contentScale = ContentScale.Inside,
-                contentDescription = null
-            )
+            Box(modifier = modifier.fillMaxWidth()) {
+                Image(
+                    modifier = modifier
+                        .height(48.dp)
+                        .align(Alignment.Center),
+                    painter = painterResource(id = R.drawable.racesync_logo),
+                    contentScale = ContentScale.Inside,
+                    contentDescription = null,
+                )
+                IconButton(
+                    modifier = modifier.align(Alignment.CenterStart),
+                    onClick = onMenuClicked
+                ) {
+                    Image(
+                        imageVector = Icons.Default.Menu,
+                        contentDescription = null)
+                }
+            }
             LandingTabs(
                 tabs = tabs,
                 pagerState = pagerState,

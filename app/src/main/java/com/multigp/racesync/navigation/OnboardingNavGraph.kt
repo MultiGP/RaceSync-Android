@@ -14,7 +14,7 @@ import com.multigp.racesync.screens.onboarding.LoginScreen
 import com.multigp.racesync.screens.onboarding.RegistrationScreen
 
 @Composable
-fun NavGraph(
+fun OnboardingNavGraph(
     navController: NavHostController,
     modifier: Modifier = Modifier
 ) {

@@ -1,40 +1,73 @@
 package com.multigp.racesync.screens.landing
 
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.material3.DrawerState
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalDrawerSheet
+import androidx.compose.material3.ModalNavigationDrawer
+import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
-import com.google.accompanist.pager.rememberPagerState
-import com.multigp.racesync.navigation.LandingTopBar
-import com.multigp.racesync.navigation.landingTabs
-import com.multigp.racesync.ui.theme.RaceSyncTheme
+import androidx.navigation.NavHostController
+import com.multigp.racesync.navigation.LandingNavGraph
+import com.multigp.racesync.navigation.NavDestination
+import com.multigp.racesync.navigation.drawerMenu
+import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalPagerApi::class)
 @Composable
-fun LandingScreen(modifier: Modifier = Modifier) {
-    val pagerState = rememberPagerState()
-    Scaffold(
-        topBar = { LandingTopBar(tabs = landingTabs, pagerState = pagerState) }
-    )
-    { paddingValues ->
-        HorizontalPager(
-            state = pagerState,
-            count = landingTabs.size,
-            modifier = modifier.padding(paddingValues)
-        ) { page ->
-            landingTabs[page].screen()
+fun LandingScreen(
+    navController: NavHostController,
+    drawerState: DrawerState,
+    modifier: Modifier = Modifier
+) {
+    val scope = rememberCoroutineScope()
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                DrawerContent(menus = drawerMenu) { route ->
+                    scope.launch {
+                        drawerState.close()
+                    }
+                    navController.navigate(route)
+                }
+            }
         }
+    ) {
+        LandingNavGraph(
+            navController = navController,
+            modifier = modifier,
+            onMenuClicked = {
+                scope.launch {
+                    drawerState.open()
+                }
+            }
+        )
     }
 }
 
-
-@Preview(showBackground = true)
 @Composable
-fun LandingScreenView() {
-    RaceSyncTheme {
-        LandingScreen()
+fun DrawerContent(
+    menus: List<NavDestination>,
+    modifier: Modifier = Modifier,
+    onMenuClick: (String) -> Unit
+) {
+    Column(modifier = modifier.fillMaxSize()) {
+        Text(
+            text = "Settings",
+            color = MaterialTheme.colorScheme.primary,
+            style = MaterialTheme.typography.titleMedium
+        )
+        menus.forEach {
+            NavigationDrawerItem(
+                label = { Text(text = it.title!!) },
+                icon = { Image(imageVector = it.icon!!, contentDescription = null) },
+                selected = false,
+                onClick = { onMenuClick(it.route) })
+        }
     }
 }
