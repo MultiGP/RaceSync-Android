@@ -1,6 +1,7 @@
 package com.multigp.racesync.screens.landing
 
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.rememberScaffoldState
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -8,7 +9,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
-import com.multigp.racesync.navigation.LandingTopBar
+import com.multigp.racesync.composables.HomeScreenTopBar
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
@@ -21,7 +22,7 @@ fun HomeScreen(
     val pagerState = rememberPagerState()
     Scaffold(
         topBar = {
-            LandingTopBar(
+            HomeScreenTopBar(
                 tabs = landingTabs,
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked

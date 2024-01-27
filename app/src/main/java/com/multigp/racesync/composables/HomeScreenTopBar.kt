@@ -1,4 +1,4 @@
-package com.multigp.racesync.navigation
+package com.multigp.racesync.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
@@ -27,12 +27,13 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
+import com.multigp.racesync.navigation.TabItem
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun LandingTopBar(
+fun HomeScreenTopBar(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
@@ -62,7 +63,7 @@ fun LandingTopBar(
                         contentDescription = null)
                 }
             }
-            LandingTabs(
+            HomeScreenTabs(
                 tabs = tabs,
                 pagerState = pagerState,
                 modifier = modifier
@@ -74,7 +75,7 @@ fun LandingTopBar(
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun LandingTabs(
+fun HomeScreenTabs(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier
@@ -116,7 +117,7 @@ fun LandingTabs(
 @OptIn(ExperimentalPagerApi::class)
 @Preview(showBackground = true)
 @Composable
-fun LandingTopBarPreview() {
+fun HomeScreenTopBarPreview() {
     val tabs = listOf(
         TabItem.Joined,
         TabItem.Nearby,
@@ -124,19 +125,19 @@ fun LandingTopBarPreview() {
     )
     val pagerState = rememberPagerState()
     RaceSyncTheme {
-        LandingTopBar(tabs, pagerState = pagerState)
+        HomeScreenTopBar(tabs, pagerState = pagerState)
     }
 }
 
 @OptIn(ExperimentalPagerApi::class)
 @Preview(showBackground = true)
 @Composable
-fun TabsPreview() {
+fun HomeScreenTabsPreview() {
     val tabs = listOf(
         TabItem.Joined,
         TabItem.Nearby,
         TabItem.Chapters
     )
     val pagerState = rememberPagerState()
-    LandingTabs(tabs = tabs, pagerState = pagerState)
+    HomeScreenTabs(tabs = tabs, pagerState = pagerState)
 }

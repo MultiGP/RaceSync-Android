@@ -35,8 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.CustomTextField
-import com.multigp.racesync.composables.PasswordTextField
+import com.multigp.racesync.composables.text.CustomTextField
+import com.multigp.racesync.composables.text.PasswordTextField
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.ui.theme.multiGPRed
 import com.multigp.racesync.viewmodels.LoginViewModel

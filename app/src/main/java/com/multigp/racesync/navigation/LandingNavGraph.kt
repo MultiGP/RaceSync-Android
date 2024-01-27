@@ -25,7 +25,9 @@ fun LandingNavGraph(
             )
         }
         composable(route = TrackDesign.route) {
-            DesignTrackScreen()
+            DesignTrackScreen(
+                onMenuClicked = onMenuClicked
+            )
         }
     }
 }

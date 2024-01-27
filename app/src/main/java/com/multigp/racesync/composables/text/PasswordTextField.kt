@@ -1,4 +1,4 @@
-package com.multigp.racesync.composables
+package com.multigp.racesync.composables.text
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
