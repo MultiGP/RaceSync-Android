@@ -1,7 +1,10 @@
 package com.multigp.racesync.screens.onboarding
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -15,12 +18,18 @@ import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -33,68 +42,123 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.text.CustomTextField
 import com.multigp.racesync.composables.text.PasswordTextField
+import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.ui.theme.multiGPRed
+import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = viewModel(),
+    viewModel: LoginViewModel = hiltViewModel(),
     onClickRegisterAccount: () -> Unit = {},
     onClickRecoverPassword: () -> Unit = {},
-    onClickLogin: () -> Unit = {}
+    onLoginComplete: (sessionId: String, userInfo: UserInfo) -> Unit
 ) {
     val loginUiState by viewModel.uiState.collectAsState()
-    Surface(
-        modifier = modifier.padding(all = 16.dp),
-        color = MaterialTheme.colorScheme.background
-    ) {
-        Column(
-            modifier = modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Spacer(modifier = modifier.weight(1f))
-            Image(
-                painter = painterResource(id = R.drawable.racesync_logo),
-                contentDescription = "RaceSync Logo"
-            )
-            Spacer(modifier = modifier.weight(1f))
-            LoginForm(
-                loginUiState.email,
-                loginUiState.password,
-                onEmailChanged = { viewModel.onEmailChanged(it) },
-                onPasswordChanged = { viewModel.onPasswordChanged(it) },
-                modifier = modifier,
-                onClickLogin = onClickLogin,
-                onClickRegisterAccount = onClickRegisterAccount,
-                onClickRecoverPassword = onClickRecoverPassword
-            )
-            Text(
-                modifier = modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                text = stringResource(R.string.login_term_of_use),
-                textAlign = TextAlign.Start
-            )
-            Spacer(modifier = modifier.weight(1f))
-            Footer()
+    val snackbarHostState = remember { SnackbarHostState() }
+
+    Scaffold(
+        snackbarHost = {
+            SnackbarHost(hostState = snackbarHostState)
+        },
+    ) { paddingValues ->
+        Box(modifier = modifier.padding(paddingValues = paddingValues)) {
+            Surface(
+                modifier = modifier.padding(all = 16.dp),
+                color = MaterialTheme.colorScheme.background
+            ) {
+                LoginScreenContent(
+                    uiState = loginUiState,
+                    viewModel = viewModel,
+                    modifier = modifier,
+                    onClickRegisterAccount = onClickRegisterAccount,
+                    onClickRecoverPassword = onClickRecoverPassword,
+                    onClickLogin = { viewModel.onLogin() }
+                )
+            }
+
+            if (loginUiState.isLoginInProgress) {
+                ProgressHUD(
+                    modifier = modifier,
+                    text = R.string.hud_login_progress
+                )
+            }
+
+            if (loginUiState.didLoginFailed) {
+                LaunchedEffect(Unit) {
+                    snackbarHostState.showSnackbar(
+                        message = loginUiState.loginError ?: "Failed to login. Please try again",
+                        duration = SnackbarDuration.Long
+                    )
+                }
+            }
+
+            if (loginUiState.didLoginSucceed) {
+                onLoginComplete(loginUiState.sessionId!!, loginUiState.userInfo!!)
+            }
         }
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+@Composable
+fun LoginScreenContent(
+    uiState: LoginUiState,
+    viewModel: LoginViewModel,
+    modifier: Modifier = Modifier,
+    onClickRegisterAccount: () -> Unit = {},
+    onClickRecoverPassword: () -> Unit = {},
+    onClickLogin: () -> Unit = {}
+) {
+    Column(
+        modifier = modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Spacer(modifier = modifier.weight(1f))
+        Image(
+            painter = painterResource(id = R.drawable.racesync_logo),
+            contentDescription = "RaceSync Logo"
+        )
+        Spacer(modifier = modifier.weight(1f))
+        LoginForm(
+            uiState.email,
+            uiState.password,
+            isValidForm = uiState.isValidForm,
+            onEmailChanged = { viewModel.onEmailChanged(it) },
+            onPasswordChanged = { viewModel.onPasswordChanged(it) },
+            modifier = modifier,
+            onClickLogin = { viewModel.onLogin() },
+            onClickRegisterAccount = onClickRegisterAccount,
+            onClickRecoverPassword = onClickRecoverPassword
+        )
+        Text(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = 8.dp),
+            style = MaterialTheme.typography.bodyMedium,
+            text = stringResource(R.string.login_term_of_use),
+            textAlign = TextAlign.Start
+        )
+        Spacer(modifier = modifier.weight(1f))
+        Footer()
+    }
+}
 
 @Composable
 fun LoginForm(
     email: String,
     password: String,
     modifier: Modifier = Modifier,
+    isValidForm: Boolean = false,
     onEmailChanged: (String) -> Unit = {},
     onPasswordChanged: (String) -> Unit = {},
     onClickLogin: () -> Unit = {},
@@ -158,7 +222,8 @@ fun LoginForm(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            onClick = onClickLogin
+            onClick = onClickLogin,
+            enabled = isValidForm
         ) {
             Text(
                 style = MaterialTheme.typography.titleMedium,
@@ -196,6 +261,7 @@ fun Footer(modifier: Modifier = Modifier) {
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {
@@ -203,7 +269,7 @@ fun LoginScreenPreview() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginScreen()
+            LoginScreen(onLoginComplete = { sessionId, userInfo -> })
         }
     }
 }

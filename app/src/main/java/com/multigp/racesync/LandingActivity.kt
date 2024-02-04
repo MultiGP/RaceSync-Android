@@ -15,7 +15,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.compose.rememberNavController
 import com.multigp.racesync.screens.landing.LandingScreen
 import com.multigp.racesync.ui.theme.RaceSyncTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class LandingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,6 +26,11 @@ class LandingActivity : ComponentActivity() {
                 LandingRoot()
             }
         }
+    }
+
+    companion object {
+        const val EXTRA_SESSION_ID = "extra_session_id"
+        const val EXTRA_USER_INFO = "extra_user_info"
     }
 }
 

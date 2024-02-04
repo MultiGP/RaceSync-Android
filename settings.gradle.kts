@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "RaceSync"
 include(":app")
- 
+include(":domain")
+include(":data")
