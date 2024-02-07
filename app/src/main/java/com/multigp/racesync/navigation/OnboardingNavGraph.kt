@@ -17,7 +17,6 @@ import com.multigp.racesync.screens.onboarding.ForgotPasswordScreen
 import com.multigp.racesync.screens.onboarding.LoginScreen
 import com.multigp.racesync.screens.onboarding.RegistrationScreen
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun OnboardingNavGraph(
     navController: NavHostController,

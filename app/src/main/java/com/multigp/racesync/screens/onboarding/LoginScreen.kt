@@ -53,7 +53,6 @@ import com.multigp.racesync.ui.theme.multiGPRed
 import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun LoginScreen(
     modifier: Modifier = Modifier,
@@ -108,7 +107,6 @@ fun LoginScreen(
     }
 }
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun LoginScreenContent(
     uiState: LoginUiState,
@@ -261,7 +259,6 @@ fun Footer(modifier: Modifier = Modifier) {
     }
 }
 
-@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Preview(showBackground = true)
 @Composable
 fun LoginScreenPreview() {

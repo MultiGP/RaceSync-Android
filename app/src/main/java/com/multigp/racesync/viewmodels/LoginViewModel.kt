@@ -1,8 +1,6 @@
 package com.multigp.racesync.viewmodels
 
-import android.os.Build
 import android.text.TextUtils
-import androidx.annotation.RequiresExtension
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.BuildConfig
@@ -56,7 +54,6 @@ class LoginViewModel @Inject constructor(
         }
     }
 
-    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun onLogin() {
         val request =
             LoginRequest(BuildConfig.API_KEY, _uiState.value.email, _uiState.value.password)
