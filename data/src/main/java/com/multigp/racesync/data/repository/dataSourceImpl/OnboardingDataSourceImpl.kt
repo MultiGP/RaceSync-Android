@@ -9,7 +9,7 @@ import retrofit2.Response
 class OnboardingDataSourceImpl(
     private val raceSyncApi: RaceSyncApi
 ) : OnboardingDataSource {
-    override suspend fun login(body: LoginRequest): Response<LoginResponse> {
+    override suspend fun login(body: LoginRequest): LoginResponse {
         return raceSyncApi.login(body)
     }
 }

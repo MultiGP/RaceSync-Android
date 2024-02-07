@@ -5,5 +5,5 @@ import com.multigp.racesync.domain.model.LoginResponse
 import retrofit2.Response
 
 interface OnboardingDataSource {
-    suspend fun login(body: LoginRequest): Response<LoginResponse>
+    suspend fun login(body: LoginRequest): LoginResponse
 }

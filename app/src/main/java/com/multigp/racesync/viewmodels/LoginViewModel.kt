@@ -1,6 +1,5 @@
 package com.multigp.racesync.viewmodels
 
-import android.net.http.HttpException
 import android.os.Build
 import android.text.TextUtils
 import androidx.annotation.RequiresExtension
@@ -14,9 +13,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import java.io.IOException
 import javax.inject.Inject
 
 
@@ -63,37 +62,44 @@ class LoginViewModel @Inject constructor(
             LoginRequest(BuildConfig.API_KEY, _uiState.value.email, _uiState.value.password)
 
         viewModelScope.launch {
-            try {
-                _uiState.update { it.copy(isLoginInProgress = true) }
-                val response = useCases.performLoginUseCase(request)
-                _uiState.update { it.copy(isLoginInProgress = false) }
-                if (response.isSuccessful && (response.body()?.status ?: 0) == 1) {
-                    _uiState.update { curr ->
-                        curr.copy(
-                            didLoginSucceed = true,
-                            sessionId = response.body()?.sessionId,
-                            userInfo = response.body()?.userInfo
+            viewModelScope.launch {
+                useCases.performLoginUseCase(request)
+                    .onStart {
+                        _uiState.update { it.copy(isLoginInProgress = true) }
+                    }
+                    .collect { result ->
+                        result.fold(
+                            onSuccess = { response ->
+                                if (response.status == 1) {
+                                    _uiState.update { curr ->
+                                        curr.copy(
+                                            isLoginInProgress = false,
+                                            didLoginSucceed = true,
+                                            sessionId = response.sessionId,
+                                            userInfo = response.userInfo
+                                        )
+                                    }
+                                } else {
+                                    _uiState.update { curr ->
+                                        curr.copy(
+                                            isLoginInProgress = false,
+                                            didLoginFailed = true,
+                                            loginError = response.errorMessage()
+                                        )
+                                    }
+                                }
+                            },
+                            onFailure = { throwable ->
+                                _uiState.update { curr ->
+                                    curr.copy(
+                                        isLoginInProgress = false,
+                                        didLoginFailed = true,
+                                        loginError = throwable.localizedMessage
+                                    )
+                                }
+                            }
                         )
                     }
-                } else {
-                    _uiState.update { curr ->
-                        curr.copy(
-                            didLoginFailed = true,
-                            loginError = if (!response.isSuccessful)
-                                response.message()
-                            else
-                                response.body()?.errorMessage()
-                        )
-                    }
-                }
-            } catch (e: IOException) {
-                _uiState.update { curr ->
-                    curr.copy(didLoginFailed = true, loginError = e.localizedMessage)
-                }
-            } catch (e: HttpException) {
-                _uiState.update { curr ->
-                    curr.copy(didLoginFailed = true, loginError = e.localizedMessage)
-                }
             }
         }
     }
