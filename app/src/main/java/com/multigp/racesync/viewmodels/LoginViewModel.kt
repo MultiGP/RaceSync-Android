@@ -36,6 +36,21 @@ class LoginViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
 
+    init {
+        viewModelScope.launch {
+            useCases.getLoginInfoUserCase()
+                .collect { (sessionId, userInfo) ->
+                    _uiState.update { curr ->
+                        curr.copy(
+                            didLoginSucceed = true,
+                            userInfo = userInfo,
+                            sessionId = sessionId
+                        )
+                    }
+                }
+        }
+    }
+
     fun onEmailChanged(newValue: String): Unit {
         _uiState.update { currentState ->
             currentState.copy(

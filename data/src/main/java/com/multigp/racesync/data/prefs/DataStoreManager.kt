@@ -22,7 +22,7 @@ class DataStoreManager(val context: Context) {
 
     suspend fun saveSessionId(sessionId: String) {
         context.dataStore.edit { preferences ->
-            preferences[KEY_USER_INFO] = sessionId
+            preferences[KEY_SESSION_ID] = sessionId
         }
     }
 

@@ -1,6 +1,7 @@
 package com.multigp.racesync.di
 
 import com.multigp.racesync.domain.repositories.LoginRepository
+import com.multigp.racesync.domain.useCase.GetLoginInfoUserCase
 import com.multigp.racesync.domain.useCase.LoginUseCase
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.Module
@@ -13,6 +14,7 @@ import dagger.hilt.components.SingletonComponent
 object UseCaseModule {
     @Provides
     fun provideMovieUseCases(loginRepository: LoginRepository) = RaceSyncUseCases(
-        performLoginUseCase = LoginUseCase(loginRepository)
+        performLoginUseCase = LoginUseCase(loginRepository),
+        getLoginInfoUserCase = GetLoginInfoUserCase(loginRepository)
     )
 }
