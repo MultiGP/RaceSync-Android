@@ -1,7 +1,5 @@
 package com.multigp.racesync.screens.onboarding
 
-import android.os.Build
-import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -49,7 +47,6 @@ import com.multigp.racesync.composables.text.CustomTextField
 import com.multigp.racesync.composables.text.PasswordTextField
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.ui.theme.RaceSyncTheme
-import com.multigp.racesync.ui.theme.multiGPRed
 import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
 
@@ -201,7 +198,7 @@ fun LoginForm(
         ) {
             Text(
                 text = stringResource(R.string.login_forgot_password),
-                color = multiGPRed,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleSmall
             )
         }
@@ -212,7 +209,7 @@ fun LoginForm(
         ) {
             Text(
                 text = stringResource(R.string.login_create_account),
-                color = multiGPRed,
+                color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.titleSmall
             )
         }

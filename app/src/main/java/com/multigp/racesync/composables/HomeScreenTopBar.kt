@@ -1,18 +1,22 @@
 package com.multigp.racesync.composables
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LeadingIconTab
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
@@ -60,7 +64,8 @@ fun HomeScreenTopBar(
                 ) {
                     Image(
                         imageVector = Icons.Default.Menu,
-                        contentDescription = null)
+                        contentDescription = null
+                    )
                 }
             }
             HomeScreenTabs(
@@ -84,8 +89,17 @@ fun HomeScreenTabs(
     // OR ScrollableTabRow()
     TabRow(
         selectedTabIndex = pagerState.currentPage,
-        containerColor = MaterialTheme.colorScheme.surface,
-        contentColor = MaterialTheme.colorScheme.primary,
+        containerColor = MaterialTheme.colorScheme.background,
+        contentColor = MaterialTheme.colorScheme.secondary,
+        indicator = { tabPositions ->
+            TabRowDefaults.Indicator(
+                modifier = modifier.tabIndicatorOffset(tabPositions[pagerState.currentPage]),
+                color = MaterialTheme.colorScheme.secondary
+            )
+        },
+        divider = {
+            Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
+        }
     ) {
         tabs.forEachIndexed { index, tab ->
             // OR Tab()
@@ -109,6 +123,9 @@ fun HomeScreenTabs(
                         pagerState.animateScrollToPage(index)
                     }
                 },
+                selectedContentColor = MaterialTheme.colorScheme.secondary,
+                unselectedContentColor = MaterialTheme.colorScheme.secondary
+
             )
         }
     }

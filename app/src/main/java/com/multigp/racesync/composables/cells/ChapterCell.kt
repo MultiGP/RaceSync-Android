@@ -1,5 +1,6 @@
 package com.multigp.racesync.composables.cells
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
@@ -12,6 +13,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -26,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
@@ -51,7 +54,7 @@ fun ChapterCell(
                     .clip(CircleShape)
                     .border(
                         width = 1.dp,
-                        color = MaterialTheme.colorScheme.surfaceVariant,
+                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                         CircleShape
                     )
                     .clipToBounds()
@@ -60,26 +63,34 @@ fun ChapterCell(
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
                     text = "Sat, Jan 27 @ 8:00 AM",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
                 Text(
-                    text = "RippinAZ Winter Race S...",
-                    style = MaterialTheme.typography.bodyLarge,
+                    text = "Propeller Pint Micro Racing Series",
+                    style = MaterialTheme.typography.titleLarge,
                     color = Color.Black,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = modifier.padding(top = 8.dp)
+                    modifier = modifier.padding(top = 8.dp, end = 4.dp),
+                    overflow = TextOverflow.Ellipsis,
+                    maxLines = 1
                 )
                 Text(
                     text = "Rippin' AZ",
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.Black,
+                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
                     modifier = modifier.padding(top = 8.dp)
                 )
             }
             Column {
                 OutlinedButton(
-                    onClick = { }
+                    onClick = { },
+                    shape = MaterialTheme.shapes.small,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.surface,
+                        contentColor = MaterialTheme.colorScheme.tertiary
+                    ),
+                    border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.tertiary)
                 ) {
                     Text(
                         text = "Join",
@@ -89,13 +100,18 @@ fun ChapterCell(
                 }
                 Button(
                     onClick = {},
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+                    shape = MaterialTheme.shapes.small,
+                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.secondary
+                    )
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_group),
                         contentDescription = null
                     )
-                    Spacer(modifier = modifier.width(8.dp))
+                    Spacer(modifier = modifier.width(4.dp))
                     Text(
                         text = "10",
                         style = MaterialTheme.typography.titleMedium

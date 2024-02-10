@@ -1,6 +1,8 @@
 package com.multigp.racesync.composables
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.height
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -16,6 +18,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -32,14 +37,15 @@ fun OnboardingTopBar(
         topBar = {
             CenterAlignedTopAppBar(
                 colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.primary,
+                    containerColor = MaterialTheme.colorScheme.background,
+                    titleContentColor = MaterialTheme.colorScheme.secondary,
                 ),
                 title = {
                     Text(
                         title,
                         maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                        overflow = TextOverflow.Ellipsis,
+                        color = MaterialTheme.colorScheme.secondary
                     )
                 },
                 navigationIcon = {
@@ -55,5 +61,15 @@ fun OnboardingTopBar(
         },
     ) { innerPadding ->
         content(innerPadding)
+    }
+}
+
+@Preview(showBackground = true, heightDp = 48)
+@Composable
+fun OnboardingTopBarPreview(){
+    RaceSyncTheme {
+        OnboardingTopBar("Recover Password", content = {
+            Box(modifier = Modifier.height(24.dp))
+        })
     }
 }
