@@ -77,10 +77,12 @@ fun ChapterCell(
                     maxLines = 1
                 )
                 Text(
-                    text = "Rippin' AZ",
+                    text = chapter.description,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                    modifier = modifier.padding(top = 8.dp)
+                    modifier = modifier.padding(top = 8.dp),
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
                 )
             }
             Column {
