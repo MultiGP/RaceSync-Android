@@ -74,6 +74,10 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.25.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0")
 
+    //Permissions and Location
+    implementation("com.google.accompanist:accompanist-permissions:0.25.0")
+    implementation("com.google.android.gms:play-services-location:21.1.0")
+
     //hilt
     val hilt_version="2.48"
     implementation("com.google.dagger:hilt-android:$hilt_version")
