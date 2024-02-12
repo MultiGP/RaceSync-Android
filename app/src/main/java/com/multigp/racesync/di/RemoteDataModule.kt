@@ -1,7 +1,9 @@
 package com.multigp.racesync.di
 
 import com.multigp.racesync.data.api.RaceSyncApi
+import com.multigp.racesync.data.repository.dataSource.ChaptersDataSource
 import com.multigp.racesync.data.repository.dataSource.OnboardingDataSource
+import com.multigp.racesync.data.repository.dataSourceImpl.ChaptersDataSourceImpl
 import com.multigp.racesync.data.repository.dataSourceImpl.OnboardingDataSourceImpl
 import dagger.Module
 import dagger.Provides
@@ -13,6 +15,11 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object RemoteDataModule {
     @Provides
-    fun provideMoviesRemoteDataSource(raceSyncApi: RaceSyncApi): OnboardingDataSource =
+    fun provideLoginRemoteDataSource(raceSyncApi: RaceSyncApi): OnboardingDataSource =
         OnboardingDataSourceImpl(raceSyncApi)
+
+
+    @Provides
+    fun provideChaptersRemoteDataSource(raceSyncApi: RaceSyncApi): ChaptersDataSource =
+        ChaptersDataSourceImpl(raceSyncApi)
 }

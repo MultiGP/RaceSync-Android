@@ -71,6 +71,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
 
+    implementation ("io.coil-kt:coil-compose:2.5.0")
     implementation("com.google.accompanist:accompanist-pager:0.25.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0")
 

@@ -1,4 +1,4 @@
-package com.multigp.racesync.domain.model
+package com.multigp.racesync.domain.model.requests
 
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable

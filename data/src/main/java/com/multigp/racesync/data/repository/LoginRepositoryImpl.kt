@@ -2,8 +2,8 @@ package com.multigp.racesync.data.repository
 
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.data.repository.dataSource.OnboardingDataSource
-import com.multigp.racesync.domain.model.LoginRequest
-import com.multigp.racesync.domain.model.LoginResponse
+import com.multigp.racesync.domain.model.requests.LoginRequest
+import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.repositories.LoginRepository
 import kotlinx.coroutines.Dispatchers
@@ -19,10 +19,10 @@ class LoginRepositoryImpl(
     LoginRepository {
     override suspend fun login(
         body: LoginRequest
-    ): Flow<Result<LoginResponse>> = flow {
+    ): Flow<Result<BaseResponse2<UserInfo>>> = flow {
         val loginResponse = onboardingDataSource.login(body)
         if (loginResponse.status == 1) {
-            dataStore.saveUserInfo(loginResponse.userInfo)
+            dataStore.saveUserInfo(loginResponse.data)
             dataStore.saveSessionId(loginResponse.sessionId)
         }
         emit(Result.success(loginResponse))

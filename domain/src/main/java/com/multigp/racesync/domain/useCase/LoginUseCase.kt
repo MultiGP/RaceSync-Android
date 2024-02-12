@@ -1,6 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
-import com.multigp.racesync.domain.model.LoginRequest
+import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.repositories.LoginRepository
 
 class LoginUseCase(private val loginRepository: LoginRepository) {

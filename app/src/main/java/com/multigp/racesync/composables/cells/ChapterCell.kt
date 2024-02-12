@@ -1,7 +1,6 @@
 package com.multigp.racesync.composables.cells
 
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,13 +28,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import com.multigp.racesync.R
-import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.multigp.racesync.domain.model.Chapter
+
 
 @Composable
 fun ChapterCell(
+    chapter: Chapter,
     modifier: Modifier = Modifier
 ) {
     Column {
@@ -45,8 +46,8 @@ fun ChapterCell(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Image(
-                painter = painterResource(id = R.drawable.logo_powered_by),
+            AsyncImage(
+                model = chapter.mainImageFileName,
                 contentDescription = null,
                 contentScale = ContentScale.Inside,
                 modifier = modifier
@@ -62,12 +63,12 @@ fun ChapterCell(
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
-                    text = "Sat, Jan 27 @ 8:00 AM",
+                    text = chapter.dateAdded,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
                 Text(
-                    text = "Propeller Pint Micro Racing Series",
+                    text = chapter.name,
                     style = MaterialTheme.typography.titleLarge,
                     color = Color.Black,
                     fontWeight = FontWeight.SemiBold,
@@ -113,7 +114,7 @@ fun ChapterCell(
                     )
                     Spacer(modifier = modifier.width(4.dp))
                     Text(
-                        text = "10",
+                        text = "" + chapter.memberCount,
                         style = MaterialTheme.typography.titleMedium
                     )
                 }
@@ -124,10 +125,10 @@ fun ChapterCell(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun ChapterCellPerview() {
-    RaceSyncTheme {
-        ChapterCell()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun ChapterCellPerview() {
+//    RaceSyncTheme {
+//        ChapterCell()
+//    }
+//}

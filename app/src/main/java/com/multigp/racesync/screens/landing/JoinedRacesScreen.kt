@@ -17,7 +17,7 @@ fun JoinedRacesScreen(modifier: Modifier = Modifier) {
     val items: List<Int> = List(10) { it + 1 }
     LazyColumn(){
         items(items){
-            ChapterCell()
+//            ChapterCell()
         }
     }
 }

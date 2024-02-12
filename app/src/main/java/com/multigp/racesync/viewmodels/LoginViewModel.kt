@@ -4,7 +4,7 @@ import android.text.TextUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.BuildConfig
-import com.multigp.racesync.domain.model.LoginRequest
+import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -88,7 +88,7 @@ class LoginViewModel @Inject constructor(
                                             isLoginInProgress = false,
                                             didLoginSucceed = true,
                                             sessionId = response.sessionId,
-                                            userInfo = response.userInfo
+                                            userInfo = response.data
                                         )
                                     }
                                 } else {
