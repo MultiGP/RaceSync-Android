@@ -28,6 +28,9 @@ class LandingViewModel @Inject constructor(
     private val _nearbyUiState = MutableStateFlow<ChaptersUiState>(ChaptersUiState.Loading)
     val nearbyUiState: StateFlow<ChaptersUiState> = _nearbyUiState.asStateFlow()
 
+    private val _joinedUiState = MutableStateFlow<ChaptersUiState>(ChaptersUiState.Loading)
+    val JoinedUiState: StateFlow<ChaptersUiState> = _joinedUiState.asStateFlow()
+
     fun fetchChapters(){
         viewModelScope.launch {
             useCases.getChaptersUseCase()
@@ -51,6 +54,28 @@ class LandingViewModel @Inject constructor(
     }
 
     fun fetchNearbyChapters(){
+        viewModelScope.launch {
+            useCases.getChaptersUseCase(10.0)
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { response ->
+                            if (response.status) {
+                                _nearbyUiState.value = ChaptersUiState.Success(response.data)
+                            } else {
+                                _nearbyUiState.value = ChaptersUiState.Error(response.errorMessage())
+                            }
+                        },
+                        onFailure = { throwable ->
+                            _nearbyUiState.value = ChaptersUiState.Error(
+                                throwable.localizedMessage ?: "Error loading chapters"
+                            )
+                        }
+                    )
+                }
+        }
+    }
+
+    fun fetchJoinedChapters(){
         viewModelScope.launch {
             useCases.getChaptersUseCase(10.0)
                 .collect { result ->

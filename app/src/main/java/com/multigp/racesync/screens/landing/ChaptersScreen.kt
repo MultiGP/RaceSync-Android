@@ -14,6 +14,7 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.cells.ChapterCell
+import com.multigp.racesync.composables.cells.ChapterLoadingCell
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.ChaptersUiState
 import com.multigp.racesync.viewmodels.LandingViewModel
@@ -29,10 +30,11 @@ fun ChaptersScreen(
     }
 
     when (val state = uiState) {
-        is ChaptersUiState.Loading -> ProgressHUD(
-            modifier = modifier,
-            text = R.string.landing_loading_chapters
-        )
+        is ChaptersUiState.Loading -> LazyColumn() {
+            items(10) {_ ->
+                ChapterLoadingCell()
+            }
+        }
 
         is ChaptersUiState.Success -> LazyColumn() {
             items(state.chapters) {chapter ->

@@ -1,6 +1,7 @@
 package com.multigp.racesync.composables.cells
 
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -29,8 +30,9 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
+import com.multigp.racesync.composables.image.AsyncCircularLogo
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.image.CircularLogo
 import com.multigp.racesync.domain.model.Chapter
 
 
@@ -46,20 +48,11 @@ fun ChapterCell(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            AsyncImage(
-                model = chapter.mainImageFileName,
-                contentDescription = null,
-                contentScale = ContentScale.Inside,
-                modifier = modifier
-                    .size(64.dp)
-                    .clip(CircleShape)
-                    .border(
-                        width = 1.dp,
-                        color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
-                        CircleShape
-                    )
-                    .clipToBounds()
-            )
+            if(chapter.mainImageFileName != null) {
+                AsyncCircularLogo(url = chapter.mainImageFileName)
+            }else{
+                CircularLogo(id = R.drawable.logo_powered_by)
+            }
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(

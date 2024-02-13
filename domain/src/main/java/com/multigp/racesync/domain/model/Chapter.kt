@@ -34,7 +34,7 @@ data class Chapter(
     @SerializedName("longitude")
     val longitude: String,
     @SerializedName("mainImageFileName")
-    val mainImageFileName: String,
+    val mainImageFileName: String?,
     @SerializedName("meetupUrl")
     val meetupUrl: String,
     @SerializedName("name")
