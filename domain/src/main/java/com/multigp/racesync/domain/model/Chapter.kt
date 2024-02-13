@@ -16,9 +16,9 @@ data class Chapter(
     @SerializedName("country")
     val country: String,
     @SerializedName("dateAdded")
-    val dateAdded: String,
+    val dateAdded: String?,
     @SerializedName("dateModified")
-    val dateModified: String,
+    val dateModified: String?,
     @SerializedName("description")
     val description: String,
     @SerializedName("facebookUrl")

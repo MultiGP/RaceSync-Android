@@ -15,12 +15,12 @@ import dagger.hilt.components.SingletonComponent
 @InstallIn(SingletonComponent::class)
 object UseCaseModule {
     @Provides
-    fun provideMovieUseCases(
+    fun provideRaceSyncUseCases(
         loginRepository: LoginRepository,
         chaptersRepository: ChaptersRepository
     ) = RaceSyncUseCases(
         performLoginUseCase = LoginUseCase(loginRepository),
         getLoginInfoUserCase = GetLoginInfoUserCase(loginRepository),
-        getChaptersUseCase = GetChaptersUseCase(chaptersRepository)
+        getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUserCase(loginRepository))
     )
 }

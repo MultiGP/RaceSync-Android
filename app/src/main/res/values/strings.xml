@@ -20,4 +20,16 @@
     <string name="permissions_location_request">Kindly grant location access to access all app features.</string>
     <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
 
+
+    <string name="placeholder_title_no_races">No Races Found</string>
+    <string name="placeholder_title_no_chapters">No Chapters Found</string>
+    <string name="placeholder_message_no_races">You haven\'t joined any upcoming races yet.</string>
+    <string name="placeholder_message_no_nearby_races">No races found around your area</string>
+    <string name="placeholder_message_no_chapters">No chapters found, please try again later.</string>
+    <string name="placeholder_btn_title_search_nearby">Search Nearby Races</string>
+
+
+    <string name="error_title_loading_races">Error Loading Races</string>
+    <string name="error_title_loading_chapters">Error Loading Chapters</string>
+    <string name="error_btn_title_retry">Retry</string>
 </resources>

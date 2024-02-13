@@ -56,7 +56,7 @@ fun ChapterCell(
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
-                    text = chapter.dateAdded,
+                    text = chapter.dateAdded ?: "",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )

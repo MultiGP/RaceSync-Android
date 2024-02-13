@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class BaseResponse<T>(
     @SerializedName("data")
-    val data: T,
+    val data: T?,
     @SerializedName("errors")
     val errors: Error? = null,
     @SerializedName("sessionId")

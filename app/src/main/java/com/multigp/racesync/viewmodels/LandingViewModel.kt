@@ -31,16 +31,18 @@ class LandingViewModel @Inject constructor(
     private val _joinedUiState = MutableStateFlow<ChaptersUiState>(ChaptersUiState.Loading)
     val JoinedUiState: StateFlow<ChaptersUiState> = _joinedUiState.asStateFlow()
 
-    fun fetchChapters(){
+    fun fetchChapters() {
         viewModelScope.launch {
             useCases.getChaptersUseCase()
                 .collect { result ->
                     result.fold(
                         onSuccess = { response ->
                             if (response.status) {
-                                _chaptersUiState.value = ChaptersUiState.Success(response.data)
+                                _chaptersUiState.value =
+                                    ChaptersUiState.Success(response.data ?: emptyList())
                             } else {
-                                _chaptersUiState.value = ChaptersUiState.Error(response.errorMessage())
+                                _chaptersUiState.value =
+                                    ChaptersUiState.Error(response.errorMessage())
                             }
                         },
                         onFailure = { throwable ->
@@ -53,16 +55,18 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchNearbyChapters(){
+    fun fetchNearbyChapters() {
         viewModelScope.launch {
-            useCases.getChaptersUseCase(10.0)
+            useCases.getChaptersUseCase(15.0)
                 .collect { result ->
                     result.fold(
                         onSuccess = { response ->
                             if (response.status) {
-                                _nearbyUiState.value = ChaptersUiState.Success(response.data)
+                                _nearbyUiState.value =
+                                    ChaptersUiState.Success(response.data ?: emptyList())
                             } else {
-                                _nearbyUiState.value = ChaptersUiState.Error(response.errorMessage())
+                                _nearbyUiState.value =
+                                    ChaptersUiState.Error(response.errorMessage())
                             }
                         },
                         onFailure = { throwable ->
@@ -75,20 +79,23 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchJoinedChapters(){
+    fun fetchJoinedChapters() {
         viewModelScope.launch {
-            useCases.getChaptersUseCase(10.0)
+            _nearbyUiState.value = ChaptersUiState.Loading
+            useCases.getChaptersUseCase.fetchJoinedChapters()
                 .collect { result ->
                     result.fold(
                         onSuccess = { response ->
                             if (response.status) {
-                                _nearbyUiState.value = ChaptersUiState.Success(response.data)
+                                _joinedUiState.value =
+                                    ChaptersUiState.Success(response.data ?: emptyList())
                             } else {
-                                _nearbyUiState.value = ChaptersUiState.Error(response.errorMessage())
+                                _joinedUiState.value =
+                                    ChaptersUiState.Error(response.errorMessage())
                             }
                         },
                         onFailure = { throwable ->
-                            _nearbyUiState.value = ChaptersUiState.Error(
+                            _joinedUiState.value = ChaptersUiState.Error(
                                 throwable.localizedMessage ?: "Error loading chapters"
                             )
                         }

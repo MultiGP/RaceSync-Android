@@ -8,11 +8,11 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.CustomAlertDialog
-import com.multigp.racesync.composables.ProgressHUD
+import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterCell
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
 import com.multigp.racesync.ui.theme.RaceSyncTheme
@@ -25,27 +25,44 @@ fun ChaptersScreen(
     viewModel: LandingViewModel = hiltViewModel()
 ) {
     val uiState by remember { viewModel.chaptersUiState }.collectAsState()
-    LaunchedEffect(key1 = true){
+    LaunchedEffect(key1 = true) {
         viewModel.fetchChapters()
     }
 
     when (val state = uiState) {
         is ChaptersUiState.Loading -> LazyColumn() {
-            items(10) {_ ->
-                ChapterLoadingCell()
+            items(10) { _ ->
+                ChapterLoadingCell(modifier)
             }
         }
 
-        is ChaptersUiState.Success -> LazyColumn() {
-            items(state.chapters) {chapter ->
-                ChapterCell(chapter)
+        is ChaptersUiState.Success -> {
+            if (state.chapters.isNotEmpty()) {
+                LazyColumn() {
+                    items(state.chapters) { chapter ->
+                        ChapterCell(chapter, modifier = modifier)
+                    }
+                }
+            } else {
+                PlaceholderScreen(
+                    modifier = modifier,
+                    title = stringResource(R.string.placeholder_title_no_chapters),
+                    message = stringResource(R.string.placeholder_message_no_chapters),
+                    canRetry = false,
+                )
             }
         }
 
-        is ChaptersUiState.Error -> CustomAlertDialog(
-            title = "Error loading Chapters",
-            body = state.message,
-            onDismiss = {}
+        is ChaptersUiState.Error -> PlaceholderScreen(
+            modifier = modifier,
+            title = stringResource(R.string.error_title_loading_chapters),
+            message = state.message,
+            buttonTitle = stringResource(R.string.error_btn_title_retry),
+            isError = true,
+            canRetry = true,
+            onButtonClick = {
+                viewModel.fetchJoinedChapters()
+            },
         )
     }
 }
