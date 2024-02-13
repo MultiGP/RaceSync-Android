@@ -57,23 +57,23 @@ fun ChapterCell(
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
                     text = chapter.dateAdded ?: "",
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
                 Text(
                     text = chapter.name,
-                    style = MaterialTheme.typography.titleLarge,
+                    style = MaterialTheme.typography.titleMedium,
                     color = Color.Black,
                     fontWeight = FontWeight.SemiBold,
-                    modifier = modifier.padding(top = 8.dp, end = 4.dp),
+                    modifier = modifier.padding(top = 4.dp, end = 4.dp),
                     overflow = TextOverflow.Ellipsis,
                     maxLines = 1
                 )
                 Text(
                     text = chapter.description,
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
-                    modifier = modifier.padding(top = 8.dp),
+                    modifier = modifier.padding(top = 4.dp),
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis
                 )

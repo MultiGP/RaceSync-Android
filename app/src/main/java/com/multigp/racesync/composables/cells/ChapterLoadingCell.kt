@@ -38,9 +38,9 @@ fun ChapterLoadingCell(
             ComponentCircle(modifier.size(64.dp))
             Spacer(modifier = modifier.padding(start = 6.dp))
             Column(modifier = modifier.weight(1.0f)) {
-                ComponentRectangleLineLong(modifier.height(16.dp).width(110.dp))
-                ComponentRectangleLineLong(modifier.height(32.dp).padding(top = 6.dp))
-                ComponentRectangleLineLong(modifier.height(26.dp).padding(top = 6.dp))
+                ComponentRectangleLineLong(modifier.height(12.dp).width(110.dp))
+                ComponentRectangleLineLong(modifier.height(24.dp).padding(top = 6.dp))
+                ComponentRectangleLineLong(modifier.height(20.dp).padding(top = 6.dp))
             }
             Column(Modifier.padding(start = 8.dp)) {
                 ComponentRectangle(modifier.size(width = 54.dp, height = 32.dp))

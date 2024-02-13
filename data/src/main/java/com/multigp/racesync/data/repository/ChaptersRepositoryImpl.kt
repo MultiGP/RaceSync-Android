@@ -40,7 +40,7 @@ class ChaptersRepositoryImpl(
 
     override suspend fun fetchChapters(radius: Double): Flow<Result<BaseResponse<List<Chapter>>>> {
         return flow {
-            val location = locationClient.lastLocation.await()
+            val location = locationClient.lastLocation.await() ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
             val chaptersRequest = ChaptersRequest(
                 joined = null,
                 nearBy = NearbyChapters(location.latitude, location.longitude, radius)
