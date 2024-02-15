@@ -7,6 +7,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
+import com.multigp.racesync.screens.pilot.PilotScreen
 
 @Composable
 fun LandingNavGraph(
@@ -21,12 +22,19 @@ fun LandingNavGraph(
     ) {
         composable(route = Landing.route) {
             HomeScreen(
-                onMenuClicked = onMenuClicked
+                onMenuClicked = onMenuClicked,
+                navController = navController
             )
         }
         composable(route = TrackDesign.route) {
             DesignTrackScreen(
                 onMenuClicked = onMenuClicked
+            )
+        }
+
+        composable(route = PilotNav.route) {
+            PilotScreen(
+                navController = navController
             )
         }
     }

@@ -40,6 +40,12 @@ object TrackDesign : NavDestination {
     override val route = "track"
 }
 
+object PilotNav : NavDestination {
+    override val icon = null
+    override val title = "Pilot"
+    override val route = "pilot"
+}
+
 
 object ObstaclesBuildGuide : NavDestination {
     override val icon = Icons.Default.Home

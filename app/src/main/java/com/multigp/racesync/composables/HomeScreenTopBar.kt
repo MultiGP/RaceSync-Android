@@ -2,6 +2,7 @@ package com.multigp.racesync.composables
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -31,11 +32,16 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
+import com.multigp.racesync.navigation.NavDestination
+import com.multigp.racesync.navigation.PilotNav
 import com.multigp.racesync.navigation.TabItem
+import com.multigp.racesync.navigation.TrackDesign
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import kotlinx.coroutines.launch
 
@@ -45,7 +51,9 @@ fun HomeScreenTopBar(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
-    onMenuClicked: () -> Unit = {}
+    onMenuClicked: () -> Unit = {},
+    navController: NavHostController
+
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface
@@ -73,6 +81,9 @@ fun HomeScreenTopBar(
                 }
                 Image(
                     modifier = modifier
+                        .clickable {
+                            navController.navigate(PilotNav.route)
+                        }
                         .padding(10.dp)
                         .height(25.dp)
                         .width(25.dp)
@@ -160,8 +171,9 @@ fun HomeScreenTopBarPreview() {
         TabItem.Chapters
     )
     val pagerState = rememberPagerState()
+    val navController = rememberNavController()
     RaceSyncTheme {
-        HomeScreenTopBar(tabs, pagerState = pagerState)
+        HomeScreenTopBar(tabs, pagerState = pagerState, navController = navController)
     }
 }
 

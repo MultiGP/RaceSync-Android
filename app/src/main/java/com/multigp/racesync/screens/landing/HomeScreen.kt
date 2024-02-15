@@ -8,6 +8,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.navigation.NavHostController
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
@@ -24,7 +25,8 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    onMenuClicked: () -> Unit = {}
+    onMenuClicked: () -> Unit = {},
+    navController: NavHostController
 ) {
     val pagerState = rememberPagerState()
     val permissions = listOf(
@@ -37,7 +39,8 @@ fun HomeScreen(
             HomeScreenTopBar(
                 tabs = landingTabs,
                 pagerState = pagerState,
-                onMenuClicked = onMenuClicked
+                onMenuClicked = onMenuClicked,
+                navController = navController
             )
         }
     )
@@ -73,10 +76,10 @@ fun HomeScreen(
 }
 
 
-@Preview(showBackground = true)
-@Composable
-fun LandingScreenView() {
-    RaceSyncTheme {
-        HomeScreen()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun LandingScreenView() {
+//    RaceSyncTheme {
+//        HomeScreen()
+//    }
+//}
