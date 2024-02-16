@@ -62,7 +62,7 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchNearbyChapters() {
+    fun fetchNearbyRaces() {
         viewModelScope.launch {
             useCases.getRacesUseCase(500.0)
                 .collect { result ->
@@ -86,7 +86,7 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchJoinedChapters() {
+    fun fetchJoinedRaces() {
         viewModelScope.launch {
             _nearbyUiState.value = RaceUiState.Loading
             useCases.getRacesUseCase.fetchJoinedRaces()

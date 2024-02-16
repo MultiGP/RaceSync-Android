@@ -26,7 +26,7 @@ fun JoinedRacesScreen(
 ) {
     val uiState by remember { viewModel.JoinedUiState }.collectAsState()
     LaunchedEffect(key1 = true) {
-        viewModel.fetchJoinedChapters()
+        viewModel.fetchJoinedRaces()
     }
 
     when (val state = uiState) {
@@ -63,7 +63,7 @@ fun JoinedRacesScreen(
             isError = true,
             canRetry = true,
             onButtonClick = {
-                viewModel.fetchJoinedChapters()
+                viewModel.fetchJoinedRaces()
             }
         )
     }

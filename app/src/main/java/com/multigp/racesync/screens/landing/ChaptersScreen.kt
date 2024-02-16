@@ -61,7 +61,7 @@ fun ChaptersScreen(
             isError = true,
             canRetry = true,
             onButtonClick = {
-                viewModel.fetchJoinedChapters()
+                viewModel.fetchJoinedRaces()
             },
         )
     }

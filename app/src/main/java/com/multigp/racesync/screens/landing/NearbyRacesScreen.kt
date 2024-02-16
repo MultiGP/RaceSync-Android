@@ -28,7 +28,7 @@ fun NearbyRacesScreen(
 ) {
     val uiState by remember { viewModel.nearbyUiState }.collectAsState()
     LaunchedEffect(key1 = true) {
-        viewModel.fetchNearbyChapters()
+        viewModel.fetchNearbyRaces()
     }
     when (val state = uiState) {
         is RaceUiState.Loading -> LazyColumn() {
@@ -62,7 +62,7 @@ fun NearbyRacesScreen(
             isError = true,
             canRetry = true,
             onButtonClick = {
-                viewModel.fetchNearbyChapters()
+                viewModel.fetchNearbyRaces()
             }
         )
     }
