@@ -15,9 +15,11 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterCell
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
+import com.multigp.racesync.composables.cells.RaceCell
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.ChaptersUiState
 import com.multigp.racesync.viewmodels.LandingViewModel
+import com.multigp.racesync.viewmodels.RaceUiState
 
 @Composable
 fun NearbyRacesScreen(
@@ -29,17 +31,17 @@ fun NearbyRacesScreen(
         viewModel.fetchNearbyChapters()
     }
     when (val state = uiState) {
-        is ChaptersUiState.Loading -> LazyColumn() {
+        is RaceUiState.Loading -> LazyColumn() {
             items(10) { _ ->
                 ChapterLoadingCell()
             }
         }
 
-        is ChaptersUiState.Success -> {
-            if (state.chapters.isNotEmpty()) {
+        is RaceUiState.Success -> {
+            if (state.races.isNotEmpty()) {
                 LazyColumn() {
-                    items(state.chapters) { chapter ->
-                        ChapterCell(chapter)
+                    items(state.races) { race ->
+                        RaceCell(race)
                     }
                 }
             } else {
@@ -52,7 +54,7 @@ fun NearbyRacesScreen(
             }
         }
 
-        is ChaptersUiState.Error -> PlaceholderScreen(
+        is RaceUiState.Error -> PlaceholderScreen(
             modifier = modifier,
             title = stringResource(R.string.error_title_loading_races),
             message = state.message,
