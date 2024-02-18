@@ -1,10 +1,8 @@
 package com.multigp.racesync.composables
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.TextButton
 import androidx.compose.material3.MaterialTheme
@@ -28,40 +26,35 @@ fun PlaceholderScreen(
     canRetry: Boolean = false,
     onButtonClick: () -> Unit = {}
 ) {
-    Box(
-        modifier = modifier
+    Column(
+        modifier = Modifier
             .fillMaxSize()
-            .padding(all = 32.dp),
-        contentAlignment = Alignment.Center
+            .padding(32.dp),
+        verticalArrangement = Arrangement.Center,
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Column(
-            modifier = modifier.fillMaxWidth(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleLarge,
-                color = if(isError) MaterialTheme.colorScheme.error else Color.DarkGray
-            )
-            Text(
-                text = message,
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Gray,
-                textAlign = TextAlign.Center,
-                modifier = modifier.padding(top = 8.dp)
-            )
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleLarge,
+            color = if (isError) MaterialTheme.colorScheme.error else Color.DarkGray
+        )
+        Text(
+            text = message,
+            style = MaterialTheme.typography.titleMedium,
+            color = Color.Gray,
+            textAlign = TextAlign.Center,
+            modifier = modifier.padding(top = 8.dp)
+        )
 
-            if(canRetry){
-                TextButton(
-                    onClick = onButtonClick
-                ) {
-                    Text(
-                        text = buttonTitle!!,
-                        style = MaterialTheme.typography.titleSmall,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
+        if (canRetry) {
+            TextButton(
+                onClick = onButtonClick
+            ) {
+                Text(
+                    text = buttonTitle!!,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.primary
+                )
             }
         }
     }

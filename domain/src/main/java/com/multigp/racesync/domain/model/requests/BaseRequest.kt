@@ -6,8 +6,8 @@ import java.io.Serializable
 data class BaseRequest<T>(
     @SerializedName("apiKey")
     val apiKey: String,
-    @SerializedName("sessionId")
-    val sessionId: String,
     @SerializedName("data")
-    val data: T? = null
+    val data: T? = null,
+    @SerializedName("sessionId")
+    val sessionId: String
 ) : Serializable

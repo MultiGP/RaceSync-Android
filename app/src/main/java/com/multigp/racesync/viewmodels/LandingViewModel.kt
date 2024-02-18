@@ -2,6 +2,8 @@ package com.multigp.racesync.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.paging.PagingData
+import androidx.paging.cachedIn
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
@@ -38,6 +40,12 @@ class LandingViewModel @Inject constructor(
     private val _joinedUiState = MutableStateFlow<RaceUiState>(RaceUiState.Loading)
     val JoinedUiState: StateFlow<RaceUiState> = _joinedUiState.asStateFlow()
 
+    private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
+    val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
+
+    private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
+    val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
+
     fun fetchChapters() {
         viewModelScope.launch {
             useCases.getChaptersUseCase()
@@ -64,49 +72,22 @@ class LandingViewModel @Inject constructor(
 
     fun fetchNearbyRaces() {
         viewModelScope.launch {
-            useCases.getRacesUseCase(500.0)
-                .collect { result ->
-                    result.fold(
-                        onSuccess = { response ->
-                            if (response.status) {
-                                _nearbyUiState.value =
-                                    RaceUiState.Success(response.data ?: emptyList())
-                            } else {
-                                _nearbyUiState.value =
-                                    RaceUiState.Error(response.errorMessage())
-                            }
-                        },
-                        onFailure = { throwable ->
-                            _nearbyUiState.value = RaceUiState.Error(
-                                throwable.localizedMessage ?: "Error loading chapters"
-                            )
-                        }
-                    )
+            val racesPagingData = useCases.getRacesUseCase(500.0)
+            racesPagingData
+                .cachedIn(viewModelScope)
+                .collect {
+                    _nearbyRacesPagingData.value = it
                 }
         }
     }
 
     fun fetchJoinedRaces() {
         viewModelScope.launch {
-            _nearbyUiState.value = RaceUiState.Loading
-            useCases.getRacesUseCase.fetchJoinedRaces()
-                .collect { result ->
-                    result.fold(
-                        onSuccess = { response ->
-                            if (response.status) {
-                                _joinedUiState.value =
-                                    RaceUiState.Success(response.data ?: emptyList())
-                            } else {
-                                _joinedUiState.value =
-                                    RaceUiState.Error(response.errorMessage())
-                            }
-                        },
-                        onFailure = { throwable ->
-                            _joinedUiState.value = RaceUiState.Error(
-                                throwable.localizedMessage ?: "Error loading chapters"
-                            )
-                        }
-                    )
+            val racesPagingData = useCases.getRacesUseCase.fetchJoinedRaces()
+            racesPagingData
+                .cachedIn(viewModelScope)
+                .collect {
+                    _joinedRacesPagingData.value = it
                 }
         }
     }

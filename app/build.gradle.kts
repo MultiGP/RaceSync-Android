@@ -85,6 +85,9 @@ dependencies {
     kapt("com.google.dagger:hilt-compiler:$hilt_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
+    //Paging
+    implementation ("androidx.paging:paging-compose:1.0.0-alpha14")
+
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation("com.squareup.retrofit2:converter-gson:2.9.0")

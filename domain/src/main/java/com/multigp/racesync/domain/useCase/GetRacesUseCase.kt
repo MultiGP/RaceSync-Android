@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
+import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
@@ -13,7 +14,7 @@ class GetRacesUseCase(
 
     operator suspend fun invoke(radius: Double) = racesRepository.fetchRaces(radius)
 
-    suspend fun fetchJoinedRaces(): Flow<Result<BaseResponse<List<Race>>>> {
+    suspend fun fetchJoinedRaces(): Flow<PagingData<Race>> {
         val loginInfo = loginInfoUserCase().first()
         return racesRepository.fetchRaces(loginInfo.second.id)
     }
