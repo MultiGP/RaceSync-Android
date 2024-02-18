@@ -23,7 +23,7 @@ class RacesPagingSources(
                 return LoadResult.Page(
                     data = raceList,
                     prevKey = if (currentPage == 0) null else currentPage - 1,
-                    nextKey = if (raceList.isEmpty()) null else currentPage + 1
+                    nextKey = if (raceList.isEmpty() || raceList.count() < pageSize) null else currentPage + 1
                 )
             } else {
                 throw Throwable(response.errorMessage())
