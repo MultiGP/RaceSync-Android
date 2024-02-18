@@ -22,14 +22,15 @@ import kotlinx.coroutines.tasks.await
 class ChaptersRepositoryImpl(
     private val chaptersDataSource: ChaptersDataSource,
     private val locationClient: FusedLocationProviderClient,
-    private val dataStore: DataStoreManager
+    private val dataStore: DataStoreManager,
+    private val apiKey:String,
 ) :
     ChaptersRepository {
     override suspend fun fetchChapters(): Flow<Result<BaseResponse<List<Chapter>>>> {
         return flow {
             val request = BaseRequest<ChaptersRequest>(
                 sessionId = dataStore.getSessionId()!!,
-                apiKey = "da65552b-0de4-331a-04c2-6991bae6fe27"
+                apiKey = apiKey
             )
             val response = chaptersDataSource.fetchChapters(request)
             emit(Result.success(response))
@@ -47,7 +48,7 @@ class ChaptersRepositoryImpl(
             )
             val request = BaseRequest<ChaptersRequest>(
                 sessionId = dataStore.getSessionId()!!,
-                apiKey = "da65552b-0de4-331a-04c2-6991bae6fe27",
+                apiKey = apiKey,
                 data = chaptersRequest
             )
             val response = chaptersDataSource.fetchChapters(request)
@@ -64,7 +65,7 @@ class ChaptersRepositoryImpl(
             )
             val request = BaseRequest<ChaptersRequest>(
                 sessionId = dataStore.getSessionId()!!,
-                apiKey = "da65552b-0de4-331a-04c2-6991bae6fe27",
+                apiKey = apiKey,
                 data = chaptersRequest
             )
             val response = chaptersDataSource.fetchChapters(request)

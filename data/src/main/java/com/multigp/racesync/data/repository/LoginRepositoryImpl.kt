@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.flowOn
 
 class LoginRepositoryImpl(
     private val onboardingDataSource: OnboardingDataSource,
-    private val dataStore: DataStoreManager
+    private val dataStore: DataStoreManager,
 ) :
     LoginRepository {
     override suspend fun login(

@@ -51,4 +51,9 @@ object NetworkModule {
         return retrofit.create(RaceSyncApi::class.java)
     }
 
+    @Provides
+    fun provideAPiKey(): String{
+        return BuildConfig.API_KEY
+    }
+
 }

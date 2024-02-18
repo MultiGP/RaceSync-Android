@@ -5,8 +5,10 @@ import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.multigp.racesync.data.api.RaceSyncApi
+import com.multigp.racesync.data.paging.JoinedRacesPagingSources
+import com.multigp.racesync.data.paging.NearbyRacesPagingSources
 import com.multigp.racesync.data.prefs.DataStoreManager
-import com.multigp.racesync.data.repository.dataSource.RaceDataSource
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.JoinedRaces
@@ -15,16 +17,15 @@ import com.multigp.racesync.domain.model.requests.PastRaces
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 @SuppressLint("MissingPermission")
 class RacesRepositoryImpl(
-    private val raceDataSource: RaceDataSource,
+    private val raceSyncApi: RaceSyncApi,
     private val locationClient: FusedLocationProviderClient,
-    private val dataStore: DataStoreManager
+    private val dataStore: DataStoreManager,
+    private val apiKey: String
 ) : RacesRepository {
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
         val location = locationClient.lastLocation.await()
@@ -36,13 +37,13 @@ class RacesRepositoryImpl(
             past = PastRaces()
         )
         val request = BaseRequest(
-            apiKey = "da65552b-0de4-331a-04c2-6991bae6fe27",
+            apiKey = apiKey,
             data = raceRequest,
             sessionId = dataStore.getSessionId()!!
         )
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-            pagingSourceFactory = { raceDataSource.fetchNearbyRaces(request) }
+            pagingSourceFactory = { NearbyRacesPagingSources(raceSyncApi, request) }
         )
             .flow
     }
@@ -54,13 +55,13 @@ class RacesRepositoryImpl(
             past = PastRaces(orderByDistance = false)
         )
         val request = BaseRequest(
-            apiKey = "da65552b-0de4-331a-04c2-6991bae6fe27",
+            apiKey = apiKey,
             data = raceRequest,
             sessionId = dataStore.getSessionId()!!
         )
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-            pagingSourceFactory = { raceDataSource.fetchNearbyRaces(request) }
+            pagingSourceFactory = { JoinedRacesPagingSources(raceSyncApi, request) }
         )
             .flow
     }
