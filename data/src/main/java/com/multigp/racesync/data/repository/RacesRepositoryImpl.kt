@@ -6,7 +6,7 @@ import androidx.paging.PagingConfig
 import androidx.paging.PagingData
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.data.api.RaceSyncApi
-import com.multigp.racesync.data.paging.JoinedRacesPagingSources
+import com.multigp.racesync.data.paging.RacesPagingSources
 import com.multigp.racesync.data.paging.NearbyRacesPagingSources
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.Race
@@ -43,7 +43,7 @@ class RacesRepositoryImpl(
         )
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-            pagingSourceFactory = { NearbyRacesPagingSources(raceSyncApi, request) }
+            pagingSourceFactory = { RacesPagingSources(raceSyncApi, request) }
         )
             .flow
     }
@@ -61,7 +61,7 @@ class RacesRepositoryImpl(
         )
         return Pager(
             config = PagingConfig(pageSize = 10, enablePlaceholders = true),
-            pagingSourceFactory = { JoinedRacesPagingSources(raceSyncApi, request) }
+            pagingSourceFactory = { RacesPagingSources(raceSyncApi, request) }
         )
             .flow
     }
