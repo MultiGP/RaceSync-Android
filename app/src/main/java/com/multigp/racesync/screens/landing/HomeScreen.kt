@@ -17,6 +17,8 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.HomeScreenTopBar
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
+import com.multigp.racesync.domain.model.Chapter
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
@@ -24,7 +26,10 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    onMenuClicked: () -> Unit = {}
+    onMenuClicked: () -> Unit = {},
+    onRaceSelected: (Race) -> Unit = {},
+    onChapterSelected: (Chapter) -> Unit = {}
+
 ) {
     val pagerState = rememberPagerState()
     val permissions = listOf(
@@ -47,7 +52,11 @@ fun HomeScreen(
             count = landingTabs.size,
             modifier = modifier.padding(paddingValues)
         ) { page ->
-            landingTabs[page].screen()
+            when (page) {
+                0 -> JoinedRacesScreen(onRaceSelected = onRaceSelected)
+                1 -> NearbyRacesScreen(onRaceSelected = onRaceSelected)
+                2 -> ChaptersScreen(onChapterSelected = onChapterSelected)
+            }
         }
         if (!permissionState.allPermissionsGranted) {
             Box(modifier = modifier.fillMaxSize()) {

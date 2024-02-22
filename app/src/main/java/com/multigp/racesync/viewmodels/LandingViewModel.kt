@@ -4,13 +4,18 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
+import androidx.paging.filter
+import androidx.paging.map
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -20,12 +25,6 @@ sealed class ChaptersUiState {
     data class Error(val message: String) : ChaptersUiState()
 }
 
-sealed class RaceUiState {
-    object Loading : RaceUiState()
-    data class Success(val races: List<Race>) : RaceUiState()
-    data class Error(val message: String) : RaceUiState()
-}
-
 @HiltViewModel
 class LandingViewModel @Inject constructor(
     val useCases: RaceSyncUseCases
@@ -33,12 +32,6 @@ class LandingViewModel @Inject constructor(
 
     private val _chaptersUiState = MutableStateFlow<ChaptersUiState>(ChaptersUiState.Loading)
     val chaptersUiState: StateFlow<ChaptersUiState> = _chaptersUiState.asStateFlow()
-
-    private val _nearbyUiState = MutableStateFlow<RaceUiState>(RaceUiState.Loading)
-    val nearbyUiState: StateFlow<RaceUiState> = _nearbyUiState.asStateFlow()
-
-    private val _joinedUiState = MutableStateFlow<RaceUiState>(RaceUiState.Loading)
-    val JoinedUiState: StateFlow<RaceUiState> = _joinedUiState.asStateFlow()
 
     private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
@@ -72,12 +65,19 @@ class LandingViewModel @Inject constructor(
 
     fun fetchNearbyRaces() {
         viewModelScope.launch {
-            val racesPagingData = useCases.getRacesUseCase(500.0)
+            val racesPagingData = useCases.getRacesUseCase(10000.0)
             racesPagingData
                 .cachedIn(viewModelScope)
                 .collect {
                     _nearbyRacesPagingData.value = it
                 }
+        }
+    }
+
+    fun fetchNearByRace(raceId:String): Flow<PagingData<Race>> {
+        val data = _nearbyRacesPagingData.value.filter { it.id == raceId }
+        return flow {
+            emit(data)
         }
     }
 
@@ -91,4 +91,6 @@ class LandingViewModel @Inject constructor(
                 }
         }
     }
+
+    fun fetchRace(raceId: String) = useCases.getRacesUseCase.fetchRace(raceId)
 }

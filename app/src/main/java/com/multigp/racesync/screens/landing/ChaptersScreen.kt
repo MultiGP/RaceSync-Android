@@ -1,5 +1,6 @@
 package com.multigp.racesync.screens.landing
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
@@ -15,6 +16,7 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterCell
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
+import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.ChaptersUiState
 import com.multigp.racesync.viewmodels.LandingViewModel
@@ -22,7 +24,8 @@ import com.multigp.racesync.viewmodels.LandingViewModel
 @Composable
 fun ChaptersScreen(
     modifier: Modifier = Modifier,
-    viewModel: LandingViewModel = hiltViewModel()
+    viewModel: LandingViewModel = hiltViewModel(),
+    onChapterSelected: (Chapter) -> Unit = {}
 ) {
     val uiState by remember { viewModel.chaptersUiState }.collectAsState()
     LaunchedEffect(key1 = true) {
@@ -40,7 +43,11 @@ fun ChaptersScreen(
             if (state.chapters.isNotEmpty()) {
                 LazyColumn() {
                     items(state.chapters) { chapter ->
-                        ChapterCell(chapter, modifier = modifier)
+                        ChapterCell(
+                            chapter,
+                            modifier = modifier,
+                            onClick = onChapterSelected
+                        )
                     }
                 }
             } else {

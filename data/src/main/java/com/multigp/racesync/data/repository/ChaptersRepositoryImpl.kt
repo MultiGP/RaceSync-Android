@@ -44,7 +44,7 @@ class ChaptersRepositoryImpl(
             val location = locationClient.lastLocation.await() ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
             val chaptersRequest = ChaptersRequest(
                 joined = null,
-                nearBy = NearbyChapters(location.latitude, location.longitude, radius)
+                nearBy = NearbyChapters(3.1319, 101.6841, radius)//NearbyChapters(location.latitude, location.longitude, radius)
             )
             val request = BaseRequest<ChaptersRequest>(
                 sessionId = dataStore.getSessionId()!!,

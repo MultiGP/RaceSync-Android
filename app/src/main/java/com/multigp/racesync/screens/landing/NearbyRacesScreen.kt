@@ -1,5 +1,6 @@
 package com.multigp.racesync.screens.landing
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
@@ -15,13 +16,15 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
 import com.multigp.racesync.composables.cells.RaceCell
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
 
 @Composable
 fun NearbyRacesScreen(
     modifier: Modifier = Modifier,
-    viewModel: LandingViewModel = hiltViewModel()
+    viewModel: LandingViewModel = hiltViewModel(),
+    onRaceSelected: (Race) -> Unit = {}
 ) {
     val racePagingItems = viewModel.nearbyRacesPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
@@ -36,7 +39,11 @@ fun NearbyRacesScreen(
             }
         ) { race ->
             race?.let {
-                RaceCell(it)
+                RaceCell(
+                    it,
+                    modifier = modifier,
+                    onClick = onRaceSelected
+                )
             }
         }
 

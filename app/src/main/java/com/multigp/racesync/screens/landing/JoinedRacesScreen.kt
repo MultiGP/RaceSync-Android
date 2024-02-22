@@ -1,7 +1,6 @@
 package com.multigp.racesync.screens.landing
 
 
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -15,12 +14,14 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
 import com.multigp.racesync.composables.cells.RaceCell
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.viewmodels.LandingViewModel
 
 @Composable
 fun JoinedRacesScreen(
     modifier: Modifier = Modifier,
-    viewModel: LandingViewModel = hiltViewModel()
+    viewModel: LandingViewModel = hiltViewModel(),
+    onRaceSelected: (Race) -> Unit = {}
 ) {
     val racePagingItems = viewModel.joinedRacesPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
@@ -35,7 +36,11 @@ fun JoinedRacesScreen(
             }
         ) { race ->
             race?.let {
-                RaceCell(it)
+                RaceCell(
+                    it,
+                    modifier = modifier,
+                    onClick = onRaceSelected
+                )
             }
         }
 
@@ -49,7 +54,7 @@ fun JoinedRacesScreen(
                     item { ChapterLoadingCell() }
                 }
 
-                loadState.refresh is LoadState.Error  -> {
+                loadState.refresh is LoadState.Error -> {
                     val errorMessage = (loadState.refresh as LoadState.Error).error.message
                     item {
                         PlaceholderScreen(
@@ -65,6 +70,7 @@ fun JoinedRacesScreen(
                         )
                     }
                 }
+
                 loadState.append is LoadState.Error -> {
                     val errorMessage = (loadState.append as LoadState.Error).error.message
                     item {
@@ -81,6 +87,7 @@ fun JoinedRacesScreen(
                         )
                     }
                 }
+
                 loadState.append.endOfPaginationReached && racePagingItems.itemCount == 0 -> {
                     item {
                         PlaceholderScreen(

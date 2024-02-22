@@ -18,4 +18,8 @@ class GetRacesUseCase(
         val loginInfo = loginInfoUserCase().first()
         return racesRepository.fetchRaces(loginInfo.second.id)
     }
+
+    fun fetchRace(raceId: String): Flow<Race>{
+        return racesRepository.fetchRace(raceId)
+    }
 }

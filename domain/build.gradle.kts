@@ -10,7 +10,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -42,6 +41,10 @@ dependencies {
     //Gson
     implementation("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.google.code.gson:gson:2.8.9")
+
+    //Room
+    val room_version="2.6.1"
+    implementation("androidx.room:room-ktx:$room_version")
 
     //Paging
     implementation ("androidx.paging:paging-compose:1.0.0-alpha14")

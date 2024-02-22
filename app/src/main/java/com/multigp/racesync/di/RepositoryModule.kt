@@ -2,6 +2,7 @@ package com.multigp.racesync.di
 
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.data.api.RaceSyncApi
+import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.data.repository.ChaptersRepositoryImpl
 import com.multigp.racesync.data.repository.LoginRepositoryImpl
@@ -39,8 +40,10 @@ object RepositoryModule {
     @Provides
     fun provideRacesRepository(
         raceSyncApi: RaceSyncApi,
+        raceSyncDB: RaceSyncDB,
         dataStore: DataStoreManager,
         locationClient: FusedLocationProviderClient,
         apiKey: String,
-    ): RacesRepository = RacesRepositoryImpl(raceSyncApi, locationClient, dataStore, apiKey)
+    ): RacesRepository =
+        RacesRepositoryImpl(raceSyncApi, raceSyncDB, locationClient, dataStore, apiKey)
 }

@@ -71,7 +71,7 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
 
-    implementation ("io.coil-kt:coil-compose:2.5.0")
+    implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.google.accompanist:accompanist-pager:0.25.0")
     implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0")
 
@@ -80,13 +80,20 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.1.0")
 
     //hilt
-    val hilt_version="2.48"
+    val hilt_version = "2.48"
     implementation("com.google.dagger:hilt-android:$hilt_version")
     kapt("com.google.dagger:hilt-compiler:$hilt_version")
     implementation("androidx.hilt:hilt-navigation-compose:1.0.0")
 
+    //ROOM DB
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    kapt("androidx.room:room-compiler:$room_version")
+    implementation("androidx.room:room-ktx:$room_version")
+    implementation("androidx.room:room-paging:$room_version")
+
     //Paging
-    implementation ("androidx.paging:paging-compose:1.0.0-alpha14")
+    implementation("androidx.paging:paging-compose:1.0.0-alpha14")
 
     // Retrofit
     implementation("com.squareup.retrofit2:retrofit:2.9.0")

@@ -3,6 +3,10 @@ package com.multigp.racesync.navigation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.navigation.NavType
+import androidx.navigation.navArgument
+import com.multigp.racesync.domain.model.Chapter
+import com.multigp.racesync.domain.model.Race
 
 interface NavDestination {
     val icon: ImageVector?
@@ -32,6 +36,28 @@ object Landing : NavDestination {
     override val icon = Icons.Default.Home
     override val title = "Home"
     override val route = "landing"
+}
+
+object RaceDetails : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "Race Details"
+    override val route = "race_details"
+    const val raceIdArg = "race"
+    val routeWithArgs = "${route}/{${raceIdArg}}"
+    val arguments = listOf(
+        navArgument(raceIdArg) { type = NavType.StringType }
+    )
+}
+
+object ChapterDetails : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "Chapter Details"
+    override val route = "chapter_details"
+    const val chapterIdArg = "chapter"
+    val routeWithArgs = "${route}/{${chapterIdArg}}"
+    val arguments = listOf(
+        navArgument(chapterIdArg) { type = NavType.StringType }
+    )
 }
 
 object TrackDesign : NavDestination {
@@ -78,6 +104,13 @@ object SendFeedback : NavDestination {
 }
 
 
-
-
-val drawerMenu = listOf(Landing, TrackDesign, ObstaclesBuildGuide, RulesRegulation, VisitMultiGPShop, VisitMultiGP, SendFeedback, Logout)
+val drawerMenu = listOf(
+    Landing,
+    TrackDesign,
+    ObstaclesBuildGuide,
+    RulesRegulation,
+    VisitMultiGPShop,
+    VisitMultiGP,
+    SendFeedback,
+    Logout
+)

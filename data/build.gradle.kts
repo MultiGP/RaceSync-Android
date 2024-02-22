@@ -1,6 +1,7 @@
 plugins {
     id("com.android.library")
     id("org.jetbrains.kotlin.android")
+    id("kotlin-kapt")
 }
 
 android {
@@ -9,7 +10,6 @@ android {
 
     defaultConfig {
         minSdk = 24
-        targetSdk = 34
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -52,6 +52,13 @@ dependencies {
 
     //location
     implementation("com.google.android.gms:play-services-location:21.1.0")
+
+    //Room
+    val room_version="2.6.1"
+    implementation ("androidx.room:room-runtime:$room_version")
+    kapt ("androidx.room:room-compiler:$room_version")
+    implementation ("androidx.room:room-ktx:$room_version")
+    implementation ("androidx.room:room-paging:$room_version")
 
     //Paging
     implementation ("androidx.paging:paging-compose:1.0.0-alpha14")
