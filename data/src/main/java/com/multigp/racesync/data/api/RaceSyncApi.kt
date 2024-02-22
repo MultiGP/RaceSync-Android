@@ -21,6 +21,8 @@ interface RaceSyncApi {
 
     @POST("chapter/list")
     suspend fun fetchChapters(
+        @Query("currentPage") page: Int,
+        @Query("pageSize") pageSize: Int,
         @Body request: BaseRequest<ChaptersRequest>
     ): BaseResponse<List<Chapter>>
 

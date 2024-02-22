@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import androidx.paging.map
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
@@ -13,8 +12,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -30,8 +27,8 @@ class LandingViewModel @Inject constructor(
     val useCases: RaceSyncUseCases
 ) : ViewModel() {
 
-    private val _chaptersUiState = MutableStateFlow<ChaptersUiState>(ChaptersUiState.Loading)
-    val chaptersUiState: StateFlow<ChaptersUiState> = _chaptersUiState.asStateFlow()
+    private val _chaptersPagingData = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
+    val chaptersPagingData: StateFlow<PagingData<Chapter>> = _chaptersPagingData
 
     private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
@@ -41,24 +38,11 @@ class LandingViewModel @Inject constructor(
 
     fun fetchChapters() {
         viewModelScope.launch {
-            useCases.getChaptersUseCase()
-                .collect { result ->
-                    result.fold(
-                        onSuccess = { response ->
-                            if (response.status) {
-                                _chaptersUiState.value =
-                                    ChaptersUiState.Success(response.data ?: emptyList())
-                            } else {
-                                _chaptersUiState.value =
-                                    ChaptersUiState.Error(response.errorMessage())
-                            }
-                        },
-                        onFailure = { throwable ->
-                            _chaptersUiState.value = ChaptersUiState.Error(
-                                throwable.localizedMessage ?: "Error loading chapters"
-                            )
-                        }
-                    )
+            val chaptersPagingData = useCases.getChaptersUseCase()
+            chaptersPagingData
+                .cachedIn(viewModelScope)
+                .collect {
+                    _chaptersPagingData.value = it
                 }
         }
     }
@@ -74,7 +58,7 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchNearByRace(raceId:String): Flow<PagingData<Race>> {
+    fun fetchNearByRace(raceId: String): Flow<PagingData<Race>> {
         val data = _nearbyRacesPagingData.value.filter { it.id == raceId }
         return flow {
             emit(data)
@@ -93,4 +77,6 @@ class LandingViewModel @Inject constructor(
     }
 
     fun fetchRace(raceId: String) = useCases.getRacesUseCase.fetchRace(raceId)
+
+    fun fetchChapter(chapterId: String) = useCases.getChaptersUseCase(chapterId)
 }

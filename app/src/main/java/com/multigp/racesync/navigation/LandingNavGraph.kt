@@ -53,7 +53,7 @@ fun LandingNavGraph(
         }
         composable(
             route = ChapterDetails.routeWithArgs,
-            arguments = RaceDetails.arguments
+            arguments = ChapterDetails.arguments
         ) { navBackStackEntry ->
             navBackStackEntry.arguments?.getString(ChapterDetails.chapterIdArg)
                 ?.let {chapterId ->

@@ -1,77 +1,50 @@
 package com.multigp.racesync.data.repository
 
 import android.annotation.SuppressLint
+import androidx.paging.ExperimentalPagingApi
+import androidx.paging.Pager
+import androidx.paging.PagingConfig
+import androidx.paging.PagingData
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.multigp.racesync.data.api.RaceSyncApi
+import com.multigp.racesync.data.db.RaceSyncDB
+import com.multigp.racesync.data.paging.ChapterRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
-import com.multigp.racesync.data.repository.dataSource.ChaptersDataSource
-import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
-import com.multigp.racesync.domain.model.requests.JoinedChapters
-import com.multigp.racesync.domain.model.requests.NearbyChapters
 import com.multigp.racesync.domain.repositories.ChaptersRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.tasks.await
 
 @SuppressLint("MissingPermission")
 class ChaptersRepositoryImpl(
-    private val chaptersDataSource: ChaptersDataSource,
+    private val raceSyncApi: RaceSyncApi,
+    private val raceSyncDB: RaceSyncDB,
     private val locationClient: FusedLocationProviderClient,
     private val dataStore: DataStoreManager,
-    private val apiKey:String,
-) :
-    ChaptersRepository {
-    override suspend fun fetchChapters(): Flow<Result<BaseResponse<List<Chapter>>>> {
-        return flow {
-            val request = BaseRequest<ChaptersRequest>(
-                sessionId = dataStore.getSessionId()!!,
-                apiKey = apiKey
-            )
-            val response = chaptersDataSource.fetchChapters(request)
-            emit(Result.success(response))
-        }
-            .catch { emit(Result.failure(it)) }
-            .flowOn(Dispatchers.IO)
+    private val apiKey: String,
+) : ChaptersRepository {
+    private val chapterDao = raceSyncDB.chapterDao()
+
+    @OptIn(ExperimentalPagingApi::class)
+    override suspend fun fetchChapters(): Flow<PagingData<Chapter>> {
+
+        val request = BaseRequest<ChaptersRequest>(
+            sessionId = dataStore.getSessionId()!!,
+            apiKey = apiKey
+        )
+
+        val pagingSourceFactory = { chapterDao.getAllChapters() }
+        return Pager(
+            config = PagingConfig(pageSize = 20),
+            remoteMediator = ChapterRemoteMediator(
+                raceSyncApi,
+                raceSyncDB,
+                request
+            ),
+            pagingSourceFactory = pagingSourceFactory,
+        ).flow
     }
 
-    override suspend fun fetchChapters(radius: Double): Flow<Result<BaseResponse<List<Chapter>>>> {
-        return flow {
-            val location = locationClient.lastLocation.await() ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
-            val chaptersRequest = ChaptersRequest(
-                joined = null,
-                nearBy = NearbyChapters(3.1319, 101.6841, radius)//NearbyChapters(location.latitude, location.longitude, radius)
-            )
-            val request = BaseRequest<ChaptersRequest>(
-                sessionId = dataStore.getSessionId()!!,
-                apiKey = apiKey,
-                data = chaptersRequest
-            )
-            val response = chaptersDataSource.fetchChapters(request)
-            emit(Result.success(response))
-        }
-            .catch { emit(Result.failure(it)) }
-            .flowOn(Dispatchers.IO)
-    }
-
-    override suspend fun fetchChapters(pilotId: String): Flow<Result<BaseResponse<List<Chapter>>>> {
-        return flow {
-            val chaptersRequest = ChaptersRequest(
-                joined = JoinedChapters(pilotId = pilotId)
-            )
-            val request = BaseRequest<ChaptersRequest>(
-                sessionId = dataStore.getSessionId()!!,
-                apiKey = apiKey,
-                data = chaptersRequest
-            )
-            val response = chaptersDataSource.fetchChapters(request)
-            emit(Result.success(response))
-        }
-            .catch { emit(Result.failure(it)) }
-            .flowOn(Dispatchers.IO)
-    }
+    override fun fetchChapter(chapterId: String) = chapterDao.getChapter(chapterId)
 }

@@ -37,7 +37,8 @@ class RacesRepositoryImpl(
             ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
         val raceRequest = RaceRequest(
             joined = null,
-            nearBy = NearbyRaces(3.1319, 101.6841, radius),//NearbyRaces(location.latitude, location.longitude, radius),
+            nearBy = NearbyRaces(location.latitude, location.longitude, radius),
+//            nearBy = NearbyRaces(3.1319, 101.6841, radius),
             upComing = UpcomingRaces(),
             past = PastRaces()
         )
@@ -82,7 +83,5 @@ class RacesRepositoryImpl(
         ).flow
     }
 
-    override fun fetchRace(raceId:String): Flow<Race>{
-        return raceDao.getRace(raceId)
-    }
+    override fun fetchRace(raceId: String) = raceDao.getRace(raceId)
 }

@@ -28,7 +28,7 @@ class ChapterRemoteMediator(
             val page = when (loadType) {
                 LoadType.REFRESH -> {
                     val remoteKeys = getRemoteKeyClosestToCurrentPosition(state)
-                    remoteKeys?.nextKey?.minus(1) ?: 1
+                    remoteKeys?.nextKey?.minus(1) ?: 0
                 }
 
                 LoadType.PREPEND -> {
@@ -49,7 +49,7 @@ class ChapterRemoteMediator(
                     nextPage
                 }
             }
-            val response = raceSyncApi.fetchChapters(chapterRequest)
+            val response = raceSyncApi.fetchChapters(page, state.config.pageSize, chapterRequest)
             var endOfPaginationReached = false
             if (response.status) {
                 val chapters: List<Chapter>? = response.data

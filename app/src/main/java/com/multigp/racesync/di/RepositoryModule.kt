@@ -7,7 +7,6 @@ import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.data.repository.ChaptersRepositoryImpl
 import com.multigp.racesync.data.repository.LoginRepositoryImpl
 import com.multigp.racesync.data.repository.RacesRepositoryImpl
-import com.multigp.racesync.data.repository.dataSource.ChaptersDataSource
 import com.multigp.racesync.data.repository.dataSource.OnboardingDataSource
 import com.multigp.racesync.domain.repositories.ChaptersRepository
 import com.multigp.racesync.domain.repositories.LoginRepository
@@ -30,12 +29,13 @@ object RepositoryModule {
 
     @Provides
     fun provideChaptersRepository(
-        chaptersDataSource: ChaptersDataSource,
+        raceSyncApi: RaceSyncApi,
+        raceSyncDB: RaceSyncDB,
         dataStore: DataStoreManager,
         locationClient: FusedLocationProviderClient,
         apiKey: String,
     ): ChaptersRepository =
-        ChaptersRepositoryImpl(chaptersDataSource, locationClient, dataStore, apiKey)
+        ChaptersRepositoryImpl(raceSyncApi, raceSyncDB, locationClient, dataStore, apiKey)
 
     @Provides
     fun provideRacesRepository(
