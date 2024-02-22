@@ -58,13 +58,6 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchNearByRace(raceId: String): Flow<PagingData<Race>> {
-        val data = _nearbyRacesPagingData.value.filter { it.id == raceId }
-        return flow {
-            emit(data)
-        }
-    }
-
     fun fetchJoinedRaces() {
         viewModelScope.launch {
             val racesPagingData = useCases.getRacesUseCase.fetchJoinedRaces()
