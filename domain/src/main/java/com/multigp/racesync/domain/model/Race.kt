@@ -6,6 +6,8 @@ import androidx.room.PrimaryKey
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.multigp.racesync.domain.extensions.formatDate
+import com.multigp.racesync.domain.extensions.toDate
 import java.io.Serializable
 
 
@@ -111,6 +113,9 @@ data class Race(
         country?.let { components.add(it) }
         return components.joinToString(separator = ", ")
     }
+
+    val snippet: String
+        get() = "Race will be held at ${startDate?.toDate()?.formatDate()}"
 
     companion object {
         val testObject: Race

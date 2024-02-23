@@ -1,4 +1,4 @@
-package com.multigp.racesync.extensions
+package com.multigp.racesync.domain.extensions
 
 import java.text.ParseException
 import java.text.SimpleDateFormat
