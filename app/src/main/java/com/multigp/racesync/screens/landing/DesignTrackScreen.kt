@@ -11,7 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.CommonTopBar
+import com.multigp.racesync.composables.topbars.CommonTopBar
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable

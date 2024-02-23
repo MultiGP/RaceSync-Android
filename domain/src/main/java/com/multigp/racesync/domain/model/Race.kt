@@ -3,6 +3,7 @@ package com.multigp.racesync.domain.model
 import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import java.io.Serializable
@@ -76,6 +77,8 @@ data class Race(
     val sizeRestriction: String?,
     @field:SerializedName("startDate")
     val startDate: String?,
+    @field:SerializedName("endDate")
+    val endDate: String?,
     @field:SerializedName("state")
     val state: String?,
     @field:SerializedName("status")
@@ -95,6 +98,20 @@ data class Race(
     @field:SerializedName("isJoined")
     val isJoined: Boolean = false
 ): Serializable {
+
+    val location: LatLng
+        get() = LatLng(latitude ?: 0.0, longitude ?: 0.0)
+
+    fun getFormattedAddress(): String{
+        val components = mutableListOf<String>()
+        address?.let { components.add(it) }
+        city?.let { components.add(it) }
+        state?.let { components.add(it) }
+        zip?.let { components.add(it) }
+        country?.let { components.add(it) }
+        return components.joinToString(separator = ", ")
+    }
+
     companion object {
         val testObject: Race
             get() {

@@ -28,10 +28,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.buttons.JoinButton
+import com.multigp.racesync.composables.buttons.ParticipantsButton
 import com.multigp.racesync.composables.image.AsyncCircularLogo
 import com.multigp.racesync.composables.image.CircularLogo
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.extensions.formatDate
+import com.multigp.racesync.extensions.toDate
 
 
 @Composable
@@ -63,7 +66,7 @@ fun ChapterCell(
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
-                    text = chapter.dateAdded ?: "",
+                    text = chapter.dateAdded?.toDate()?.formatDate() ?: "",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
@@ -86,40 +89,8 @@ fun ChapterCell(
                 )
             }
             Column {
-                OutlinedButton(
-                    onClick = { },
-                    shape = MaterialTheme.shapes.small,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.surface,
-                        contentColor = MaterialTheme.colorScheme.tertiary
-                    ),
-                    border = BorderStroke(1.dp, color = MaterialTheme.colorScheme.tertiary)
-                ) {
-                    Text(
-                        text = "Join",
-                        style = MaterialTheme.typography.labelLarge,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-                Button(
-                    onClick = {},
-                    shape = MaterialTheme.shapes.small,
-                    contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        contentColor = MaterialTheme.colorScheme.secondary
-                    )
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_group),
-                        contentDescription = null
-                    )
-                    Spacer(modifier = modifier.width(4.dp))
-                    Text(
-                        text = "" + chapter.memberCount,
-                        style = MaterialTheme.typography.titleMedium
-                    )
-                }
+                JoinButton(onClick = {})
+                ParticipantsButton(text = "" + chapter.memberCount, onClick = {})
             }
         }
         Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)

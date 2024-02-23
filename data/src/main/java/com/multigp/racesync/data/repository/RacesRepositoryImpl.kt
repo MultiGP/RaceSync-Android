@@ -33,12 +33,12 @@ class RacesRepositoryImpl(
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
-        val location = locationClient.lastLocation.await()
-            ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
+//        val location = locationClient.lastLocation.await()
+//            ?: throw Exception("Unable to get your location.\nPlease check if your location service is ON and then try again.")
         val raceRequest = RaceRequest(
             joined = null,
-            nearBy = NearbyRaces(location.latitude, location.longitude, radius),
-//            nearBy = NearbyRaces(3.1319, 101.6841, radius),
+//            nearBy = NearbyRaces(location.latitude, location.longitude, radius),
+            nearBy = NearbyRaces(3.1319, 101.6841, radius),
             upComing = UpcomingRaces(),
             past = PastRaces()
         )

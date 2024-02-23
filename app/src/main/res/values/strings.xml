@@ -32,4 +32,6 @@
     <string name="error_title_loading_races">Error Loading Races</string>
     <string name="error_title_loading_chapters">Error Loading Chapters</string>
     <string name="error_btn_title_retry">Retry</string>
+
+    <string name="title_race_details">Race Details</string>
 </resources>

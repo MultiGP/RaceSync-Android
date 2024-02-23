@@ -12,14 +12,15 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
-sealed class ChaptersUiState {
-    object Loading : ChaptersUiState()
-    data class Success(val chapters: List<Chapter>) : ChaptersUiState()
-    data class Error(val message: String) : ChaptersUiState()
+sealed class UiState<out T> {
+    object Loading : UiState<Nothing>()
+    data class Success<T>(val data: T) : UiState<T>()
+    data class Error(val message: String) : UiState<Nothing>()
 }
 
 @HiltViewModel
@@ -35,6 +36,12 @@ class LandingViewModel @Inject constructor(
 
     private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
+
+    private val _raceDetailsUiState = MutableStateFlow<UiState<Race>>(UiState.Loading)
+    val raceDetailsUiState: StateFlow<UiState<Race>> = _raceDetailsUiState.asStateFlow()
+
+    private val _chapterDetailsUiState = MutableStateFlow<UiState<Chapter>>(UiState.Loading)
+    val chapterDetailsUiState: StateFlow<UiState<Chapter>> = _chapterDetailsUiState.asStateFlow()
 
     fun fetchChapters() {
         viewModelScope.launch {
@@ -69,7 +76,19 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchRace(raceId: String) = useCases.getRacesUseCase.fetchRace(raceId)
+    fun fetchRace(raceId: String){
+        viewModelScope.launch {
+            useCases.getRacesUseCase.fetchRace(raceId).collect{race ->
+                _raceDetailsUiState.value = UiState.Success(race)
+            }
+        }
+    }
 
-    fun fetchChapter(chapterId: String) = useCases.getChaptersUseCase(chapterId)
+    fun fetchChapter(chapterId: String){
+        viewModelScope.launch {
+            useCases.getChaptersUseCase(chapterId).collect{chapter ->
+                _chapterDetailsUiState.value = UiState.Success(chapter)
+            }
+        }
+    }
 }

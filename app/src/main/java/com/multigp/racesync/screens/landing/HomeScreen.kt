@@ -14,7 +14,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.HomeScreenTopBar
+import com.multigp.racesync.composables.topbars.HomeScreenTopBar
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
 import com.multigp.racesync.domain.model.Chapter

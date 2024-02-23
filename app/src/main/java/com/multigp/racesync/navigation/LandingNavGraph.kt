@@ -7,14 +7,11 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.multigp.racesync.domain.model.Chapter
-import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.RaceDetailsScreen
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @Composable
 fun LandingNavGraph(
     navController: NavHostController,
@@ -47,8 +44,10 @@ fun LandingNavGraph(
             arguments = RaceDetails.arguments
         ) { navBackStackEntry ->
             navBackStackEntry.arguments?.getString(RaceDetails.raceIdArg)
-                ?.let {raceId ->
-                    RaceDetailsScreen(raceId)
+                ?.let { raceId ->
+                    RaceDetailsScreen(raceId, onGoBack = {
+                        navController.popBackStack()
+                    })
                 }
         }
         composable(
@@ -56,7 +55,7 @@ fun LandingNavGraph(
             arguments = ChapterDetails.arguments
         ) { navBackStackEntry ->
             navBackStackEntry.arguments?.getString(ChapterDetails.chapterIdArg)
-                ?.let {chapterId ->
+                ?.let { chapterId ->
                     ChapterDetailsScreen(chapterId)
                 }
         }
