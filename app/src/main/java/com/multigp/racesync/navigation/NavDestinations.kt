@@ -2,6 +2,7 @@ package com.multigp.racesync.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Send
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -98,7 +99,7 @@ object Logout : NavDestination {
 }
 
 object SendFeedback : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.Send
     override val title = "Send Feedback"
     override val route = "track"
 }
