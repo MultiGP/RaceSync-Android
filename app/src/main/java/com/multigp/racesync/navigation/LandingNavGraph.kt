@@ -8,8 +8,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
+import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
-import com.multigp.racesync.screens.landing.DesignWebObsBuildGuideScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.RaceDetailsScreen
 
@@ -42,8 +42,42 @@ fun LandingNavGraph(
         }
 
         composable(route = ObstaclesBuildGuide.route) {
-            DesignWebObsBuildGuideScreen(
-                onMenuClicked = onMenuClicked
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = ObstaclesBuildGuide.webUrl,
+                title = ObstaclesBuildGuide.title
+            )
+        }
+
+        composable(route = RulesRegulation.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = RulesRegulation.webUrl,
+                title = RulesRegulation.title
+            )
+        }
+
+        composable(route = VisitMultiGPShop.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = VisitMultiGPShop.webUrl,
+                title = VisitMultiGPShop.title
+            )
+        }
+
+        composable(route = SendFeedback.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = SendFeedback.webUrl,
+                title = SendFeedback.title
+            )
+        }
+
+        composable(route = VisitMultiGP.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = VisitMultiGP.webUrl,
+                title = VisitMultiGP.title
             )
         }
         composable(
