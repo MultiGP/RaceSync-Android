@@ -9,6 +9,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
+import com.multigp.racesync.screens.landing.DesignWebObsBuildGuideScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.RaceDetailsScreen
 
@@ -36,6 +37,12 @@ fun LandingNavGraph(
         }
         composable(route = TrackDesign.route) {
             DesignTrackScreen(
+                onMenuClicked = onMenuClicked
+            )
+        }
+
+        composable(route = ObstaclesBuildGuide.route) {
+            DesignWebObsBuildGuideScreen(
                 onMenuClicked = onMenuClicked
             )
         }

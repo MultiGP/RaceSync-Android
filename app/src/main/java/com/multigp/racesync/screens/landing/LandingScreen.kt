@@ -111,6 +111,7 @@ fun DrawerContent(
                         unselectedTextColor = MaterialTheme.colorScheme.secondary
                     ),
                     selected = selectedMenuItem == it.route,
+                    icon = { Icon(it.icon, contentDescription = null) },
                     onClick = { onMenuClick(it.route) })
                 Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
             }

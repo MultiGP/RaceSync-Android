@@ -1,8 +1,14 @@
 package com.multigp.racesync.navigation
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Send
+import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
 import androidx.navigation.navArgument
@@ -10,25 +16,25 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 
 interface NavDestination {
-    val icon: ImageVector?
+    val icon: ImageVector
     val title: String?
     val route: String
 }
 
 object Login : NavDestination {
-    override val icon = null
+    override val icon = Icons.Default.Home
     override val title = null
     override val route = "login"
 }
 
 object Registration : NavDestination {
-    override val icon = null
+    override val icon = Icons.Default.Home
     override val title = null
     override val route = "registration"
 }
 
 object ForgotPassword : NavDestination {
-    override val icon = null
+    override val icon = Icons.Default.Home
     override val title = null
     override val route = "forgot_password"
 }
@@ -62,38 +68,38 @@ object ChapterDetails : NavDestination {
 }
 
 object TrackDesign : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.Edit
     override val title = "MultiGP Track Designs"
     override val route = "track"
 }
 
 
 object ObstaclesBuildGuide : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.Build
     override val title = "Obstacles Build Guide"
-    override val route = "track"
+    override val route = "webobsguide"
 }
 
 object RulesRegulation : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.List
     override val title = "Season Rules & Regulations"
     override val route = "track"
 }
 
 object VisitMultiGPShop : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.ShoppingCart
     override val title = "Visit the MultiGP Shop"
     override val route = "track"
 }
 
 object VisitMultiGP : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.Star
     override val title = "Go to MultiGP.com"
     override val route = "track"
 }
 
 object Logout : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Default.ArrowBack
     override val title = "Logout"
     override val route = "track"
 }
