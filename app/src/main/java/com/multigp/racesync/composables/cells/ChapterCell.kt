@@ -40,8 +40,7 @@ fun ChapterCell(
     Column(
         modifier = modifier.clickable(
             onClick = { onClick(chapter) },
-            interactionSource = interactionSource,
-            indication = rememberRipple(color = rippleColor)
+
         )
     ) {
         Row(

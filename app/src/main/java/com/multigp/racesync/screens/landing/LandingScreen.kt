@@ -98,8 +98,7 @@ fun DrawerContent(
                 NavigationDrawerItem(
                     label = {
                         Text(
-                            text = it.title!!,
-                            fontWeight = FontWeight.Medium
+                            text = it.title!!
                         )
                     },
                     shape = RectangleShape,
@@ -112,7 +111,7 @@ fun DrawerContent(
                         unselectedTextColor = MaterialTheme.colorScheme.secondary
                     ),
                     selected = selectedMenuItem == it.route,
-                    icon = { Icon(Icons.Default.Home, contentDescription = null) },
+                    icon = { Icon(it.icon, contentDescription = null) },
                     onClick = { onMenuClick(it.route) })
                 Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
             }

@@ -112,6 +112,8 @@ dependencies {
     //Maps
     implementation("com.google.maps.android:maps-compose:4.3.0")
 
+    //Webview
+    implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

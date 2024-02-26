@@ -41,8 +41,7 @@ fun RaceCell(
     Column(
         modifier = modifier.clickable(
             onClick = { onClick(race) },
-            interactionSource = interactionSource,
-            indication = rememberRipple(color = rippleColor)
+
         )
     ) {
         Row(
