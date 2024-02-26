@@ -1,5 +1,6 @@
 package com.multigp.racesync.composables.cells
 
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -35,13 +36,11 @@ fun RaceCell(
     modifier: Modifier = Modifier,
     onClick: (Race) -> Unit = {}
 ) {
-    val rippleColor = MaterialTheme.colorScheme.primary
-    val interactionSource = remember { MutableInteractionSource() }
-
     Column(
         modifier = modifier.clickable(
+            indication = LocalIndication.current,
+            interactionSource = remember { MutableInteractionSource() },
             onClick = { onClick(race) },
-
         )
     ) {
         Row(

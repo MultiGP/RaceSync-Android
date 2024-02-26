@@ -1,5 +1,7 @@
 package com.multigp.racesync.composables.cells
 
+
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
@@ -35,12 +37,11 @@ fun ChapterCell(
     modifier: Modifier = Modifier,
     onClick: (Chapter) -> Unit = {}
 ) {
-    val rippleColor = MaterialTheme.colorScheme.primary
-    val interactionSource = remember { MutableInteractionSource() }
     Column(
         modifier = modifier.clickable(
+            indication = LocalIndication.current,
+            interactionSource = remember { MutableInteractionSource() },
             onClick = { onClick(chapter) },
-
         )
     ) {
         Row(
@@ -49,9 +50,9 @@ fun ChapterCell(
                 .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if(chapter.mainImageFileName != null) {
+            if (chapter.mainImageFileName != null) {
                 AsyncCircularLogo(url = chapter.mainImageFileName)
-            }else{
+            } else {
                 CircularLogo(id = R.drawable.logo_powered_by)
             }
             Spacer(modifier = modifier.padding(start = 8.dp))

@@ -8,6 +8,14 @@ plugins {
 }
 
 android {
+    signingConfigs {
+        create("release") {
+            storeFile = file("racesync.keystore")
+            storePassword = "R@ceSync"
+            keyAlias = "racesync"
+            keyPassword = "R@ceSync"
+        }
+    }
     namespace = "com.multigp.racesync"
     compileSdk = 34
 
@@ -16,7 +24,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.0.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -25,6 +33,7 @@ android {
 
         buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
         buildConfigField("String", "API_KEY", "\"da65552b-0de4-331a-04c2-6991bae6fe27\"")
+        signingConfig = signingConfigs.getByName("release")
     }
 
     buildTypes {
@@ -66,7 +75,7 @@ dependencies {
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
-    implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material3:material3-android:1.3.0-alpha01")
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.7.0")
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.6")
