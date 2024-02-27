@@ -1,11 +1,14 @@
 package com.multigp.racesync.data.api
 
+import com.multigp.racesync.domain.model.Aircraft
+import com.multigp.racesync.domain.model.AircraftResponse
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.UserInfo
+import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.LoginRequest
@@ -41,4 +44,10 @@ interface RaceSyncApi {
     suspend fun fetchProfile(
         @Body request: ProfileRequest
     ): BaseResponse<Profile>
+
+
+    @POST("aircraft/list")
+    suspend fun fetchAllAircraft(
+        @Body request: AircraftRequest
+    ): BaseResponse<List<Aircraft>>
 }
