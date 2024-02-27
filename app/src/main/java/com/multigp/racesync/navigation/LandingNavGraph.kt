@@ -86,7 +86,7 @@ fun LandingNavGraph(
         }
 
         composable(route = ProfileDetails.route) {
-            ProfileScreen()
+            ProfileScreen(navController = navController)
         }
         composable(
             route = RaceDetails.routeWithArgs,
