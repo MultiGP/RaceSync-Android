@@ -2,9 +2,11 @@ package com.multigp.racesync.di
 
 import com.multigp.racesync.domain.repositories.ChaptersRepository
 import com.multigp.racesync.domain.repositories.LoginRepository
+import com.multigp.racesync.domain.repositories.ProfileRepository
 import com.multigp.racesync.domain.repositories.RacesRepository
 import com.multigp.racesync.domain.useCase.GetChaptersUseCase
 import com.multigp.racesync.domain.useCase.GetLoginInfoUserCase
+import com.multigp.racesync.domain.useCase.GetProfileUseCase
 import com.multigp.racesync.domain.useCase.GetRacesUseCase
 import com.multigp.racesync.domain.useCase.LoginUseCase
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
@@ -20,11 +22,13 @@ object UseCaseModule {
     fun provideRaceSyncUseCases(
         loginRepository: LoginRepository,
         chaptersRepository: ChaptersRepository,
-        racesRepository: RacesRepository
+        racesRepository: RacesRepository,
+        profileRepository: ProfileRepository
     ) = RaceSyncUseCases(
         performLoginUseCase = LoginUseCase(loginRepository),
         getLoginInfoUserCase = GetLoginInfoUserCase(loginRepository),
         getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUserCase(loginRepository)),
-        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUserCase(loginRepository))
+        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUserCase(loginRepository)),
+        getProfileUseCase = GetProfileUseCase(profileRepository)
     )
 }

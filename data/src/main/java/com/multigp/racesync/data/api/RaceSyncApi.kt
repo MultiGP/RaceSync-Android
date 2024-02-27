@@ -3,12 +3,15 @@ package com.multigp.racesync.data.api
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.Chapter
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.LoginRequest
+import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
+import kotlinx.coroutines.flow.Flow
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -33,4 +36,9 @@ interface RaceSyncApi {
         @Query("pageSize") pageSize: Int,
         @Body request: BaseRequest<RaceRequest>
     ): BaseResponse<List<Race>>
+
+    @POST("user/profile")
+    suspend fun fetchProfile(
+        @Body request: ProfileRequest
+    ): BaseResponse<Profile>
 }
