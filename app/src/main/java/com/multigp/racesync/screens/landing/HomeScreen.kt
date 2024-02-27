@@ -27,6 +27,7 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
+    onProfileClicked: () -> Unit = {},
     onRaceSelected: (Race) -> Unit = {},
     onChapterSelected: (Chapter) -> Unit = {}
 
@@ -42,7 +43,8 @@ fun HomeScreen(
             HomeScreenTopBar(
                 tabs = landingTabs,
                 pagerState = pagerState,
-                onMenuClicked = onMenuClicked
+                onMenuClicked = onMenuClicked,
+                onProfileClicked = onProfileClicked
             )
         }
     )

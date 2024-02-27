@@ -6,10 +6,12 @@ import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.data.repository.ChaptersRepositoryImpl
 import com.multigp.racesync.data.repository.LoginRepositoryImpl
+import com.multigp.racesync.data.repository.ProfileRepositoryImpl
 import com.multigp.racesync.data.repository.RacesRepositoryImpl
 import com.multigp.racesync.data.repository.dataSource.OnboardingDataSource
 import com.multigp.racesync.domain.repositories.ChaptersRepository
 import com.multigp.racesync.domain.repositories.LoginRepository
+import com.multigp.racesync.domain.repositories.ProfileRepository
 import com.multigp.racesync.domain.repositories.RacesRepository
 import dagger.Module
 import dagger.Provides
@@ -26,6 +28,12 @@ object RepositoryModule {
         onboardingDataSource: OnboardingDataSource,
         dataStore: DataStoreManager,
     ): LoginRepository = LoginRepositoryImpl(onboardingDataSource, dataStore)
+
+    @Provides
+    fun provideProfileRepository(
+        raceSyncApi: RaceSyncApi,
+        dataStore: DataStoreManager
+    ): ProfileRepository = ProfileRepositoryImpl(raceSyncApi, dataStore)
 
     @Provides
     fun provideChaptersRepository(

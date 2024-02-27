@@ -124,6 +124,8 @@ dependencies {
     //Webview
     implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
 
+    implementation ("com.google.zxing:core:3.5.1")
+
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.5.1")

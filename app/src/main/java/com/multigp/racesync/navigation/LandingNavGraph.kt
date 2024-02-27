@@ -12,6 +12,7 @@ import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.RaceDetailsScreen
+import com.multigp.racesync.screens.profile.ProfileScreen
 
 @Composable
 fun LandingNavGraph(
@@ -27,6 +28,9 @@ fun LandingNavGraph(
         composable(route = Landing.route) {
             HomeScreen(
                 onMenuClicked = onMenuClicked,
+                onProfileClicked = {
+                    navController.navigate(ProfileDetails.route)
+                },
                 onRaceSelected = { race ->
                     navController.navigate("${RaceDetails.route}/${race.id}")
                 },
@@ -79,6 +83,10 @@ fun LandingNavGraph(
                 statWebUrl = VisitMultiGP.webUrl,
                 title = VisitMultiGP.title
             )
+        }
+
+        composable(route = ProfileDetails.route) {
+            ProfileScreen(navController = navController)
         }
         composable(
             route = RaceDetails.routeWithArgs,
