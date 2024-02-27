@@ -1,6 +1,7 @@
 package com.multigp.racesync.composables.topbars
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -44,7 +45,8 @@ fun HomeScreenTopBar(
     tabs: List<TabItem>,
     pagerState: PagerState,
     modifier: Modifier = Modifier,
-    onMenuClicked: () -> Unit = {}
+    onMenuClicked: () -> Unit = {},
+    onProfileClicked: () -> Unit = {}
 ) {
     Surface(
         color = MaterialTheme.colorScheme.surface
@@ -72,14 +74,22 @@ fun HomeScreenTopBar(
                 }
                 Image(
                     modifier = modifier
+                        .clickable(
+                            onClick = {
+                                onProfileClicked()
+                            }
+                        )
+
                         .padding(10.dp)
                         .height(25.dp)
                         .width(25.dp)
                         .clip(CircleShape)
                         .align(Alignment.CenterEnd),
+
                     painter = painterResource(id = R.drawable.profile),
                     contentScale = ContentScale.Inside,
                     contentDescription = null,
+
                 )
 
 
