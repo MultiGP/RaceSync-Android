@@ -15,5 +15,6 @@ data class AircraftRequest (
 
 data class PilotData(
     @SerializedName("pilotId")
-    val pilotId: Int
+    val pilotId: Int,
+    val retired: Boolean
 )

@@ -37,12 +37,9 @@ class ProfileRepositoryImpl(
 
     override suspend fun fetchAllAircraft(apikey: String, pilotId: Int): Flow<BaseResponse<List<Aircraft>>> = flow {
         val session = dataStore.getSessionId()
-        val pilotData = PilotData(pilotId)
+        val pilotData = PilotData(pilotId, false)
         val aircraftRequest = AircraftRequest(apikey, session, pilotData)
         val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
-
-        val newResponse: BaseResponse<List<Aircraft>>
-        newResponse.status = response.status
 
         emit(response)
     }

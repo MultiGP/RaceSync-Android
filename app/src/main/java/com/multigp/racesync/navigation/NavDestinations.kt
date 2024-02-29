@@ -68,6 +68,14 @@ object AllAircraft : NavDestination {
 
 }
 
+object AircraftDetails : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "My Aircraft Details"
+    override val route = "aircraft/{aircraftId}"
+    override val webUrl = null
+
+}
+
 object RaceDetails : NavDestination {
     override val icon = Icons.Default.Home
     override val title = "Race Details"

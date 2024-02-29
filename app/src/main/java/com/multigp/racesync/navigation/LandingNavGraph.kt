@@ -9,7 +9,10 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
+import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
+import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
@@ -108,14 +111,36 @@ fun LandingNavGraph(
                 }
             )
         ){navBackStackEntry ->
-
             val pilotId = navBackStackEntry.arguments?.getString("pilotId")!!
-            AllAircraftScreen(pilotId = pilotId, onGoBack = {
-                navController.popBackStack()
+            AllAircraftScreen(
+                pilotId = pilotId,
+                onAircraftDetailsClick = {aircraftId:String ->
+                                         navController.navigate(route = "aircraft/$aircraftId")
+                },
+                onGoBack = {
+                    navController.popBackStack()
+                },
 
-            })
-
+            )
         }
+
+        composable(
+            route = AircraftDetails.route,
+            arguments = listOf(
+                navArgument(name = "aircraftId"){
+                    type = NavType.StringType
+                }
+            )
+        ){navBackStackEntry ->
+            val aircraftId = navBackStackEntry.arguments?.getString("aircraftId")!!
+            AircraftDetailsScreen(
+                aircraftId = aircraftId,
+                onGoBack = {
+                    navController.popBackStack()
+                }
+            )
+        }
+
         composable(
             route = RaceDetails.routeWithArgs,
             arguments = RaceDetails.arguments
