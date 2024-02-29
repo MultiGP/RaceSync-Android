@@ -42,20 +42,6 @@ import com.multigp.racesync.composables.CustomDialog
 import com.multigp.racesync.navigation.AllAircraft
 import com.multigp.racesync.viewmodels.ProfileViewModel
 
-//@Composable
-//fun ProfileScreen(
-//    modifier: Modifier = Modifier,
-//    viewModel : ProfileViewModel = hiltViewModel(),
-//){
-//
-//    val profileUiState by viewModel.uiState.collectAsState()
-//
-//    Row (modifier.fillMaxSize()){
-//        Text(text = profileUiState.simpleText)
-//    }
-//
-//}
-
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,

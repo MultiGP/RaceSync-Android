@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navigation
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
@@ -132,7 +133,12 @@ fun LandingNavGraph(
             )
         ){navBackStackEntry ->
             val aircraftId = navBackStackEntry.arguments?.getString("aircraftId")!!
-            AircraftDetailsScreen(aircraftId = aircraftId)
+            AircraftDetailsScreen(
+                aircraftId = aircraftId,
+                onGoBack = {
+                    navController.popBackStack()
+                }
+            )
         }
 
         composable(
