@@ -2,6 +2,7 @@ package com.multigp.racesync.screens.allaircraft
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -39,7 +40,8 @@ fun AllAircraftScreen(
     pilotId:String,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
-    viewModel: AllAircraftViewModel = hiltViewModel()
+    viewModel: AllAircraftViewModel = hiltViewModel(),
+    onAircraftDetailsClick: (String) -> Unit = {}
 ){
     val allAircraftUiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
@@ -49,7 +51,8 @@ fun AllAircraftScreen(
     AllAircraftContent(
         pilotId = pilotId,
         onGoBack = onGoBack,
-        aircraftList = allAircraftUiState.allAircraft
+        aircraftList = allAircraftUiState.allAircraft,
+        onAircraftDetailsClick = onAircraftDetailsClick
     )
 }
 
@@ -58,7 +61,8 @@ fun AllAircraftContent(
     pilotId:String,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
-    aircraftList: List<Aircraft>
+    aircraftList: List<Aircraft>,
+    onAircraftDetailsClick: (String) -> Unit = {}
 
 ){
     Column (
@@ -66,7 +70,8 @@ fun AllAircraftContent(
     ){
         RaceDetailsTopBar(
             title = AllAircraft.title,
-            onGoBack = onGoBack
+            onGoBack = onGoBack,
+
         )
 
         LazyVerticalGrid(columns = GridCells.Fixed(2), content = {
@@ -82,6 +87,7 @@ fun AllAircraftContent(
                 ){
 
                     AsyncImage(
+
                         model = aircraft.mainImageFileName,
                         contentDescription = null,
                         contentScale = ContentScale.Crop,
@@ -89,6 +95,7 @@ fun AllAircraftContent(
                             .size(200.dp)
                             .padding(25.dp)
                             .clip(shape = RoundedCornerShape(10.dp))
+                            .clickable(onClick = {onAircraftDetailsClick("test")})
 
                     )
                     Spacer(modifier = modifier.height(8.dp))
