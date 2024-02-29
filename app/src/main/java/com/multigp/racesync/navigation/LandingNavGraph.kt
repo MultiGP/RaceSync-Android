@@ -5,8 +5,11 @@ import androidx.annotation.RequiresApi
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
+import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
@@ -86,7 +89,32 @@ fun LandingNavGraph(
         }
 
         composable(route = ProfileDetails.route) {
-            ProfileScreen(navController = navController)
+            ProfileScreen(
+                onGoBack = {
+                    navController.popBackStack()
+                },
+                onAircraftClick = { pilotId:String ->
+                    navController.navigate(route = "allaircraft/$pilotId")
+                }
+
+            )
+        }
+
+        composable(
+            route = AllAircraft.route,
+            arguments = listOf(
+                navArgument(name = "pilotId"){
+                    type = NavType.StringType
+                }
+            )
+        ){navBackStackEntry ->
+
+            val pilotId = navBackStackEntry.arguments?.getString("pilotId")!!
+            AllAircraftScreen(pilotId = pilotId, onGoBack = {
+                navController.popBackStack()
+
+            })
+
         }
         composable(
             route = RaceDetails.routeWithArgs,
