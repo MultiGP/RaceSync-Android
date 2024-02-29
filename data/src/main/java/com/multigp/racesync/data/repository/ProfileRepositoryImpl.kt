@@ -1,12 +1,10 @@
 package com.multigp.racesync.data.repository
 
 import android.util.Log
-import com.multigp.racesync.data.BuildConfig
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.BaseResponse
-import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.PilotData
@@ -22,7 +20,7 @@ import kotlinx.coroutines.flow.flowOn
 class ProfileRepositoryImpl(
     private val raceSyncApi: RaceSyncApi,
     private val dataStore: DataStoreManager
-): ProfileRepository {
+) : ProfileRepository {
     override suspend fun fetchProfile(apikey: String): Flow<BaseResponse<Profile>> = flow {
         val session = dataStore.getSessionId()
         val profileRequest = ProfileRequest(apikey, session)
@@ -32,23 +30,23 @@ class ProfileRepositoryImpl(
     }
         .catch {
 
-            Log.d("tag", "Something went wrong") }
+            Log.d("tag", "Something went wrong")
+        }
         .flowOn(Dispatchers.IO)
 
-    override suspend fun fetchAllAircraft(apikey: String, pilotId: Int): Flow<BaseResponse<List<Aircraft>>> = flow {
+    override suspend fun fetchAllAircraft(
+        apikey: String,
+        pilotId: Int
+    ): Flow<BaseResponse<List<Aircraft>>> = flow {
         val session = dataStore.getSessionId()
         val pilotData = PilotData(pilotId)
         val aircraftRequest = AircraftRequest(apikey, session, pilotData)
         val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
-
-        val newResponse: BaseResponse<List<Aircraft>>
-        newResponse.status = response.status
-
         emit(response)
     }
         .catch {
-
-        Log.d("tag", "Something went wrong") }
+            Log.d("tag", "Something went wrong")
+        }
         .flowOn(Dispatchers.IO)
 
 }
