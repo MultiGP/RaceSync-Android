@@ -41,9 +41,6 @@ class ProfileRepositoryImpl(
         val aircraftRequest = AircraftRequest(apikey, session, pilotData)
         val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
 
-        val newResponse: BaseResponse<List<Aircraft>>
-        newResponse.status = response.status
-
         emit(response)
     }
         .catch {
