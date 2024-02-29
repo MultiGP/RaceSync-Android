@@ -5,5 +5,6 @@ data class RaceSyncUseCases(
     val getLoginInfoUserCase: GetLoginInfoUserCase,
     val getChaptersUseCase: GetChaptersUseCase,
     val getRacesUseCase: GetRacesUseCase,
-    val getProfileUseCase: GetProfileUseCase
+    val getProfileUseCase: GetProfileUseCase,
+    val getAllAircraftUseCase: GetAllAircraftUseCase
 )

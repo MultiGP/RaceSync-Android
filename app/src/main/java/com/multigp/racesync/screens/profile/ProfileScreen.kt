@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.multigp.racesync.composables.CustomDialog
+import com.multigp.racesync.navigation.AllAircraft
 import com.multigp.racesync.viewmodels.ProfileViewModel
 
 //@Composable
@@ -58,15 +59,18 @@ import com.multigp.racesync.viewmodels.ProfileViewModel
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    navController: NavHostController,
     viewModel : ProfileViewModel = hiltViewModel(),
+    onGoBack: () -> Unit = {},
+    onAircraftClick: (String) -> Unit = {},
 ){
     val profileUiState by viewModel.uiState.collectAsState()
     Column(modifier.fillMaxSize()){
-        TopBar(name = "Barracuda", navController = navController, viewModel = viewModel)
+        TopBar(name = "Barracuda",  viewModel = viewModel, onGoBack = onGoBack )
         PilotBanner(profileImage = profileUiState.profilePictureUrl, backgroundImage = profileUiState.profileBackgroundUrl)
         PilotInformation( chapterCount = profileUiState.chapterCount, raceCount = profileUiState.raceCount, name = profileUiState.displayName)
-        PilotLocation(city = profileUiState.city)
+        PilotLocation(city = profileUiState.city, onAircraftClick = {
+            onAircraftClick(profileUiState.id)
+        })
     }
 
     if(viewModel.isDialogShown){
@@ -87,7 +91,7 @@ fun ProfileScreen(
 fun TopBar(
     name: String,
     modifier: Modifier = Modifier,
-    navController: NavHostController,
+    onGoBack: () -> Unit = {},
     viewModel: ProfileViewModel
 ){
     TopAppBar(
@@ -95,7 +99,7 @@ fun TopBar(
             Text(text = name)
         },
         navigationIcon = {
-            IconButton(onClick = { navController.popBackStack()}) {
+            IconButton(onClick = { onGoBack()}) {
                 Icon(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
@@ -197,6 +201,7 @@ fun PilotInformation(
 @Composable
 fun PilotLocation(
     city: String,
+    onAircraftClick: () -> Unit = {}
 
 ){
     Row(modifier = Modifier
@@ -228,7 +233,7 @@ fun PilotLocation(
             verticalArrangement = Arrangement.Center
 
         ) {
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { onAircraftClick()}) {
                 Text(text = "My Aircrafts")
             }
         }
