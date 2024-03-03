@@ -5,6 +5,8 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.multigp.racesync.domain.model.Race
 import kotlinx.coroutines.flow.Flow
 
@@ -12,6 +14,7 @@ import kotlinx.coroutines.flow.Flow
 interface RaceDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addRaces(races: List<Race>)
+
     @Query("SELECT * FROM races")
     fun getAllRaces(): PagingSource<Int, Race>
 

@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface ChaptersRepository {
-    suspend fun fetchChapters(): Flow<PagingData<Chapter>>
+    suspend fun fetchChapters(pilotId:String): Flow<PagingData<Chapter>>
 
     fun fetchChapter(chapterId: String): Flow<Chapter>
 }

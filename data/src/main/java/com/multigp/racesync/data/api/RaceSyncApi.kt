@@ -40,6 +40,12 @@ interface RaceSyncApi {
         @Body request: BaseRequest<RaceRequest>
     ): BaseResponse<List<Race>>
 
+    @POST("race/listForChapter")
+    suspend fun fetchRacesForChapter(
+        @Query("chapterId") chapterId: String,
+        @Body request: BaseRequest<Any>
+    ): BaseResponse<List<Race>>
+
     @POST("user/profile")
     suspend fun fetchProfile(
         @Body request: ProfileRequest

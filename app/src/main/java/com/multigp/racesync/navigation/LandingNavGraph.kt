@@ -39,9 +39,6 @@ fun LandingNavGraph(
                 },
                 onRaceSelected = { race ->
                     navController.navigate("${RaceDetails.route}/${race.id}")
-                },
-                onChapterSelected = { chapter ->
-                    navController.navigate("${ChapterDetails.route}/${chapter.id}")
                 }
             )
         }

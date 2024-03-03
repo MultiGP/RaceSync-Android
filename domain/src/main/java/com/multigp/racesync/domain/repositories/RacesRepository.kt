@@ -9,5 +9,7 @@ interface RacesRepository {
 
     suspend fun fetchRaces(pilotId: String): Flow<PagingData<Race>>
 
-    fun fetchRace(raceId:String): Flow<Race>
+    suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>>
+
+    fun fetchRace(raceId: String): Flow<Race>
 }

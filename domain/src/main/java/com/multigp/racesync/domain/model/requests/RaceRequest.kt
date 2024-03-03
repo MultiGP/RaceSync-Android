@@ -11,6 +11,8 @@ data class RaceRequest(
     val upComing: UpcomingRaces? = null,
     @SerializedName("past")
     val past: PastRaces? = null,
+    @SerializedName("name")
+    val name:String? = null
 )
 
 data class JoinedRaces(

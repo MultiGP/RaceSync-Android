@@ -56,10 +56,11 @@ class RaceRemoteMediator(
                 endOfPaginationReached = races == null || races.count() < state.config.pageSize
                 races?.let { races ->
                     raceSyncDB.withTransaction {
-                        if (loadType == LoadType.REFRESH) {
-                            raceDao.deleteAllRaces()
-                            raceRemoteKeysDao.deleteAllRaceRemoteKeys()
-                        }
+                        //TODO:: refresh only after a certain duration. For example, 5 mins
+//                        if (loadType == LoadType.REFRESH) {
+//                            raceDao.deleteAllRaces()
+//                            raceRemoteKeysDao.deleteAllRaceRemoteKeys()
+//                        }
 
                         val keys = races.map { race ->
                             RaceRemoteKeys(

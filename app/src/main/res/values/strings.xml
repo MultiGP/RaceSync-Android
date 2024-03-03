@@ -35,4 +35,6 @@
     <string name="error_btn_title_retry">Retry</string>
 
     <string name="title_race_details">Race Details</string>
+    <string name="title_button_join">Join</string>
+    <string name="title_button_joined">Joined</string>
 </resources>

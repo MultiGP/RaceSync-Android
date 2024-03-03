@@ -28,8 +28,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
-    onRaceSelected: (Race) -> Unit = {},
-    onChapterSelected: (Chapter) -> Unit = {}
+    onRaceSelected: (Race) -> Unit = {}
 
 ) {
     val pagerState = rememberPagerState()
@@ -57,7 +56,7 @@ fun HomeScreen(
             when (page) {
                 0 -> JoinedRacesScreen(onRaceSelected = onRaceSelected)
                 1 -> NearbyRacesScreen(onRaceSelected = onRaceSelected)
-                2 -> ChaptersScreen(onChapterSelected = onChapterSelected)
+                2 -> ChaptersScreen(onChapterSelected = onRaceSelected)
             }
         }
         if (!permissionState.allPermissionsGranted) {

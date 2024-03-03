@@ -138,7 +138,7 @@ fun RaceContentsScreen(
                 Column(
                     verticalArrangement = Arrangement.Center
                 ) {
-                    JoinButton(onClick = {})
+                    JoinButton(race.isJoined, onClick = {})
                     ParticipantsButton(text = "" + race.participantCount, onClick = {})
                 }
             }

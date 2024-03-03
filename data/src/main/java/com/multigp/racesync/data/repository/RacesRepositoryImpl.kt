@@ -12,9 +12,10 @@ import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.requests.BaseRequest
+import com.multigp.racesync.domain.model.requests.ChaptersRequest
+import com.multigp.racesync.domain.model.requests.JoinedChapters
 import com.multigp.racesync.domain.model.requests.JoinedRaces
 import com.multigp.racesync.domain.model.requests.NearbyRaces
-import com.multigp.racesync.domain.model.requests.PastRaces
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
@@ -31,29 +32,24 @@ class RacesRepositoryImpl(
     private val apiKey: String
 ) : RacesRepository {
     private val raceDao = raceSyncDB.raceDao()
+    private val chapterDao = raceSyncDB.chapterDao()
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
-        return locationClient.lastLocation.await()?.let {location ->
+        return locationClient.lastLocation.await()?.let { location ->
             val raceRequest = RaceRequest(
                 joined = null,
                 nearBy = NearbyRaces(location.latitude, location.longitude, radius),
-//            nearBy = NearbyRaces(3.1319, 101.6841, radius),
-                upComing = UpcomingRaces(),
-                past = PastRaces()
+                upComing = UpcomingRaces(orderByDistance = true)
             )
             val request = BaseRequest(
-                apiKey = apiKey,
-                data = raceRequest,
-                sessionId = dataStore.getSessionId()!!
+                apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
             )
             val pagingSourceFactory = { raceDao.getAllRaces() }
             Pager(
                 config = PagingConfig(pageSize = 20),
                 remoteMediator = RaceRemoteMediator(
-                    raceSyncApi,
-                    raceSyncDB,
-                    request
+                    raceSyncApi, raceSyncDB, request
                 ),
                 pagingSourceFactory = pagingSourceFactory,
             ).flow
@@ -68,25 +64,67 @@ class RacesRepositoryImpl(
     override suspend fun fetchRaces(pilotId: String): Flow<PagingData<Race>> {
         val raceRequest = RaceRequest(
             joined = JoinedRaces(pilotId = pilotId),
-            upComing = UpcomingRaces(orderByDistance = false),
-            past = PastRaces(orderByDistance = false)
+            upComing = UpcomingRaces(orderByDistance = false)
         )
         val request = BaseRequest(
-            apiKey = apiKey,
-            data = raceRequest,
-            sessionId = dataStore.getSessionId()!!
+            apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
         )
         val pagingSourceFactory = { raceDao.getJoinedRaces(true) }
         return Pager(
             config = PagingConfig(pageSize = 20),
             remoteMediator = RaceRemoteMediator(
-                raceSyncApi,
-                raceSyncDB,
-                request
+                raceSyncApi, raceSyncDB, request
             ),
             pagingSourceFactory = pagingSourceFactory,
         ).flow
     }
+
+    override suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>> {
+        /*
+            Three steps involved to fetch joined chapter races
+            1. Fetch joined chapters
+            2. Fetch list of races associated with chapter -> returns race name name and id only
+            3. Fetch each race using name as search string
+        */
+
+        val request = BaseRequest(
+            data = ChaptersRequest(JoinedChapters(pilotId = pilotId)),
+            sessionId = dataStore.getSessionId()!!,
+            apiKey = apiKey
+        )
+
+        val raceRequest = BaseRequest<Any>(
+            apiKey = apiKey,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        return flow {
+            val response = raceSyncApi.fetchChapters(0, 25, request)
+            if (response.status) {
+                response.data?.let { chapters ->
+                    chapterDao.addChapters(chapters)
+                    val races = chapters.map { chapter ->
+                        raceSyncApi.fetchRacesForChapter(chapter.id, raceRequest)
+                    }
+                        .filter { it.status && it.data != null }
+                        .flatMap { it.data!! }
+                        .map {
+                            val singleRaceRequest = BaseRequest(
+                                data = RaceRequest(name = it.name),
+                                sessionId = dataStore.getSessionId()!!,
+                                apiKey = apiKey
+                            )
+                            raceSyncApi.fetchRaces(0, 1, singleRaceRequest)
+                        }
+                        .filter { it.status && it.data != null }
+                        .flatMap { it.data!! }
+                    raceDao.addRaces(races)
+                    emit(races)
+                } ?: emit(emptyList())
+            }
+        }
+    }
+
 
     override fun fetchRace(raceId: String) = raceDao.getRace(raceId)
 }

@@ -1,7 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
 import androidx.paging.PagingData
-import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
@@ -19,7 +18,12 @@ class GetRacesUseCase(
         return racesRepository.fetchRaces(loginInfo.second.id)
     }
 
-    fun fetchRace(raceId: String): Flow<Race>{
+    suspend fun fetchJoinedChapterRaces(): Flow<List<Race>> {
+        val loginInfo = loginInfoUserCase().first()
+        return racesRepository.fetchJoinedChapterRaces(loginInfo.second.id)
+    }
+
+    fun fetchRace(raceId: String): Flow<Race> {
         return racesRepository.fetchRace(raceId)
     }
 }

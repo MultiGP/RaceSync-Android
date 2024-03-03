@@ -13,6 +13,10 @@ import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
+import com.multigp.racesync.domain.model.requests.JoinedChapters
+import com.multigp.racesync.domain.model.requests.JoinedRaces
+import com.multigp.racesync.domain.model.requests.RaceRequest
+import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.ChaptersRepository
 import kotlinx.coroutines.flow.Flow
 
@@ -27,9 +31,14 @@ class ChaptersRepositoryImpl(
     private val chapterDao = raceSyncDB.chapterDao()
 
     @OptIn(ExperimentalPagingApi::class)
-    override suspend fun fetchChapters(): Flow<PagingData<Chapter>> {
+    override suspend fun fetchChapters(pilotId: String): Flow<PagingData<Chapter>> {
 
-        val request = BaseRequest<ChaptersRequest>(
+        val chapterRequest = ChaptersRequest(
+            joined = JoinedChapters(pilotId = pilotId)
+        )
+
+        val request = BaseRequest(
+            data = chapterRequest,
             sessionId = dataStore.getSessionId()!!,
             apiKey = apiKey
         )

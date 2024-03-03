@@ -80,7 +80,7 @@ fun RaceCell(
                 )
             }
             Column {
-                JoinButton(onClick = {})
+                JoinButton(race.isJoined, onClick = {})
                 ParticipantsButton(text = "" + race.participantCount, onClick = {})
             }
         }
