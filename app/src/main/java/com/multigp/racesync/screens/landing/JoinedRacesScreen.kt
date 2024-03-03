@@ -23,7 +23,8 @@ import com.multigp.racesync.viewmodels.UiState
 fun JoinedRacesScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    onRaceSelected: (Race) -> Unit = {}
+    onRaceSelected: (Race) -> Unit = {},
+    gotoNearbyRaces: () -> Unit = {}
 ) {
     val racePagingItems = viewModel.joinedRacesPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
@@ -97,7 +98,7 @@ fun JoinedRacesScreen(
                             message = stringResource(R.string.placeholder_message_no_races),
                             buttonTitle = stringResource(R.string.placeholder_btn_title_search_nearby),
                             canRetry = true,
-                            onButtonClick = {}
+                            onButtonClick = gotoNearbyRaces
                         )
                     }
                 }

@@ -9,6 +9,7 @@ import com.google.gson.annotations.SerializedName
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import java.io.Serializable
+import java.util.Date
 
 
 @Keep
@@ -116,6 +117,9 @@ data class Race(
 
     val snippet: String
         get() = "Race will be held at ${startDate?.toDate()?.formatDate()}"
+
+    val isUpcoming: Boolean
+        get() = (startDate?.toDate()?.compareTo(Date()) ?: -1) >=0
 
     companion object {
         val testObject: Race

@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import com.multigp.racesync.domain.model.Aircraft
+import com.multigp.racesync.domain.model.requests.NearbyRaces
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen

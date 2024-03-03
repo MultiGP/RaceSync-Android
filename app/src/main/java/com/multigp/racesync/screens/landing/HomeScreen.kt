@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -22,6 +23,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class, ExperimentalPermissionsApi::class)
 @Composable
@@ -30,9 +32,10 @@ fun HomeScreen(
     onMenuClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
-
 ) {
     val pagerState = rememberPagerState()
+    val coroutineScope = rememberCoroutineScope()
+
     val permissions = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         Manifest.permission.ACCESS_COARSE_LOCATION
@@ -56,9 +59,17 @@ fun HomeScreen(
             modifier = modifier.padding(paddingValues),
         ) { page ->
             when (page) {
-                0 -> JoinedRacesScreen(onRaceSelected = onRaceSelected)
+                0 -> JoinedRacesScreen(onRaceSelected = onRaceSelected, gotoNearbyRaces = {
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(1)
+                    }
+                })
                 1 -> NearbyRacesScreen(onRaceSelected = onRaceSelected)
-                2 -> ChaptersScreen(onChapterSelected = onRaceSelected)
+                2 -> ChaptersScreen(onChapterSelected = onRaceSelected, gotoNearbyRaces = {
+                    coroutineScope.launch {
+                        pagerState.scrollToPage(1)
+                    }
+                })
             }
         }
         if (!permissionState.allPermissionsGranted) {

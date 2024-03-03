@@ -67,15 +67,17 @@ class LandingViewModel @Inject constructor(
                 val racesPagingData = useCases.getRacesUseCase(radius)
                 racesPagingData
                     .cachedIn(viewModelScope)
-                    .collect {
-                        _nearbyRacesPagingData.value = it.filter { race ->
-                            calculateDistance(
-                                race.latitude!!,
-                                race.latitude!!,
-                                curLocation.latitude,
-                                curLocation.longitude
-                            ) > radius
-                        }
+                    .collect { pagingData ->
+                        _nearbyRacesPagingData.value = pagingData
+                            .filter { it.isUpcoming }
+                            .filter { race ->
+                                calculateDistance(
+                                    race.latitude!!,
+                                    race.latitude!!,
+                                    curLocation.latitude,
+                                    curLocation.longitude
+                                ) > radius
+                            }
                     }
             }
         }
@@ -86,8 +88,8 @@ class LandingViewModel @Inject constructor(
             val racesPagingData = useCases.getRacesUseCase.fetchJoinedRaces()
             racesPagingData
                 .cachedIn(viewModelScope)
-                .collect {
-                    _joinedRacesPagingData.value = it
+                .collect { pagingData ->
+                    _joinedRacesPagingData.value = pagingData.filter { it.isUpcoming }
                 }
         }
     }

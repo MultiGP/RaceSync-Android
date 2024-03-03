@@ -10,6 +10,7 @@ import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
+import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
@@ -22,6 +23,7 @@ import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
+import java.util.Date
 
 @SuppressLint("MissingPermission")
 class RacesRepositoryImpl(
@@ -99,11 +101,13 @@ class RacesRepositoryImpl(
         )
 
         return flow {
+            //Fetch joined chapters
             val response = raceSyncApi.fetchChapters(0, 25, request)
             if (response.status) {
                 response.data?.let { chapters ->
                     chapterDao.addChapters(chapters)
                     val races = chapters.map { chapter ->
+                        //Fetch race list for each chapter -> return name and id only
                         raceSyncApi.fetchRacesForChapter(chapter.id, raceRequest)
                     }
                         .filter { it.status && it.data != null }
@@ -114,10 +118,12 @@ class RacesRepositoryImpl(
                                 sessionId = dataStore.getSessionId()!!,
                                 apiKey = apiKey
                             )
+                            //Fetch complete race details
                             raceSyncApi.fetchRaces(0, 1, singleRaceRequest)
                         }
                         .filter { it.status && it.data != null }
                         .flatMap { it.data!! }
+                        .filter { it.isUpcoming  }
                     raceDao.addRaces(races)
                     emit(races)
                 } ?: emit(emptyList())

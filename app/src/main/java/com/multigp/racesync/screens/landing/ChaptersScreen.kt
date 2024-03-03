@@ -23,7 +23,8 @@ import com.multigp.racesync.viewmodels.UiState
 fun ChaptersScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    onChapterSelected: (Race) -> Unit = {}
+    onChapterSelected: (Race) -> Unit = {},
+    gotoNearbyRaces: () -> Unit = {}
 ) {
     val uiState by viewModel.joineChapterRacesUiState.collectAsState()
     LaunchedEffect(Unit) {
@@ -42,13 +43,24 @@ fun ChaptersScreen(
 
         is UiState.Success -> {
             val races = (uiState as UiState.Success).data
-            LazyColumn {
-                items(items = races, key = { it.id }) { race ->
-                    RaceCell(
-                        race, modifier = modifier,
-                        onClick = onChapterSelected
-                    )
+            if (races.count() > 0) {
+                LazyColumn {
+                    items(items = races, key = { it.id }) { race ->
+                        RaceCell(
+                            race, modifier = modifier,
+                            onClick = onChapterSelected
+                        )
+                    }
                 }
+            } else {
+                PlaceholderScreen(
+                    modifier = modifier,
+                    title = stringResource(R.string.placeholder_title_no_races),
+                    message = stringResource(R.string.placeholder_message_no_races),
+                    buttonTitle = stringResource(R.string.placeholder_btn_title_search_nearby),
+                    canRetry = true,
+                    onButtonClick = gotoNearbyRaces
+                )
             }
         }
 
@@ -61,84 +73,10 @@ fun ChaptersScreen(
                 isError = true,
                 canRetry = true,
                 onButtonClick = {
-                    viewModel.fetchChapters()
+                    viewModel.fetchJoinedChapterRaces()
                 })
         }
     }
-
-//    LazyColumn {
-//        items(
-//            items = chapterPagingItems,
-//            key = { chapter ->
-//                chapter.id
-//            }
-//        ) { race ->
-//            race?.let {
-//                ChapterCell(
-//                    it,
-//                    modifier = modifier,
-//                    onClick = onChapterSelected
-//                )
-//            }
-//        }
-//
-//        chapterPagingItems.apply {
-//            when {
-//                loadState.refresh is LoadState.Loading -> {
-//                    item { ChapterLoadingCell() }
-//                }
-//
-//                loadState.append is LoadState.Loading -> {
-//                    item { ChapterLoadingCell() }
-//                }
-//
-//                loadState.refresh is LoadState.Error -> {
-//                    val errorMessage = (loadState.refresh as LoadState.Error).error.message
-//                    item {
-//                        PlaceholderScreen(
-//                            modifier = modifier,
-//                            title = stringResource(R.string.error_title_loading_chapters),
-//                            message = errorMessage ?: "",
-//                            buttonTitle = stringResource(R.string.error_btn_title_retry),
-//                            isError = true,
-//                            canRetry = true,
-//                            onButtonClick = {
-//                                viewModel.fetchChapters()
-//                            }
-//                        )
-//                    }
-//                }
-//
-//                loadState.append is LoadState.Error -> {
-//                    val errorMessage = (loadState.append as LoadState.Error).error.message
-//                    item {
-//                        PlaceholderScreen(
-//                            modifier = modifier,
-//                            title = stringResource(R.string.error_title_loading_chapters),
-//                            message = errorMessage ?: "",
-//                            buttonTitle = stringResource(R.string.error_btn_title_retry),
-//                            isError = true,
-//                            canRetry = true,
-//                            onButtonClick = {
-//                                viewModel.fetchChapters()
-//                            }
-//                        )
-//                    }
-//                }
-//
-//                loadState.append.endOfPaginationReached && chapterPagingItems.itemCount == 0 -> {
-//                    item {
-//                        PlaceholderScreen(
-//                            modifier = modifier,
-//                            title = stringResource(R.string.placeholder_title_no_chapters),
-//                            message = "",
-//                            canRetry = false,
-//                        )
-//                    }
-//                }
-//            }
-//        }
-//    }
 }
 
 @Preview(showBackground = true, heightDp = 200)
