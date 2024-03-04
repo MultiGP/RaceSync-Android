@@ -80,6 +80,7 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
+    implementation ("com.github.SmartToolFactory:Compose-Colorful-Sliders:1.2.2")
 
     implementation("io.coil-kt:coil-compose:2.5.0")
     implementation("com.google.accompanist:accompanist-pager:0.25.0")

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -92,9 +93,6 @@ fun HomeScreenTopBar(
 
                 )
 
-
-
-
             }
             HomeScreenTabs(
                 tabs = tabs,
@@ -135,11 +133,13 @@ fun HomeScreenTabs(
                 icon = {
                     if (index == pagerState.currentPage)
                         Icon(
+                            modifier = modifier.size(20.dp),
                             painter = painterResource(id = tab.iconSelected),
                             contentDescription = ""
                         )
                     else
                         Icon(
+                            modifier = modifier.size(20.dp),
                             painter = painterResource(id = tab.iconDefault),
                             contentDescription = ""
                         )

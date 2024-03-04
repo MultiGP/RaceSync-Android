@@ -3,6 +3,7 @@ package com.multigp.racesync.composables.text
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -27,6 +28,7 @@ fun IconText(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
+            modifier = modifier.size(24.dp),
             painter = painterResource(id = icon),
             tint = color,
             contentDescription = null
