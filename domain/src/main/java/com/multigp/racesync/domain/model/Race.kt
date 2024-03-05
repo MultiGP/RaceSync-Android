@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.model
 
+import android.location.Location
 import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
@@ -7,6 +8,7 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.multigp.racesync.domain.extensions.formatDate
+import com.multigp.racesync.domain.extensions.isWithInRadius
 import com.multigp.racesync.domain.extensions.toDate
 import java.io.Serializable
 import java.util.Date
@@ -100,12 +102,12 @@ data class Race(
     val childRaceCount: String?,
     @field:SerializedName("isJoined")
     val isJoined: Boolean = false
-): Serializable {
+) : Serializable {
 
     val location: LatLng
         get() = LatLng(latitude ?: 0.0, longitude ?: 0.0)
 
-    fun getFormattedAddress(): String{
+    fun getFormattedAddress(): String {
         val components = mutableListOf<String>()
         address?.let { components.add(it) }
         city?.let { components.add(it) }
@@ -119,7 +121,16 @@ data class Race(
         get() = "Race will be held at ${startDate?.toDate()?.formatDate()}"
 
     val isUpcoming: Boolean
-        get() = (startDate?.toDate()?.compareTo(Date()) ?: -1) >=0
+        get() = (startDate?.toDate()?.compareTo(Date()) ?: -1) >= 0
+
+    fun isWithInSearchRadius(curLocation: Location, radius: Double): Boolean {
+        return if (latitude != null && longitude != null) {
+            LatLng(latitude, longitude)
+                .isWithInRadius(LatLng(curLocation.latitude, curLocation.longitude), radius)
+        } else {
+            false
+        }
+    }
 
     companion object {
         val testObject: Race

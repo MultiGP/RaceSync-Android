@@ -1,6 +1,7 @@
 package com.multigp.racesync.data.prefs
 
 import android.content.Context
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -26,6 +27,13 @@ class DataStoreManager(val context: Context) {
         }
     }
 
+    suspend fun saveSearchRadius(radius: Double, unit: String) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_RADIUS_UNIT] = unit
+            preferences[KEY_RADIUS_VALUE] = radius
+        }
+    }
+
     suspend fun getUserInfo(): UserInfo? {
         val preferences = context.dataStore.data.first()
         val json = preferences[KEY_USER_INFO]
@@ -37,9 +45,21 @@ class DataStoreManager(val context: Context) {
         return preferences[KEY_SESSION_ID]
     }
 
+    suspend fun getSearchRadius(): Pair<Double, String> {
+        val preferences = context.dataStore.data.first()
+        val unit = preferences[KEY_RADIUS_UNIT] ?: DEFAULT_RADIUS_UNIT
+        val radius = preferences[KEY_RADIUS_VALUE] ?: DEFAULT_RADIUS_VALUE
+        return Pair(radius, unit)
+    }
+
 
     companion object {
         private val KEY_USER_INFO = stringPreferencesKey("key_user_info")
         private val KEY_SESSION_ID = stringPreferencesKey("key_session_id")
+        private val KEY_RADIUS_UNIT = stringPreferencesKey("key_radius_unit")
+        private val KEY_RADIUS_VALUE = doublePreferencesKey("key_radius_value")
+
+        private const val DEFAULT_RADIUS_UNIT = "mi"
+        private const val DEFAULT_RADIUS_VALUE = 100.0
     }
 }

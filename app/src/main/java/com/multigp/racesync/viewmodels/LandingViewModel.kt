@@ -30,9 +30,6 @@ class LandingViewModel @Inject constructor(
     private val locationClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
-    private val _chaptersPagingData = MutableStateFlow<PagingData<Chapter>>(PagingData.empty())
-    val chaptersPagingData: StateFlow<PagingData<Chapter>> = _chaptersPagingData
-
     private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
 
@@ -49,34 +46,23 @@ class LandingViewModel @Inject constructor(
     val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
         _joineChapterRacesUiState.asStateFlow()
 
-    fun fetchChapters() {
-        viewModelScope.launch {
-            val chaptersPagingData = useCases.getChaptersUseCase()
-            chaptersPagingData
-                .cachedIn(viewModelScope)
-                .collect {
-                    _chaptersPagingData.value = it
-                }
-        }
-    }
+    private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
+    val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
+
 
     @SuppressLint("MissingPermission")
-    fun fetchNearbyRaces(radius: Double = 3000.0) {
+    fun fetchNearbyRaces() {
         viewModelScope.launch {
             locationClient.lastLocation.await()?.let { curLocation ->
-                val racesPagingData = useCases.getRacesUseCase(radius)
+                val searchRadius = useCases.getRacesUseCase.fetchSearchRadius()
+                val racesPagingData = useCases.getRacesUseCase.fetchNearbyRaces(searchRadius)
                 racesPagingData
                     .cachedIn(viewModelScope)
                     .collect { pagingData ->
                         _nearbyRacesPagingData.value = pagingData
                             .filter { it.isUpcoming }
                             .filter { race ->
-                                calculateDistance(
-                                    race.latitude!!,
-                                    race.latitude!!,
-                                    curLocation.latitude,
-                                    curLocation.longitude
-                                ) > radius
+                                race.isWithInSearchRadius(curLocation, searchRadius)
                             }
                     }
             }
@@ -123,14 +109,18 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun calculateDistance(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
-        val R = 6371
-        val dLat = Math.toRadians(lat2 - lat1)
-        val dLon = Math.toRadians(lon2 - lon1)
-        val a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2)) *
-                Math.sin(dLon / 2) * Math.sin(dLon / 2)
-        val c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a))
-        return R * c
+    fun saveSearchRadius(radius: Double, unit: String) {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.saveSearchRadius(radius, unit)
+            fetchNearbyRaces()
+        }
+    }
+
+    fun fetchRaceFeedOptions() {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.fetchRaceFeedOptions().collect {
+                _raceFeedOoption.value = it
+            }
+        }
     }
 }

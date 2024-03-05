@@ -52,28 +52,25 @@ class RaceRemoteMediator(
             val response = raceSyncApi.fetchRaces(page, state.config.pageSize, raceRequest)
             var endOfPaginationReached = false
             if (response.status) {
-                val races: List<Race>? = response.data
-                endOfPaginationReached = races == null || races.count() < state.config.pageSize
-                races?.let { races ->
-                    raceSyncDB.withTransaction {
-                        //TODO:: refresh only after a certain duration. For example, 5 mins
-//                        if (loadType == LoadType.REFRESH) {
-//                            raceDao.deleteAllRaces()
-//                            raceRemoteKeysDao.deleteAllRaceRemoteKeys()
-//                        }
-
-                        val keys = races.map { race ->
-                            RaceRemoteKeys(
-                                raceId = race.id,
-                                prevKey = if (page <= 1) null else page - 1,
-                                nextKey = page + 1
-                            )
-                        }
-                        raceRemoteKeysDao.addAllRaceRemoteKeys(raceRemoteKeys = keys)
-                        raceDao.addRaces(races = races)
+                val races: List<Race> = response.data ?: emptyList()
+                endOfPaginationReached = races.count() < state.config.pageSize
+                raceSyncDB.withTransaction {
+                    //TODO:: refresh only after a certain duration. For example, 5 mins
+                    if (loadType == LoadType.REFRESH) {
+                        raceDao.deleteAllRaces()
+                        raceRemoteKeysDao.deleteAllRaceRemoteKeys()
                     }
-                }
 
+                    val keys = races.map { race ->
+                        RaceRemoteKeys(
+                            raceId = race.id,
+                            prevKey = if (page <= 1) null else page - 1,
+                            nextKey = page + 1
+                        )
+                    }
+                    raceRemoteKeysDao.addAllRaceRemoteKeys(raceRemoteKeys = keys)
+                    raceDao.addRaces(races = races)
+                }
             }
             MediatorResult.Success(endOfPaginationReached = endOfPaginationReached)
         } catch (e: Exception) {

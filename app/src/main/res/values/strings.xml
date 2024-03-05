@@ -37,4 +37,8 @@
     <string name="title_race_details">Race Details</string>
     <string name="title_button_join">Join</string>
     <string name="title_button_joined">Joined</string>
+
+    <string name="label_search_radius">Search Radius</string>
+    <string name="label_measurement_system">Measurement System</string>
+
 </resources>

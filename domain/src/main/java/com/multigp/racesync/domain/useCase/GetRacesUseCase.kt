@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
+import android.location.Location
 import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
@@ -11,7 +12,9 @@ class GetRacesUseCase(
     private val loginInfoUserCase: GetLoginInfoUserCase
 ) {
 
-    operator suspend fun invoke(radius: Double) = racesRepository.fetchRaces(radius)
+    suspend fun fetchNearbyRaces(radius: Double): Flow<PagingData<Race>> {
+        return racesRepository.fetchRaces(radius)
+    }
 
     suspend fun fetchJoinedRaces(): Flow<PagingData<Race>> {
         val loginInfo = loginInfoUserCase().first()
@@ -26,4 +29,15 @@ class GetRacesUseCase(
     fun fetchRace(raceId: String): Flow<Race> {
         return racesRepository.fetchRace(raceId)
     }
+
+    suspend fun saveSearchRadius(radius: Double, unit: String) {
+        racesRepository.saveSearchRadius(radius, unit)
+    }
+
+    suspend fun fetchSearchRadius(): Double {
+        val (radius, unit) = racesRepository.fetchSearchRadius().first()
+        return if (unit == "mi") radius else radius * 0.621371
+    }
+
+    suspend fun fetchRaceFeedOptions() = racesRepository.fetchSearchRadius()
 }

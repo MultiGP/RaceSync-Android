@@ -49,7 +49,8 @@ class RacesRepositoryImpl(
             )
             val pagingSourceFactory = { raceDao.getAllRaces() }
             Pager(
-                config = PagingConfig(pageSize = 20),
+                //API doesn't support paging. Therefore fetching maximum races
+                config = PagingConfig(pageSize = 1000),
                 remoteMediator = RaceRemoteMediator(
                     raceSyncApi, raceSyncDB, request
                 ),
@@ -133,4 +134,12 @@ class RacesRepositoryImpl(
 
 
     override fun fetchRace(raceId: String) = raceDao.getRace(raceId)
+
+    override suspend fun saveSearchRadius(radius: Double, unit:String){
+        dataStore.saveSearchRadius(radius, unit)
+    }
+
+    override suspend fun fetchSearchRadius() = flow {
+        this.emit(dataStore.getSearchRadius())
+    }
 }
