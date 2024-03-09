@@ -11,6 +11,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -18,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -28,6 +30,7 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.DistanceConfigurationSheet
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
@@ -36,6 +39,7 @@ import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
+import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -134,8 +138,23 @@ fun HomeScreen(
             )
         }
 
-        if (showAircraftSheet){
-            
+        if (showAircraftSheet) {
+            val aircraftUiState by viewModel.aircraftsUiState.collectAsState()
+            LaunchedEffect(Unit) {
+                viewModel.fetchAircrafts()
+            }
+            when (aircraftUiState) {
+                is UiState.Success -> {
+                    val aircrafts = (aircraftUiState as UiState.Success).data
+                    AircraftsSheet(
+                        aircrafts = aircrafts,
+                        modifier = modifier,
+                        onAircraftClick = {},
+                        onSheetDissmissed = {showAircraftSheet = false}
+                    )
+                }
+                else -> {}
+            }
         }
 
         if (!permissionState.allPermissionsGranted) {

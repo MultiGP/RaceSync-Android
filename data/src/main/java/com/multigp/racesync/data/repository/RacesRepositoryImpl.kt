@@ -11,17 +11,24 @@ import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.extensions.toDate
+import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.JoinedChapters
 import com.multigp.racesync.domain.model.requests.JoinedRaces
 import com.multigp.racesync.domain.model.requests.NearbyRaces
+import com.multigp.racesync.domain.model.requests.PilotData
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 import java.util.Date
 

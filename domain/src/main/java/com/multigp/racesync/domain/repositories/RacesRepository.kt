@@ -1,6 +1,7 @@
 package com.multigp.racesync.domain.repositories
 
 import androidx.paging.PagingData
+import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
 import kotlinx.coroutines.flow.Flow
 

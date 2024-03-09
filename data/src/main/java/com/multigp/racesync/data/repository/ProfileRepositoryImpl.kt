@@ -12,8 +12,10 @@ import com.multigp.racesync.domain.model.requests.PilotData
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.repositories.ProfileRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -38,18 +40,22 @@ class ProfileRepositoryImpl(
         }
         .flowOn(Dispatchers.IO)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun fetchAllAircraft(): Flow<List<Aircraft>> {
         val session = dataStore.getSessionId()
         val pilotData = PilotData((dataStore.getUserInfo()?.id ?: "").toInt(), false)
 
-        return flow {
-            val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
-            val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
-            if (response.status) {
-                response.data?.let { aircrafts ->
-                    aircraftDao.add(aircrafts)
-                    emit(aircrafts)
-                } ?: emit(emptyList())
+        return aircraftDao.getAll().flatMapConcat { aircrafts ->
+            flow {
+                emit(aircrafts)
+                val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
+                val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
+                if (response.status) {
+                    response.data?.let { aircrafts ->
+                        aircraftDao.add(aircrafts)
+                        emit(aircrafts)
+                    } ?: emit(emptyList())
+                }
             }
         }
             .flowOn(Dispatchers.IO)

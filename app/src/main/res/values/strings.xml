@@ -40,5 +40,7 @@
 
     <string name="label_search_radius">Search Radius</string>
     <string name="label_measurement_system">Measurement System</string>
+    <string name="aircraft_sheet_title">Select an Aircraft</string>
+    <string name="race_feed_option_sheet_title">Race Feed Options</string>
 
 </resources>

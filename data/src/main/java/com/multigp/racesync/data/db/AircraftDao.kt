@@ -13,7 +13,7 @@ interface AircraftDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun add(aircrafts: List<Aircraft>)
     @Query("SELECT * FROM aircrafts")
-    fun getAll(): PagingSource<Int, Aircraft>
+    fun getAll(): Flow<List<Aircraft>>
 
     @Query("SELECT * FROM aircrafts WHERE id = :aircraftId")
     fun get(aircraftId: String): Flow<Aircraft>

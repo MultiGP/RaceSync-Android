@@ -68,7 +68,7 @@ fun DistanceConfigurationSheet(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(bottom = 16.dp),
-            text = "Race Feed Options",
+            text = stringResource(R.string.race_feed_option_sheet_title),
             style = MaterialTheme.typography.titleLarge,
             color = MaterialTheme.colorScheme.secondary,
             textAlign = TextAlign.Center

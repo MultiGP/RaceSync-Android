@@ -7,6 +7,7 @@ import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
@@ -49,6 +50,8 @@ class LandingViewModel @Inject constructor(
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
 
+    private val _aircraftsUiState = MutableStateFlow<UiState<List<Aircraft>>>(UiState.Loading)
+    val aircraftsUiState: StateFlow<UiState<List<Aircraft>>> = _aircraftsUiState.asStateFlow()
 
     @SuppressLint("MissingPermission")
     fun fetchNearbyRaces() {
@@ -121,6 +124,15 @@ class LandingViewModel @Inject constructor(
             useCases.getRacesUseCase.fetchRaceFeedOptions().collect {
                 _raceFeedOoption.value = it
             }
+        }
+    }
+
+    fun fetchAircrafts() {
+        viewModelScope.launch {
+            useCases.getAllAircraftUseCase()
+                .collect { aircrafts ->
+                    _aircraftsUiState.value = UiState.Success(aircrafts)
+                }
         }
     }
 }

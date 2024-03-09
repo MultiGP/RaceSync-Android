@@ -96,7 +96,7 @@ fun LandingNavGraph(
 
         composable(route = AllAircraft.route) { navBackStackEntry ->
             AllAircraftScreen(
-                onAircraftDetailsClick = { aircraftId: String ->
+                onAircraftClick = { aircraftId: String ->
                     navController.navigate(route = "aircraft/$aircraftId")
                 },
                 onGoBack = {

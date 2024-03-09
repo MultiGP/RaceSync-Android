@@ -62,7 +62,7 @@ object ProfileDetails : NavDestination {
 
 object AllAircraft : NavDestination {
     override val icon = Icons.Default.Home
-    override val title = "My Aircraft"
+    override val title = "My Aircrafts"
     override val route = "allaircraft"
     override val webUrl = null
 
