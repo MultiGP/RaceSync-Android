@@ -47,7 +47,7 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel : ProfileViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
-    onAircraftClick: (String) -> Unit = {},
+    onAircraftClick: () -> Unit = {},
 ){
     val profileUiState by viewModel.uiState.collectAsState()
     Column(modifier.fillMaxSize()){
@@ -55,7 +55,7 @@ fun ProfileScreen(
         PilotBanner(profileImage = profileUiState.profilePictureUrl, backgroundImage = profileUiState.profileBackgroundUrl)
         PilotInformation( chapterCount = profileUiState.chapterCount, raceCount = profileUiState.raceCount, name = profileUiState.displayName)
         PilotLocation(city = profileUiState.city, onAircraftClick = {
-            onAircraftClick(profileUiState.id)
+            onAircraftClick()
         })
     }
 

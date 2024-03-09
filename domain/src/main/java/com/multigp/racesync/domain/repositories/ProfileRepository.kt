@@ -10,5 +10,5 @@ import kotlinx.coroutines.flow.Flow
 interface ProfileRepository {
     suspend fun fetchProfile(apikey: String): Flow<BaseResponse<Profile>>
 
-    suspend fun fetchAllAircraft(apikey: String, pilotId: Int): Flow<BaseResponse<List<Aircraft>>>
+    suspend fun fetchAllAircraft(): Flow<List<Aircraft>>
 }

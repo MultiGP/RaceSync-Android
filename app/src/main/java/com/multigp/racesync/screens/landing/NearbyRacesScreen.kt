@@ -24,7 +24,8 @@ import com.multigp.racesync.viewmodels.LandingViewModel
 fun NearbyRacesScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    onRaceSelected: (Race) -> Unit = {}
+    onRaceSelected: (Race) -> Unit = {},
+    onJoinRace: (Race) -> Unit = {}
 ) {
     val racePagingItems = viewModel.nearbyRacesPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
@@ -42,7 +43,8 @@ fun NearbyRacesScreen(
                 RaceCell(
                     it,
                     modifier = modifier,
-                    onClick = onRaceSelected
+                    onClick = onRaceSelected,
+                    onRaceAction = onJoinRace
                 )
             }
         }

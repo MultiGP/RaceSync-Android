@@ -32,8 +32,10 @@ object RepositoryModule {
     @Provides
     fun provideProfileRepository(
         raceSyncApi: RaceSyncApi,
-        dataStore: DataStoreManager
-    ): ProfileRepository = ProfileRepositoryImpl(raceSyncApi, dataStore)
+        raceSyncDB: RaceSyncDB,
+        dataStore: DataStoreManager,
+        apiKey: String,
+    ): ProfileRepository = ProfileRepositoryImpl(raceSyncApi, raceSyncDB, dataStore, apiKey)
 
     @Provides
     fun provideChaptersRepository(

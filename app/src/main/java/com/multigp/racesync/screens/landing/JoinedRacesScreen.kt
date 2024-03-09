@@ -24,7 +24,8 @@ fun JoinedRacesScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
     onRaceSelected: (Race) -> Unit = {},
-    gotoNearbyRaces: () -> Unit = {}
+    gotoNearbyRaces: () -> Unit = {},
+    onJoinRace: (Race) -> Unit = {}
 ) {
     val racePagingItems = viewModel.joinedRacesPagingData.collectAsLazyPagingItems()
     LaunchedEffect(Unit) {
@@ -41,7 +42,8 @@ fun JoinedRacesScreen(
                 RaceCell(
                     it,
                     modifier = modifier,
-                    onClick = onRaceSelected
+                    onClick = onRaceSelected,
+                    onRaceAction = onJoinRace
                 )
             }
         }

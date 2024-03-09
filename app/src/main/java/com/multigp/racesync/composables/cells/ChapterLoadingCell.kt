@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -47,7 +48,7 @@ fun ChapterLoadingCell(
                 ComponentRectangle(modifier.size(width = 54.dp, height = 36.dp).padding(top = 4.dp))
             }
         }
-        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
     }
 }
 

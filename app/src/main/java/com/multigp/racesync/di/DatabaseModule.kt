@@ -2,6 +2,7 @@ package com.multigp.racesync.di
 
 import android.app.Application
 import androidx.room.Room
+import com.multigp.racesync.data.db.AircraftDao
 import com.multigp.racesync.data.db.ChapterDao
 import com.multigp.racesync.data.db.ChapterRemoteKeysDao
 import com.multigp.racesync.data.db.RaceDao
@@ -35,4 +36,7 @@ object DatabaseModule {
     @Provides
     fun provideChapterRemoteKeysDao(raceSyncDB: RaceSyncDB): ChapterRemoteKeysDao =
         raceSyncDB.chapterRemoteKeysDao()
+
+    @Provides
+    fun provideAircraftDao(raceSyncDB: RaceSyncDB): AircraftDao = raceSyncDB.aircraftDao()
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -34,7 +35,8 @@ import com.multigp.racesync.domain.model.Race
 fun RaceCell(
     race: Race,
     modifier: Modifier = Modifier,
-    onClick: (Race) -> Unit = {}
+    onClick: (Race) -> Unit = {},
+    onRaceAction: (Race) -> Unit = {}
 ) {
     Column(
         modifier = modifier.clickable(
@@ -57,7 +59,7 @@ fun RaceCell(
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
-                    text = race.startDate?.toDate()?.formatDate() ?: "--",
+                    text = race.startDate?.toDate()?.formatDate() ?: "\u2014",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
@@ -80,11 +82,11 @@ fun RaceCell(
                 )
             }
             Column {
-                JoinButton(race.isJoined, onClick = {})
+                JoinButton(race.isJoined, onClick = {onRaceAction(race)})
                 ParticipantsButton(text = "" + race.participantCount, onClick = {})
             }
         }
-        Divider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
+        HorizontalDivider(thickness = 1.dp, color = MaterialTheme.colorScheme.surfaceVariant)
     }
 }
 

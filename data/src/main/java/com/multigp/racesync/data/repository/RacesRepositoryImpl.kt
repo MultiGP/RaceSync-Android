@@ -125,8 +125,9 @@ class RacesRepositoryImpl(
                         .filter { it.status && it.data != null }
                         .flatMap { it.data!! }
                         .filter { it.isUpcoming  }
-                    raceDao.addRaces(races)
-                    emit(races)
+                    val uniqueRaces = races.distinctBy { it.id }
+                    raceDao.addRaces(uniqueRaces)
+                    emit(uniqueRaces)
                 } ?: emit(emptyList())
             }
         }

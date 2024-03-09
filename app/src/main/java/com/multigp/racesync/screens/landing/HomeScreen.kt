@@ -52,6 +52,7 @@ fun HomeScreen(
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showAircraftSheet by remember { mutableStateOf(false) }
     val raceFeedOptions by viewModel.raceFeedOption.collectAsState()
 
     val permissions = listOf(
@@ -95,18 +96,30 @@ fun HomeScreen(
             modifier = modifier.padding(paddingValues),
         ) { page ->
             when (page) {
-                0 -> JoinedRacesScreen(onRaceSelected = onRaceSelected, gotoNearbyRaces = {
-                    coroutineScope.launch {
-                        pagerState.scrollToPage(1)
-                    }
-                })
+                0 -> JoinedRacesScreen(
+                    onRaceSelected = onRaceSelected,
+                    gotoNearbyRaces = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(1)
+                        }
+                    },
+                    onJoinRace = { showAircraftSheet = true }
+                )
 
-                1 -> NearbyRacesScreen(onRaceSelected = onRaceSelected)
-                2 -> ChaptersScreen(onChapterSelected = onRaceSelected, gotoNearbyRaces = {
-                    coroutineScope.launch {
-                        pagerState.scrollToPage(1)
-                    }
-                })
+                1 -> NearbyRacesScreen(
+                    onRaceSelected = onRaceSelected,
+                    onJoinRace = { showAircraftSheet = true }
+                )
+
+                2 -> ChaptersScreen(
+                    onChapterSelected = onRaceSelected,
+                    gotoNearbyRaces = {
+                        coroutineScope.launch {
+                            pagerState.scrollToPage(1)
+                        }
+                    },
+                    onJoinRace = { showAircraftSheet = true }
+                )
             }
         }
 
@@ -119,6 +132,10 @@ fun HomeScreen(
                     viewModel.saveSearchRadius(radius, unit)
                 }
             )
+        }
+
+        if (showAircraftSheet){
+            
         }
 
         if (!permissionState.allPermissionsGranted) {

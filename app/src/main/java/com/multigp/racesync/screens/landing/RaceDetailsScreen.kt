@@ -12,6 +12,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
@@ -125,13 +126,13 @@ fun RaceContentsScreen(
                     IconText(
                         modifier = Modifier.padding(top = 12.dp),
                         text = race.startDate?.toDate()?.formatDate("EEE, MMM d\n@ h:mm a")
-                            ?: "--",
+                            ?: "\u2014",
                         icon = R.drawable.ic_race_start
                     )
                     IconText(
                         modifier = Modifier.padding(top = 12.dp),
                         text = race.endDate?.toDate()?.formatDate("EEE, MMM d\n@ h:mm a")
-                            ?: "--",
+                            ?: "\u2014",
                         icon = R.drawable.ic_race_stop
                     )
                 }
@@ -166,15 +167,15 @@ fun RaceContentsScreen(
 @Composable
 fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(top = 8.dp)) {
-        Divider(color = Color.LightGray)
-        RaceDetailsCell("Race Class", race.raceClassString ?: "--")
-        Divider(color = Color.LightGray)
-        RaceDetailsCell("Coordinator", race.ownerUserName ?: "--")
-        Divider(color = Color.LightGray)
-        RaceDetailsCell("Chapter", race.chapterName ?: "--")
-        Divider(color = Color.LightGray)
-        RaceDetailsCell("Season", race.seasonName ?: "--")
-        Divider(color = Color.LightGray)
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Race Class", race.raceClassString ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Coordinator", race.ownerUserName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Chapter", race.chapterName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Season", race.seasonName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
     }
 }
 

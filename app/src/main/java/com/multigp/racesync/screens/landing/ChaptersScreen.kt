@@ -24,7 +24,8 @@ fun ChaptersScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
     onChapterSelected: (Race) -> Unit = {},
-    gotoNearbyRaces: () -> Unit = {}
+    gotoNearbyRaces: () -> Unit = {},
+    onJoinRace: (Race) -> Unit = {}
 ) {
     val uiState by viewModel.joineChapterRacesUiState.collectAsState()
     LaunchedEffect(Unit) {
@@ -48,7 +49,8 @@ fun ChaptersScreen(
                     items(items = races, key = { it.id }) { race ->
                         RaceCell(
                             race, modifier = modifier,
-                            onClick = onChapterSelected
+                            onClick = onChapterSelected,
+                            onRaceAction = onJoinRace
                         )
                     }
                 }
