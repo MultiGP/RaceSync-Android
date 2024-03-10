@@ -26,7 +26,7 @@ fun AircraftsSheet(
     onAircraftClick: (Aircraft) -> Unit = {},
     onSheetDissmissed: () -> Unit = {}
 ) {
-    val sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
 
     ModalBottomSheet(
         onDismissRequest = onSheetDissmissed,
