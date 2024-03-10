@@ -150,21 +150,21 @@ class RacesRepositoryImpl(
         aircraftId: String
     ): Flow<Boolean> {
         val request = BaseRequest(
-            data = JoinRaceRequest(pilotId = pilotId.toInt(), aircraftId = aircraftId.toInt()),
+            data = JoinRaceRequest(aircraftId = aircraftId.toInt(), pilotId = pilotId.toInt()),
             sessionId = dataStore.getSessionId()!!,
             apiKey = apiKey
         )
         return flow {
             val response = raceSyncApi.joinRace(raceId, request)
-            if(response.isSuccessful){
-                response.body()?.let {baseResponse ->
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
                     if (baseResponse.status) {
                         emit(true)
                     } else {
                         throw Exception(baseResponse.errorMessage())
                     }
                 }
-            }else{
+            } else {
                 val errorResponse = BaseResponse.convertFromErrorResponse(response)
                 throw Exception(errorResponse.statusDescription)
             }
