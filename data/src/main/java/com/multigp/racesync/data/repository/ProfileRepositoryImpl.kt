@@ -15,7 +15,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.flatMapConcat
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -45,17 +45,15 @@ class ProfileRepositoryImpl(
         val session = dataStore.getSessionId()
         val pilotData = PilotData((dataStore.getUserInfo()?.id ?: "").toInt(), false)
 
-        return aircraftDao.getAll().flatMapConcat { aircrafts ->
-            flow {
-                emit(aircrafts)
-                val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
-                val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
-                if (response.status) {
-                    response.data?.let { aircrafts ->
-                        aircraftDao.add(aircrafts)
-                        emit(aircrafts)
-                    } ?: emit(emptyList())
-                }
+        return flow {
+            emit(aircraftDao.getAll().first())
+            val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
+            val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
+            if (response.status) {
+                response.data?.let { aircrafts ->
+                    aircraftDao.add(aircrafts)
+                    emit(aircrafts)
+                } ?: emit(emptyList())
             }
         }
             .flowOn(Dispatchers.IO)

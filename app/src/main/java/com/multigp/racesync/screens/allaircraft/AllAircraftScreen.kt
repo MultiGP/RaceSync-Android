@@ -25,7 +25,7 @@ fun AllAircraftScreen(
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
     viewModel: AllAircraftViewModel = hiltViewModel(),
-    onAircraftClick: (String) -> Unit = {}
+    onAircraftClick: (Aircraft) -> Unit = {}
 ) {
     val allAircraftUiState by viewModel.uiState.collectAsState()
     LaunchedEffect(Unit) {
@@ -50,7 +50,7 @@ fun AllAircraftScreen(
 fun AllAircraftGrid(
     modifier: Modifier = Modifier,
     aircraftList: List<Aircraft>,
-    onAircraftClick: (String) -> Unit = {}
+    onAircraftClick: (Aircraft) -> Unit = {}
 ) {
     LazyVerticalGrid(
         columns = GridCells.Fixed(2),

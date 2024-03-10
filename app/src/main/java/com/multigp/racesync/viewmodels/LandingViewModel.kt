@@ -12,6 +12,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -20,6 +21,7 @@ import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 sealed class UiState<out T> {
+    object None : UiState<Nothing>()
     object Loading : UiState<Nothing>()
     data class Success<T>(val data: T) : UiState<T>()
     data class Error(val message: String) : UiState<Nothing>()
@@ -52,6 +54,9 @@ class LandingViewModel @Inject constructor(
 
     private val _aircraftsUiState = MutableStateFlow<UiState<List<Aircraft>>>(UiState.Loading)
     val aircraftsUiState: StateFlow<UiState<List<Aircraft>>> = _aircraftsUiState.asStateFlow()
+
+    private val _homeScreenUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
+    val homeScreenUiState: StateFlow<UiState<Boolean>> = _homeScreenUiState.asStateFlow()
 
     @SuppressLint("MissingPermission")
     fun fetchNearbyRaces() {
@@ -133,6 +138,26 @@ class LandingViewModel @Inject constructor(
                 .collect { aircrafts ->
                     _aircraftsUiState.value = UiState.Success(aircrafts)
                 }
+        }
+    }
+
+    fun joinRace(raceId: String, aircraftId: String) {
+        viewModelScope.launch {
+            _homeScreenUiState.value = UiState.Loading
+            try {
+                useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
+                    _homeScreenUiState.value = UiState.Success(it)
+                }
+            } catch (exception: Exception) {
+                _homeScreenUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to join race")
+            }
+        }
+    }
+
+    fun updateJoinRaceUiState(isClosed: Boolean = true){
+        if(isClosed) {
+            _homeScreenUiState.value = UiState.None
         }
     }
 }

@@ -2,6 +2,7 @@ package com.multigp.racesync.domain.useCase
 
 import android.location.Location
 import androidx.paging.PagingData
+import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
@@ -40,4 +41,9 @@ class GetRacesUseCase(
     }
 
     suspend fun fetchRaceFeedOptions() = racesRepository.fetchSearchRadius()
+
+    suspend fun joinRace(raceId:String, aircraftId:String): Flow<Boolean>{
+        val pilotId = loginInfoUserCase().first().second.id
+        return racesRepository.joinRace(pilotId, raceId, aircraftId)
+    }
 }

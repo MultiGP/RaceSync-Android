@@ -23,7 +23,7 @@ import com.multigp.racesync.screens.allaircraft.AllAircraftGrid
 fun AircraftsSheet(
     aircrafts: List<Aircraft>,
     modifier: Modifier = Modifier,
-    onAircraftClick: (String) -> Unit = {},
+    onAircraftClick: (Aircraft) -> Unit = {},
     onSheetDissmissed: () -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState()

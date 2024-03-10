@@ -10,27 +10,20 @@ import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
-import com.multigp.racesync.domain.extensions.toDate
-import com.multigp.racesync.domain.model.Aircraft
+import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
-import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
+import com.multigp.racesync.domain.model.requests.JoinRaceRequest
 import com.multigp.racesync.domain.model.requests.JoinedChapters
 import com.multigp.racesync.domain.model.requests.JoinedRaces
 import com.multigp.racesync.domain.model.requests.NearbyRaces
-import com.multigp.racesync.domain.model.requests.PilotData
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.flatMapConcat
 import kotlinx.coroutines.flow.flow
-import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
-import java.util.Date
 
 @SuppressLint("MissingPermission")
 class RacesRepositoryImpl(
@@ -131,7 +124,7 @@ class RacesRepositoryImpl(
                         }
                         .filter { it.status && it.data != null }
                         .flatMap { it.data!! }
-                        .filter { it.isUpcoming  }
+                        .filter { it.isUpcoming }
                     val uniqueRaces = races.distinctBy { it.id }
                     raceDao.addRaces(uniqueRaces)
                     emit(uniqueRaces)
@@ -143,11 +136,38 @@ class RacesRepositoryImpl(
 
     override fun fetchRace(raceId: String) = raceDao.getRace(raceId)
 
-    override suspend fun saveSearchRadius(radius: Double, unit:String){
+    override suspend fun saveSearchRadius(radius: Double, unit: String) {
         dataStore.saveSearchRadius(radius, unit)
     }
 
     override suspend fun fetchSearchRadius() = flow {
         this.emit(dataStore.getSearchRadius())
+    }
+
+    override suspend fun joinRace(
+        pilotId: String,
+        raceId: String,
+        aircraftId: String
+    ): Flow<Boolean> {
+        val request = BaseRequest(
+            data = JoinRaceRequest(pilotId = pilotId.toInt(), aircraftId = aircraftId.toInt()),
+            sessionId = dataStore.getSessionId()!!,
+            apiKey = apiKey
+        )
+        return flow {
+            val response = raceSyncApi.joinRace(raceId, request)
+            if(response.isSuccessful){
+                response.body()?.let {baseResponse ->
+                    if (baseResponse.status) {
+                        emit(true)
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            }else{
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }
     }
 }

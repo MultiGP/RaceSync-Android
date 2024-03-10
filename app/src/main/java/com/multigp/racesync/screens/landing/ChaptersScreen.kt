@@ -78,6 +78,7 @@ fun ChaptersScreen(
                     viewModel.fetchJoinedChapterRaces()
                 })
         }
+        else -> {}
     }
 }
 

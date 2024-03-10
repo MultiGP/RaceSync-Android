@@ -95,9 +95,6 @@ fun CustomDialog(
                         textAlign = TextAlign.Center,
                     )
                 }
-
-
-
             }
         }
     }

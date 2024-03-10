@@ -30,10 +30,6 @@ fun ChapterDetailsScreen(
     }
 
     when (uiState) {
-        is UiState.Loading -> {
-
-        }
-
         is UiState.Success -> {
             val chapter = (uiState as UiState.Success).data
             Surface {
@@ -45,10 +41,7 @@ fun ChapterDetailsScreen(
                 }
             }
         }
-
-        is UiState.Error -> {
-
-        }
+        else -> {}
     }
 }
 

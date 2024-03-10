@@ -19,8 +19,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.modifier.modifierLocalConsumer
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,10 +31,13 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.AircraftsSheet
+import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.DistanceConfigurationSheet
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
+import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.topbars.HomeScreenTopBar
+import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
@@ -57,7 +60,22 @@ fun HomeScreen(
     val coroutineScope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
     var showAircraftSheet by remember { mutableStateOf(false) }
-    val raceFeedOptions by viewModel.raceFeedOption.collectAsState()
+    var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
+    var selectedRace by remember { mutableStateOf<Race?>(null) }
+    var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
+
+    val joinRaceUiState by viewModel.homeScreenUiState.collectAsState()
+
+    val onJoinRace: (Race) -> Unit = { race ->
+        selectedRace = race
+        showAircraftSheet = true
+    }
+
+    val gotoNearbyRaces: () -> Unit = {
+        coroutineScope.launch {
+            pagerState.scrollToPage(1)
+        }
+    }
 
     val permissions = listOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
@@ -102,32 +120,25 @@ fun HomeScreen(
             when (page) {
                 0 -> JoinedRacesScreen(
                     onRaceSelected = onRaceSelected,
-                    gotoNearbyRaces = {
-                        coroutineScope.launch {
-                            pagerState.scrollToPage(1)
-                        }
-                    },
-                    onJoinRace = { showAircraftSheet = true }
+                    gotoNearbyRaces = gotoNearbyRaces,
+                    onJoinRace = onJoinRace
                 )
 
                 1 -> NearbyRacesScreen(
                     onRaceSelected = onRaceSelected,
-                    onJoinRace = { showAircraftSheet = true }
+                    onJoinRace = onJoinRace
                 )
 
                 2 -> ChaptersScreen(
                     onChapterSelected = onRaceSelected,
-                    gotoNearbyRaces = {
-                        coroutineScope.launch {
-                            pagerState.scrollToPage(1)
-                        }
-                    },
-                    onJoinRace = { showAircraftSheet = true }
+                    gotoNearbyRaces = gotoNearbyRaces,
+                    onJoinRace = onJoinRace
                 )
             }
         }
 
         if (showBottomSheet) {
+            val raceFeedOptions by viewModel.raceFeedOption.collectAsState()
             DistanceConfigurationSheet(
                 initialRadius = raceFeedOptions.first,
                 initialUnit = raceFeedOptions.second,
@@ -149,12 +160,71 @@ fun HomeScreen(
                     AircraftsSheet(
                         aircrafts = aircrafts,
                         modifier = modifier,
-                        onAircraftClick = {},
-                        onSheetDissmissed = {showAircraftSheet = false}
+                        onAircraftClick = { aircraft ->
+                            selectedAircraft = aircraft
+                            showJoinRaceConfirmationDialog = true
+                        },
+                        onSheetDissmissed = { showAircraftSheet = false }
                     )
                 }
+
                 else -> {}
             }
+        }
+
+        if (showJoinRaceConfirmationDialog) {
+            CustomAlertDialog(
+                title = stringResource(R.string.alert_join_race_title),
+                body = stringResource(
+                    R.string.alert_join_race_message,
+                    selectedAircraft?.name ?: ""
+                ),
+                confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
+                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+                onConfirm = {
+                    viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
+                    showJoinRaceConfirmationDialog = false
+                    showAircraftSheet = false
+                },
+                onDismiss = {
+                    showJoinRaceConfirmationDialog = false
+                    showAircraftSheet = false
+                },
+                onDismissRequest = {
+                    showJoinRaceConfirmationDialog = false
+                    showAircraftSheet = false
+                }
+            )
+        }
+
+        when (joinRaceUiState) {
+            is UiState.Loading -> {
+                ProgressHUD(
+                    modifier = modifier,
+                    text = R.string.progress_join_race
+                )
+            }
+
+            is UiState.Success -> {
+                CustomAlertDialog(
+                    title = "Race Joined",
+                    body = "You have successfuly joined race ${selectedRace?.name}",
+                    confirmButtonTitle = "OK",
+                    onConfirm = { viewModel.updateJoinRaceUiState(true) }
+                )
+            }
+
+            is UiState.Error -> {
+                val errorMessage = (joinRaceUiState as UiState.Error).message
+                CustomAlertDialog(
+                    title = "Error",
+                    body = errorMessage,
+                    confirmButtonTitle = "OK",
+                    onConfirm = { viewModel.updateJoinRaceUiState(true) }
+                )
+            }
+
+            else -> {}
         }
 
         if (!permissionState.allPermissionsGranted) {

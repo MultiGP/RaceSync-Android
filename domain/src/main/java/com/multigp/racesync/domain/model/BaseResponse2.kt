@@ -6,7 +6,7 @@ data class BaseResponse2<T>(
     @SerializedName("data")
     val data: T,
     @SerializedName("errors")
-    val errors: Error? = null,
+    val errors: Map<String, List<String>>? = emptyMap(),
     @SerializedName("sessionId")
     val sessionId: String,
     @SerializedName("status")
@@ -14,10 +14,7 @@ data class BaseResponse2<T>(
     @SerializedName("statusDescription")
     val statusDescription: String
 ){
-    fun errorMessage() = errors?.password?.get(0) ?: ""
+    fun errorMessage(): String{
+        return errors?.values?.joinToString("\n") ?: "Unknown Error"
+    }
 }
-
-data class Error(
-    @SerializedName("password")
-    val password: List<String>
-)

@@ -2,6 +2,7 @@ package com.multigp.racesync.domain.repositories
 
 import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.Aircraft
+import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import kotlinx.coroutines.flow.Flow
 
@@ -17,4 +18,6 @@ interface RacesRepository {
     suspend fun saveSearchRadius(radius: Double, unit:String)
 
     suspend fun fetchSearchRadius(): Flow<Pair<Double, String>>
+
+    suspend fun joinRace(pilotId:String, raceId:String, aircraftId:String): Flow<Boolean>
 }

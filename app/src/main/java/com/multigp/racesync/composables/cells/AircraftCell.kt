@@ -25,13 +25,13 @@ import com.multigp.racesync.domain.model.Aircraft
 fun AircraftCell(
     aircraft: Aircraft,
     modifier: Modifier = Modifier,
-    onAircraftClick: (String) -> Unit = {}
+    onAircraftClick: (Aircraft) -> Unit = {}
 ) {
     Column(
         modifier = modifier.clickable(
             indication = LocalIndication.current,
             interactionSource = remember { MutableInteractionSource() },
-            onClick = { onAircraftClick(aircraft.id) },
+            onClick = { onAircraftClick(aircraft) },
         ),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

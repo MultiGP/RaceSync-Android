@@ -11,10 +11,12 @@ import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
+import com.multigp.racesync.domain.model.requests.JoinRaceRequest
 import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import kotlinx.coroutines.flow.Flow
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 import retrofit2.http.Query
@@ -56,4 +58,10 @@ interface RaceSyncApi {
     suspend fun fetchAllAircraft(
         @Body request: AircraftRequest
     ): BaseResponse<List<Aircraft>>
+
+    @POST("race/join")
+    suspend fun joinRace(
+        @Query("id") raceId: String,
+        @Body request: BaseRequest<JoinRaceRequest>
+    ): Response<BaseResponse<Any>>
 }
