@@ -150,7 +150,7 @@ class RacesRepositoryImpl(
         aircraftId: String
     ): Flow<Boolean> {
         val request = BaseRequest(
-            data = JoinRaceRequest(aircraftId = aircraftId.toInt(), pilotId = pilotId.toInt()),
+            data = JoinRaceRequest(aircraftId = aircraftId),
             sessionId = dataStore.getSessionId()!!,
             apiKey = apiKey
         )

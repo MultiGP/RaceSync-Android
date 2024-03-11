@@ -64,4 +64,10 @@ interface RaceSyncApi {
         @Query("id") raceId: String,
         @Body request: BaseRequest<JoinRaceRequest>
     ): Response<BaseResponse<Any>>
+
+    @POST("race/resign")
+    suspend fun resignFromRace(
+        @Query("id") raceId: String,
+        @Body request: BaseRequest<JoinRaceRequest>
+    ): Response<BaseResponse<Any>>
 }

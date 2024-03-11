@@ -15,10 +15,10 @@ data class BaseResponse<T>(
     @SerializedName("status")
     val status: Boolean,
     @SerializedName("statusDescription")
-    val statusDescription: String
+    val statusDescription: String?
 ) {
     fun errorMessage(): String {
-       return errors?.values?.joinToString("\n") ?: "Unknown Error"
+       return errors?.values?.joinToString("\n") ?: statusDescription ?: "Unknown Error"
     }
 
     companion object {
