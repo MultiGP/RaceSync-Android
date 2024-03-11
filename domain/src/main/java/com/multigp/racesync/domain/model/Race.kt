@@ -63,7 +63,7 @@ data class Race(
     @field:SerializedName("ownerUserName")
     val ownerUserName: String?,
     @field:SerializedName("participantCount")
-    val participantCount: String?,
+    var participantCount: Int = 0,
     @field:SerializedName("propellerSizeRestriction")
     val propellerSizeRestriction: String?,
     @field:SerializedName("raceClass")
@@ -101,7 +101,7 @@ data class Race(
     @field:SerializedName("childRaceCount")
     val childRaceCount: String?,
     @field:SerializedName("isJoined")
-    val isJoined: Boolean = false
+    var isJoined: Boolean = false
 ) : Serializable {
 
     val location: LatLng

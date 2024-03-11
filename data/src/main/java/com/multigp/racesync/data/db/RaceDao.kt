@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.RawQuery
+import androidx.room.Update
 import androidx.sqlite.db.SupportSQLiteQuery
 import com.multigp.racesync.domain.model.Race
 import kotlinx.coroutines.flow.Flow
@@ -26,4 +27,7 @@ interface RaceDao {
 
     @Query("DELETE FROM races")
     suspend fun deleteAllRaces()
+
+    @Update
+    suspend fun updateRace(race:Race)
 }

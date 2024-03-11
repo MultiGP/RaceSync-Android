@@ -20,4 +20,6 @@ interface RacesRepository {
     suspend fun fetchSearchRadius(): Flow<Pair<Double, String>>
 
     suspend fun joinRace(pilotId:String, raceId:String, aircraftId:String): Flow<Boolean>
+
+    suspend fun resignFromRace(raceId:String): Flow<Boolean>
 }

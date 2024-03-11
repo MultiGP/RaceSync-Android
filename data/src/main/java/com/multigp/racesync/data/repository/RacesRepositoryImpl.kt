@@ -22,6 +22,7 @@ import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.tasks.await
 
@@ -159,6 +160,37 @@ class RacesRepositoryImpl(
             if (response.isSuccessful) {
                 response.body()?.let { baseResponse ->
                     if (baseResponse.status) {
+                        val race = raceDao.getRace(raceId).first()
+                        race.isJoined = true
+                        race.participantCount += 1
+                        raceDao.updateRace(race)
+                        emit(true)
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }
+    }
+
+    override suspend fun resignFromRace(raceId: String): Flow<Boolean> {
+        val request = BaseRequest(
+            data = null,
+            sessionId = dataStore.getSessionId()!!,
+            apiKey = apiKey
+        )
+        return flow {
+            val response = raceSyncApi.resignFromRace(raceId, request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        val race = raceDao.getRace(raceId).first()
+                        race.isJoined = false
+                        race.participantCount -= 1
+                        raceDao.updateRace(race)
                         emit(true)
                     } else {
                         throw Exception(baseResponse.errorMessage())

@@ -33,9 +33,10 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.DistanceConfigurationSheet
+import com.multigp.racesync.composables.JoinRaceUI
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
-import com.multigp.racesync.composables.ProgressHUD
+import com.multigp.racesync.composables.ResignRaceUI
 import com.multigp.racesync.composables.topbars.HomeScreenTopBar
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
@@ -61,14 +62,20 @@ fun HomeScreen(
     var showBottomSheet by remember { mutableStateOf(false) }
     var showAircraftSheet by remember { mutableStateOf(false) }
     var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
+    var showResignRaceDialog by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
     var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
 
-    val joinRaceUiState by viewModel.homeScreenUiState.collectAsState()
+    val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
+    val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
-        showAircraftSheet = true
+        if (!race.isJoined) {
+            showAircraftSheet = true
+        }else{
+            showResignRaceDialog = true
+        }
     }
 
     val gotoNearbyRaces: () -> Unit = {
@@ -197,35 +204,34 @@ fun HomeScreen(
             )
         }
 
-        when (joinRaceUiState) {
-            is UiState.Loading -> {
-                ProgressHUD(
-                    modifier = modifier,
-                    text = R.string.progress_join_race
-                )
-            }
+        JoinRaceUI(
+            uiState = joinRaceUiState,
+            modifier = modifier,
+            onProcessComplete = { viewModel.updateJoinRaceUiState(true) })
 
-            is UiState.Success -> {
-                CustomAlertDialog(
-                    title = "Race Joined",
-                    body = "You have successfuly joined race ${selectedRace?.name}",
-                    confirmButtonTitle = "OK",
-                    onConfirm = { viewModel.updateJoinRaceUiState(true) }
-                )
-            }
-
-            is UiState.Error -> {
-                val errorMessage = (joinRaceUiState as UiState.Error).message
-                CustomAlertDialog(
-                    title = "Error",
-                    body = errorMessage,
-                    confirmButtonTitle = "OK",
-                    onConfirm = { viewModel.updateJoinRaceUiState(true) }
-                )
-            }
-
-            else -> {}
+        if(showResignRaceDialog){
+            CustomAlertDialog(
+                title = stringResource(R.string.alert_resign_race_title),
+                body = stringResource(R.string.alert_resign_race_message),
+                confirmButtonTitle = stringResource(R.string.alert_resign_race_lbl_btn_confirm),
+                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+                onConfirm = {
+                    viewModel.resignFromRace((selectedRace?.id)!!)
+                    showResignRaceDialog = false
+                },
+                onDismiss = {
+                    showResignRaceDialog = false
+                },
+                onDismissRequest = {
+                    showResignRaceDialog = false
+                }
+            )
         }
+
+        ResignRaceUI(
+            uiState = resignRaceUiState,
+            modifier = modifier,
+            onProcessComplete = { viewModel.updateResignRaceUiState(true) })
 
         if (!permissionState.allPermissionsGranted) {
             Box(modifier = modifier.fillMaxSize()) {
@@ -249,7 +255,6 @@ fun HomeScreen(
         }
     }
 }
-
 
 @Preview(showBackground = true)
 @Composable

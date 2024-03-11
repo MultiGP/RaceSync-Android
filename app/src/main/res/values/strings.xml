@@ -44,10 +44,14 @@
     <string name="race_feed_option_sheet_title">Race Feed Options</string>
 
     <string name="alert_join_race_title">Join Race</string>
+    <string name="alert_resign_race_title">Resign Race</string>
     <string name="alert_join_race_message">Join the race with %s?</string>
+    <string name="alert_resign_race_message">Are you sure you want to resign from this race?</string>
     <string name="alert_join_race_lbl_btn_confirm">Yes, Join Race</string>
+    <string name="alert_resign_race_lbl_btn_confirm">Yes, Resign</string>
     <string name="lbl_btn_cancel">Cancel</string>
 
     <string name="progress_join_race">Joining race, please wait…</string>
+    <string name="progress_resign_race">Resigning from the race, please wait…</string>
 
 </resources>

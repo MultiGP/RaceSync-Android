@@ -40,7 +40,6 @@ class ProfileRepositoryImpl(
         }
         .flowOn(Dispatchers.IO)
 
-    @OptIn(ExperimentalCoroutinesApi::class)
     override suspend fun fetchAllAircraft(): Flow<List<Aircraft>> {
         val session = dataStore.getSessionId()
         val pilotData = PilotData((dataStore.getUserInfo()?.id ?: "").toInt(), false)

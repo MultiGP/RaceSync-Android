@@ -68,6 +68,6 @@ interface RaceSyncApi {
     @POST("race/resign")
     suspend fun resignFromRace(
         @Query("id") raceId: String,
-        @Body request: BaseRequest<JoinRaceRequest>
+        @Body request: BaseRequest<Nothing>
     ): Response<BaseResponse<Any>>
 }

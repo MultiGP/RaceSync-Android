@@ -12,7 +12,6 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -55,8 +54,11 @@ class LandingViewModel @Inject constructor(
     private val _aircraftsUiState = MutableStateFlow<UiState<List<Aircraft>>>(UiState.Loading)
     val aircraftsUiState: StateFlow<UiState<List<Aircraft>>> = _aircraftsUiState.asStateFlow()
 
-    private val _homeScreenUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
-    val homeScreenUiState: StateFlow<UiState<Boolean>> = _homeScreenUiState.asStateFlow()
+    private val _joinRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
+    val joinRaceUiState: StateFlow<UiState<Boolean>> = _joinRaceUiState.asStateFlow()
+
+    private val _resignRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
+    val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
 
     @SuppressLint("MissingPermission")
     fun fetchNearbyRaces() {
@@ -143,21 +145,41 @@ class LandingViewModel @Inject constructor(
 
     fun joinRace(raceId: String, aircraftId: String) {
         viewModelScope.launch {
-            _homeScreenUiState.value = UiState.Loading
+            _joinRaceUiState.value = UiState.Loading
             try {
                 useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
-                    _homeScreenUiState.value = UiState.Success(it)
+                    _joinRaceUiState.value = UiState.Success(it)
                 }
             } catch (exception: Exception) {
-                _homeScreenUiState.value =
-                    UiState.Error(exception.localizedMessage ?: "Failed to join race")
+                _joinRaceUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to join the race")
+            }
+        }
+    }
+
+    fun resignFromRace(raceId: String) {
+        viewModelScope.launch {
+            _resignRaceUiState.value = UiState.Loading
+            try {
+                useCases.getRacesUseCase.resignFromRace(raceId).collect {
+                    _resignRaceUiState.value = UiState.Success(it)
+                }
+            } catch (exception: Exception) {
+                _resignRaceUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
             }
         }
     }
 
     fun updateJoinRaceUiState(isClosed: Boolean = true){
         if(isClosed) {
-            _homeScreenUiState.value = UiState.None
+            _joinRaceUiState.value = UiState.None
+        }
+    }
+
+    fun updateResignRaceUiState(isClosed: Boolean = true){
+        if(isClosed) {
+            _resignRaceUiState.value = UiState.None
         }
     }
 }
