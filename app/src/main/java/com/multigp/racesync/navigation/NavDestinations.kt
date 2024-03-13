@@ -4,12 +4,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
+import androidx.compose.material.icons.filled.BuildCircle
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.BuildCircle
+import androidx.compose.material.icons.outlined.EditRoad
+import androidx.compose.material.icons.outlined.Feedback
+import androidx.compose.material.icons.outlined.Flag
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Logout
+import androidx.compose.material.icons.outlined.MenuBook
+import androidx.compose.material.icons.outlined.ShoppingBag
+import androidx.compose.material.icons.outlined.ShoppingCart
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavType
@@ -23,6 +33,7 @@ interface NavDestination {
     val title: String?
     val route: String
     val webUrl: String?
+
 }
 
 object Login : NavDestination {
@@ -47,7 +58,7 @@ object ForgotPassword : NavDestination {
 }
 
 object Landing : NavDestination {
-    override val icon = Icons.Default.Home
+    override val icon = Icons.Outlined.Home
     override val title = "Home"
     override val route = "landing"
     override val webUrl = null
@@ -101,7 +112,7 @@ object ChapterDetails : NavDestination {
 }
 
 object TrackDesign : NavDestination {
-    override val icon = Icons.Default.Edit
+    override val icon = Icons.Outlined.EditRoad
     override val title = "MultiGP Track Designs"
     override val webUrl = null
     override val route = "track"
@@ -109,42 +120,42 @@ object TrackDesign : NavDestination {
 
 
 object ObstaclesBuildGuide : NavDestination {
-    override val icon = Icons.Default.Build
+    override val icon = Icons.Outlined.BuildCircle
     override val title = "Obstacle Build Guide"
     override val route = "webobsguide"
     override val webUrl = "https://www.multigp.com/multigp-drone-race-course-obstacles/"
 }
 
 object RulesRegulation : NavDestination {
-    override val icon = Icons.AutoMirrored.Default.List
+    override val icon = Icons.Outlined.MenuBook
     override val title = "Season Rules & Regulations"
     override val route = "rules-regulation"
     override val webUrl = "https://docs.google.com/document/d/1n1-TXigEqiD-yQ7-Vqb2lVP3wE4uIuuYnFGIam4vtsI/edit#heading=h.c7d32jvxr7wf"
 }
 
 object VisitMultiGPShop : NavDestination {
-    override val icon = Icons.Default.ShoppingCart
+    override val icon = Icons.Outlined.ShoppingBag
     override val title = "Visit the MultiGP Shop"
     override val route = "webstore"
     override val webUrl = "https://www.multigp.com/webstore/"
 }
 
 object VisitMultiGP : NavDestination {
-    override val icon = Icons.Default.Star
+    override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"
     override val route = "track"
     override val webUrl = "https://www.multigp.com/"
 }
 
 object Logout : NavDestination {
-    override val icon = Icons.Default.ArrowBack
+    override val icon = Icons.Outlined.Logout
     override val title = "Logout"
     override val route = "landing"
     override val webUrl = null
 }
 
 object SendFeedback : NavDestination {
-    override val icon = Icons.Default.Send
+    override val icon = Icons.Outlined.Feedback
     override val title = "Send Feedback"
     override val route = "feedback"
     override val webUrl = "https://docs.google.com/forms/d/e/1FAIpQLSfY9qr-5I7JYtQ5s5UsVflMyXu-iW3-InzG03qAJOwGv9P1Tg/viewform?pli=1"
@@ -153,7 +164,6 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
-    TrackDesign,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,
