@@ -43,6 +43,7 @@ import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
+import com.multigp.racesync.viewmodels.ProfileViewModel
 import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
@@ -53,6 +54,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel(),
     onMenuClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
@@ -68,6 +70,7 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
+    val profileUiState by profileViewModel.uiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -96,7 +99,8 @@ fun HomeScreen(
                 tabs = landingTabs,
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked,
-                onProfileClicked = onProfileClicked
+                onProfileClicked = onProfileClicked,
+                profileImage = profileUiState.profilePictureUrl
             )
         },
         floatingActionButton = {
