@@ -43,6 +43,7 @@ import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
+import com.multigp.racesync.viewmodels.ProfileViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(
