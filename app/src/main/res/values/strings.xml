@@ -43,6 +43,10 @@
     <string name="aircraft_sheet_title">Select an Aircraft</string>
     <string name="race_feed_option_sheet_title">Race Feed Options</string>
 
+    <string name="title_empty_aircrafts">No Matching Aircraft</string>
+    <string name="message_empty_aircrafts">You don\'t have any aircraft matching the race requirements</string>
+    <string name="btn_title_add_aircraft">Add Aircraft</string>
+
     <string name="alert_join_race_title">Join Race</string>
     <string name="alert_resign_race_title">Resign Race</string>
     <string name="alert_join_race_message">Join the race with %s?</string>

@@ -45,7 +45,10 @@ class ProfileRepositoryImpl(
         val pilotData = PilotData((dataStore.getUserInfo()?.id ?: "").toInt(), false)
 
         return flow {
-            emit(aircraftDao.getAll().first())
+            val aircrafts = aircraftDao.getAll().first()
+            if(aircrafts.isNotEmpty()) {
+                emit(aircrafts)
+            }
             val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
             val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
             if (response.status) {

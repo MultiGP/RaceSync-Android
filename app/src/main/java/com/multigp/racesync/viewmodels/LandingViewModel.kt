@@ -12,6 +12,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -136,10 +137,15 @@ class LandingViewModel @Inject constructor(
 
     fun fetchAircrafts() {
         viewModelScope.launch {
-            useCases.getAllAircraftUseCase()
-                .collect { aircrafts ->
-                    _aircraftsUiState.value = UiState.Success(aircrafts)
-                }
+            _aircraftsUiState.value = UiState.Loading
+            try {
+                useCases.getAllAircraftUseCase()
+                    .collect { aircrafts ->
+                        _aircraftsUiState.value = UiState.Success(aircrafts)
+                    }
+            }catch (exception:Exception){
+                _aircraftsUiState.value = UiState.Error(exception.localizedMessage ?: "Failed to load aircrafts")
+            }
         }
     }
 

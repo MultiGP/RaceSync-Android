@@ -43,7 +43,6 @@ import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
-import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -73,7 +72,7 @@ fun HomeScreen(
         selectedRace = race
         if (!race.isJoined) {
             showAircraftSheet = true
-        }else{
+        } else {
             showResignRaceDialog = true
         }
     }
@@ -161,97 +160,90 @@ fun HomeScreen(
             LaunchedEffect(Unit) {
                 viewModel.fetchAircrafts()
             }
-            when (aircraftUiState) {
-                is UiState.Success -> {
-                    val aircrafts = (aircraftUiState as UiState.Success).data
-                    AircraftsSheet(
-                        aircrafts = aircrafts,
-                        modifier = modifier,
-                        onAircraftClick = { aircraft ->
-                            selectedAircraft = aircraft
-                            showJoinRaceConfirmationDialog = true
-                        },
-                        onSheetDissmissed = { showAircraftSheet = false }
-                    )
-                }
+            AircraftsSheet(
+                uiState = aircraftUiState,
+                modifier = modifier,
+                onAircraftClick = { aircraft ->
+                    selectedAircraft = aircraft
+                    showJoinRaceConfirmationDialog = true
+                },
+                onSheetDissmissed = { showAircraftSheet = false }
+            )
+        }
+    }
 
-                else -> {}
+    if (showJoinRaceConfirmationDialog) {
+        CustomAlertDialog(
+            title = stringResource(R.string.alert_join_race_title),
+            body = stringResource(
+                R.string.alert_join_race_message,
+                selectedAircraft?.name ?: ""
+            ),
+            confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
+            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+            onConfirm = {
+                viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
+            },
+            onDismiss = {
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
+            },
+            onDismissRequest = {
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
             }
-        }
+        )
+    }
 
-        if (showJoinRaceConfirmationDialog) {
-            CustomAlertDialog(
-                title = stringResource(R.string.alert_join_race_title),
-                body = stringResource(
-                    R.string.alert_join_race_message,
-                    selectedAircraft?.name ?: ""
-                ),
-                confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
-                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-                onConfirm = {
-                    viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                },
-                onDismiss = {
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                },
-                onDismissRequest = {
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                }
-            )
-        }
+    JoinRaceUI(
+        uiState = joinRaceUiState,
+        modifier = modifier,
+        onProcessComplete = { viewModel.updateJoinRaceUiState(true) })
 
-        JoinRaceUI(
-            uiState = joinRaceUiState,
-            modifier = modifier,
-            onProcessComplete = { viewModel.updateJoinRaceUiState(true) })
+    if (showResignRaceDialog) {
+        CustomAlertDialog(
+            title = stringResource(R.string.alert_resign_race_title),
+            body = stringResource(R.string.alert_resign_race_message),
+            confirmButtonTitle = stringResource(R.string.alert_resign_race_lbl_btn_confirm),
+            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+            onConfirm = {
+                viewModel.resignFromRace((selectedRace?.id)!!)
+                showResignRaceDialog = false
+            },
+            onDismiss = {
+                showResignRaceDialog = false
+            },
+            onDismissRequest = {
+                showResignRaceDialog = false
+            }
+        )
+    }
 
-        if(showResignRaceDialog){
-            CustomAlertDialog(
-                title = stringResource(R.string.alert_resign_race_title),
-                body = stringResource(R.string.alert_resign_race_message),
-                confirmButtonTitle = stringResource(R.string.alert_resign_race_lbl_btn_confirm),
-                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-                onConfirm = {
-                    viewModel.resignFromRace((selectedRace?.id)!!)
-                    showResignRaceDialog = false
-                },
-                onDismiss = {
-                    showResignRaceDialog = false
-                },
-                onDismissRequest = {
-                    showResignRaceDialog = false
-                }
-            )
-        }
+    ResignRaceUI(
+        uiState = resignRaceUiState,
+        modifier = modifier,
+        onProcessComplete = { viewModel.updateResignRaceUiState(true) })
 
-        ResignRaceUI(
-            uiState = resignRaceUiState,
-            modifier = modifier,
-            onProcessComplete = { viewModel.updateResignRaceUiState(true) })
-
-        if (!permissionState.allPermissionsGranted) {
-            Box(modifier = modifier.fillMaxSize()) {
-                PermissionsHandler(
-                    permissionState = permissionState,
-                    deniedContent = { shouldShowRationale ->
-                        PermissionDeniedContent(
-                            alertTitle = R.string.permissions_location_title,
-                            requestMessage = R.string.permissions_location_request,
-                            rationaleMessage = R.string.permissions_location_rationale,
-                            shouldShowRationale = shouldShowRationale
-                        ) {
-                            permissionState.launchMultiplePermissionRequest()
-                        }
-                    },
-                    grantedContent = {
-                        Box(modifier = modifier)
+    if (!permissionState.allPermissionsGranted) {
+        Box(modifier = modifier.fillMaxSize()) {
+            PermissionsHandler(
+                permissionState = permissionState,
+                deniedContent = { shouldShowRationale ->
+                    PermissionDeniedContent(
+                        alertTitle = R.string.permissions_location_title,
+                        requestMessage = R.string.permissions_location_request,
+                        rationaleMessage = R.string.permissions_location_rationale,
+                        shouldShowRationale = shouldShowRationale
+                    ) {
+                        permissionState.launchMultiplePermissionRequest()
                     }
-                )
-            }
+                },
+                grantedContent = {
+                    Box(modifier = modifier)
+                }
+            )
         }
     }
 }
