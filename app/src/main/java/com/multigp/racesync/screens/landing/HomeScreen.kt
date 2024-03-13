@@ -52,6 +52,7 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
+    profileViewModel: ProfileViewModel = hiltViewModel(),
     onMenuClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
@@ -67,6 +68,7 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
+    val profileUiState by profileViewModel.uiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -95,7 +97,8 @@ fun HomeScreen(
                 tabs = landingTabs,
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked,
-                onProfileClicked = onProfileClicked
+                onProfileClicked = onProfileClicked,
+                profileImage = profileUiState.profilePictureUrl
             )
         },
         floatingActionButton = {

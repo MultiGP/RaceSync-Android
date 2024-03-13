@@ -1,6 +1,8 @@
 package com.multigp.racesync.composables.topbars
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,21 +25,28 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.PagerState
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
 import com.multigp.racesync.navigation.TabItem
 import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.multigp.racesync.viewmodels.ProfileViewModel
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
@@ -47,8 +56,11 @@ fun HomeScreenTopBar(
     pagerState: PagerState,
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {}
+    onProfileClicked: () -> Unit = {},
+    profileImage: String
 ) {
+
+
     Surface(
         color = MaterialTheme.colorScheme.surface
     ) {
@@ -73,7 +85,10 @@ fun HomeScreenTopBar(
                         contentDescription = null
                     )
                 }
-                Image(
+                AsyncImage(
+                    model = profileImage,
+                    contentDescription = null,
+                    contentScale = ContentScale.Inside,
                     modifier = modifier
                         .clickable(
                             onClick = {
@@ -86,12 +101,8 @@ fun HomeScreenTopBar(
                         .width(25.dp)
                         .clip(CircleShape)
                         .align(Alignment.CenterEnd),
-
-                    painter = painterResource(id = R.drawable.profile),
-                    contentScale = ContentScale.Inside,
-                    contentDescription = null,
-
                 )
+
 
             }
             HomeScreenTabs(
@@ -159,30 +170,30 @@ fun HomeScreenTabs(
     }
 }
 
-@OptIn(ExperimentalPagerApi::class)
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenTopBarPreview() {
-    val tabs = listOf(
-        TabItem.Joined,
-        TabItem.Nearby,
-        TabItem.Chapters
-    )
-    val pagerState = rememberPagerState()
-    RaceSyncTheme {
-        HomeScreenTopBar(tabs, pagerState = pagerState)
-    }
-}
-
-@OptIn(ExperimentalPagerApi::class)
-@Preview(showBackground = true)
-@Composable
-fun HomeScreenTabsPreview() {
-    val tabs = listOf(
-        TabItem.Joined,
-        TabItem.Nearby,
-        TabItem.Chapters
-    )
-    val pagerState = rememberPagerState()
-    HomeScreenTabs(tabs = tabs, pagerState = pagerState)
-}
+//@OptIn(ExperimentalPagerApi::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenTopBarPreview() {
+//    val tabs = listOf(
+//        TabItem.Joined,
+//        TabItem.Nearby,
+//        TabItem.Chapters
+//    )
+//    val pagerState = rememberPagerState()
+//    RaceSyncTheme {
+//        HomeScreenTopBar(tabs, pagerState = pagerState)
+//    }
+//}
+//
+//@OptIn(ExperimentalPagerApi::class)
+//@Preview(showBackground = true)
+//@Composable
+//fun HomeScreenTabsPreview() {
+//    val tabs = listOf(
+//        TabItem.Joined,
+//        TabItem.Nearby,
+//        TabItem.Chapters
+//    )
+//    val pagerState = rememberPagerState()
+//    HomeScreenTabs(tabs = tabs, pagerState = pagerState)
+//}

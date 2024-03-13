@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.outlined.QrCode
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -51,7 +52,7 @@ fun ProfileScreen(
 ){
     val profileUiState by viewModel.uiState.collectAsState()
     Column(modifier.fillMaxSize()){
-        TopBar(name = "Barracuda",  viewModel = viewModel, onGoBack = onGoBack )
+        TopBar(name = profileUiState.userName,  viewModel = viewModel, onGoBack = onGoBack )
         PilotBanner(profileImage = profileUiState.profilePictureUrl, backgroundImage = profileUiState.profileBackgroundUrl)
         PilotInformation( chapterCount = profileUiState.chapterCount, raceCount = profileUiState.raceCount, name = profileUiState.displayName)
         PilotLocation(city = profileUiState.city, onAircraftClick = {
@@ -97,7 +98,7 @@ fun TopBar(
         actions = {
             IconButton(onClick = { viewModel.onShowQrCode()}) {
                 Icon(
-                    imageVector = Icons.Default.Info,
+                    imageVector = Icons.Outlined.QrCode,
                     contentDescription = "QR Code",
                     tint = Color.Black,
                     modifier = modifier.size(24.dp)
