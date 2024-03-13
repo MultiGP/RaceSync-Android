@@ -52,7 +52,7 @@ fun ProfileScreen(
 ){
     val profileUiState by viewModel.uiState.collectAsState()
     Column(modifier.fillMaxSize()){
-        TopBar(name = "Barracuda",  viewModel = viewModel, onGoBack = onGoBack )
+        TopBar(name = profileUiState.userName,  viewModel = viewModel, onGoBack = onGoBack )
         PilotBanner(profileImage = profileUiState.profilePictureUrl, backgroundImage = profileUiState.profileBackgroundUrl)
         PilotInformation( chapterCount = profileUiState.chapterCount, raceCount = profileUiState.raceCount, name = profileUiState.displayName)
         PilotLocation(city = profileUiState.city, onAircraftClick = {
