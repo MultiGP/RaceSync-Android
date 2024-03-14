@@ -23,8 +23,8 @@ android {
         applicationId = "com.multigp.racesync"
         minSdk = 24
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.0.3"
+        versionCode = 4
+        versionName = "0.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -46,8 +46,8 @@ android {
             buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
         }
         debug {
-            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
-//            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
+//            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
+            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
     }
     compileOptions {
