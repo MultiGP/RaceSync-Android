@@ -14,6 +14,7 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,9 +36,15 @@ import com.multigp.racesync.domain.model.Race
 fun RaceCell(
     race: Race,
     modifier: Modifier = Modifier,
+    showDistance:Boolean = false,
     onClick: (Race) -> Unit = {},
-    onRaceAction: (Race) -> Unit = {}
+    onRaceAction: (Race) -> Unit = {},
+    getDistance: (Race) -> Unit = {}
 ) {
+    LaunchedEffect(Unit){
+        getDistance(race)
+    }
+
     Column(
         modifier = modifier.clickable(
             indication = LocalIndication.current,
@@ -73,7 +80,7 @@ fun RaceCell(
                     maxLines = 1
                 )
                 Text(
-                    text = race.chapterName,
+                    text = if(!showDistance) race.chapterName else race.distance ?: "\u2014",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
                     modifier = modifier.padding(top = 4.dp),

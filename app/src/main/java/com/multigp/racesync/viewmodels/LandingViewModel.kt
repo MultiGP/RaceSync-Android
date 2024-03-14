@@ -1,7 +1,11 @@
 package com.multigp.racesync.viewmodels
 
 import android.annotation.SuppressLint
+import android.location.Location
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -27,6 +31,7 @@ sealed class UiState<out T> {
     data class Error(val message: String) : UiState<Nothing>()
 }
 
+@SuppressLint("MissingPermission")
 @HiltViewModel
 class LandingViewModel @Inject constructor(
     val useCases: RaceSyncUseCases,
@@ -188,4 +193,9 @@ class LandingViewModel @Inject constructor(
             _resignRaceUiState.value = UiState.None
         }
     }
+
+    suspend fun getRaceDistance(race: Race){
+        useCases.getRacesUseCase.calculateRaceDistace(race)
+    }
+
 }

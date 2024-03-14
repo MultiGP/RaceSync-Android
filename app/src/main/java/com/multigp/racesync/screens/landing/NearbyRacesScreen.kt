@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -19,6 +20,7 @@ import com.multigp.racesync.composables.cells.RaceCell
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
+import kotlinx.coroutines.launch
 
 @Composable
 fun NearbyRacesScreen(
@@ -27,7 +29,9 @@ fun NearbyRacesScreen(
     onRaceSelected: (Race) -> Unit = {},
     onJoinRace: (Race) -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
     val racePagingItems = viewModel.nearbyRacesPagingData.collectAsLazyPagingItems()
+
     LaunchedEffect(Unit) {
         viewModel.fetchNearbyRaces()
     }
@@ -43,8 +47,14 @@ fun NearbyRacesScreen(
                 RaceCell(
                     it,
                     modifier = modifier,
+                    showDistance=true,
                     onClick = onRaceSelected,
-                    onRaceAction = onJoinRace
+                    onRaceAction = onJoinRace,
+                    getDistance = { race ->
+                        scope.launch {
+                            viewModel.getRaceDistance(race)
+                        }
+                    }
                 )
             }
         }

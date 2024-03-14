@@ -12,7 +12,7 @@ class GetChaptersUseCase(
 ) {
     suspend operator fun invoke(): Flow<PagingData<Chapter>> {
         val loginInfo = loginInfoUserCase().first()
-        return chaptersRepository.fetchChapters(loginInfo.second.id)
+        return chaptersRepository.fetchChapters(loginInfo.second!!.id)
     }
 
     operator fun invoke(chapterId: String) = chaptersRepository.fetchChapter(chapterId)

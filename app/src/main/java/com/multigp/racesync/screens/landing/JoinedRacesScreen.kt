@@ -2,9 +2,10 @@ package com.multigp.racesync.screens.landing
 
 
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -17,7 +18,7 @@ import com.multigp.racesync.composables.cells.ChapterLoadingCell
 import com.multigp.racesync.composables.cells.RaceCell
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.viewmodels.LandingViewModel
-import com.multigp.racesync.viewmodels.UiState
+import kotlinx.coroutines.launch
 
 @Composable
 fun JoinedRacesScreen(
@@ -28,6 +29,7 @@ fun JoinedRacesScreen(
     onJoinRace: (Race) -> Unit = {}
 ) {
     val racePagingItems = viewModel.joinedRacesPagingData.collectAsLazyPagingItems()
+
     LaunchedEffect(Unit) {
         viewModel.fetchJoinedRaces()
     }

@@ -48,7 +48,9 @@ class RacesRepositoryImpl(
             val request = BaseRequest(
                 apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
             )
-            val pagingSourceFactory = { raceDao.getAllRaces() }
+            val pagingSourceFactory = {
+                raceDao.getAllRaces()
+            }
             Pager(
                 //API doesn't support paging. Therefore fetching maximum races
                 config = PagingConfig(pageSize = 1000),
@@ -200,6 +202,22 @@ class RacesRepositoryImpl(
                 val errorResponse = BaseResponse.convertFromErrorResponse(response)
                 throw Exception(errorResponse.statusDescription)
             }
+        }
+    }
+
+    override suspend fun calculateRaceDistance(race: Race) {
+        try {
+            locationClient.lastLocation.await()?.let { location ->
+                val distance = race.calculateDistance(location)
+                val (_, unit) = dataStore.getSearchRadius()
+                if (unit == "mi") {
+                    race.distance = String.format("%.2f mi", distance * 0.621371)
+                } else {
+                    race.distance = String.format("%.2f km", distance)
+                }
+                raceDao.updateRace(race)
+            }
+        } catch (_: Exception) {
         }
     }
 }

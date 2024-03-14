@@ -19,12 +19,12 @@ class GetRacesUseCase(
 
     suspend fun fetchJoinedRaces(): Flow<PagingData<Race>> {
         val loginInfo = loginInfoUserCase().first()
-        return racesRepository.fetchRaces(loginInfo.second.id)
+        return racesRepository.fetchRaces(loginInfo.second!!.id)
     }
 
     suspend fun fetchJoinedChapterRaces(): Flow<List<Race>> {
         val loginInfo = loginInfoUserCase().first()
-        return racesRepository.fetchJoinedChapterRaces(loginInfo.second.id)
+        return racesRepository.fetchJoinedChapterRaces(loginInfo.second!!.id)
     }
 
     fun fetchRace(raceId: String): Flow<Race> {
@@ -43,11 +43,15 @@ class GetRacesUseCase(
     suspend fun fetchRaceFeedOptions() = racesRepository.fetchSearchRadius()
 
     suspend fun joinRace(raceId:String, aircraftId:String): Flow<Boolean>{
-        val pilotId = loginInfoUserCase().first().second.id
+        val pilotId = loginInfoUserCase().first().second!!.id
         return racesRepository.joinRace(pilotId, raceId, aircraftId)
     }
 
     suspend fun resignFromRace(raceId:String): Flow<Boolean>{
         return racesRepository.resignFromRace(raceId)
+    }
+
+    suspend fun calculateRaceDistace(race:Race){
+        racesRepository.calculateRaceDistance(race)
     }
 }

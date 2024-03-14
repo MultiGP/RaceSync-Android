@@ -47,20 +47,21 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.text.CustomTextField
 import com.multigp.racesync.composables.text.PasswordTextField
-import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.multigp.racesync.viewmodels.LoginFormUiState
 import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
+import com.multigp.racesync.viewmodels.UiState
 
 @Composable
 fun LoginScreen(
+    loginUiState: LoginUiState,
     modifier: Modifier = Modifier,
-    viewModel: LoginViewModel = hiltViewModel(),
+    loginViewModel: LoginViewModel = hiltViewModel(),
     onClickRegisterAccount: () -> Unit = {},
-    onClickRecoverPassword: () -> Unit = {},
-    onLoginComplete: (sessionId: String, userInfo: UserInfo) -> Unit
+    onClickRecoverPassword: () -> Unit = {}
 ) {
-    val loginUiState by viewModel.uiState.collectAsState()
+    val formUiState by loginViewModel.formUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
     Scaffold(
@@ -74,33 +75,30 @@ fun LoginScreen(
                 color = MaterialTheme.colorScheme.background
             ) {
                 LoginScreenContent(
-                    uiState = loginUiState,
-                    viewModel = viewModel,
+                    uiState = formUiState,
+                    viewModel = loginViewModel,
                     modifier = modifier,
                     onClickRegisterAccount = onClickRegisterAccount,
-                    onClickRecoverPassword = onClickRecoverPassword,
-                    onClickLogin = { viewModel.onLogin() }
+                    onClickRecoverPassword = onClickRecoverPassword
                 )
             }
 
-            if (loginUiState.isLoginInProgress) {
-                ProgressHUD(
-                    modifier = modifier,
-                    text = R.string.hud_login_progress
-                )
-            }
-
-            if (loginUiState.didLoginFailed) {
-                LaunchedEffect(Unit) {
-                    snackbarHostState.showSnackbar(
-                        message = loginUiState.loginError ?: "Failed to login. Please try again",
-                        duration = SnackbarDuration.Long
+            when(loginUiState){
+                is LoginUiState.Loading -> {
+                    ProgressHUD(
+                        modifier = modifier,
+                        text = R.string.hud_login_progress
                     )
                 }
-            }
-
-            if (loginUiState.didLoginSucceed) {
-                onLoginComplete(loginUiState.sessionId!!, loginUiState.userInfo!!)
+                is LoginUiState.Error -> {
+                    LaunchedEffect(Unit) {
+                        snackbarHostState.showSnackbar(
+                            message = loginUiState.message,
+                            duration = SnackbarDuration.Long
+                        )
+                    }
+                }
+                else -> {}
             }
         }
     }
@@ -108,16 +106,17 @@ fun LoginScreen(
 
 @Composable
 fun LoginScreenContent(
-    uiState: LoginUiState,
+    uiState: LoginFormUiState,
     viewModel: LoginViewModel,
     modifier: Modifier = Modifier,
     onClickRegisterAccount: () -> Unit = {},
-    onClickRecoverPassword: () -> Unit = {},
-    onClickLogin: () -> Unit = {}
+    onClickRecoverPassword: () -> Unit = {}
 ) {
     val state = rememberScrollState()
     Column(
-        modifier = modifier.fillMaxSize().verticalScroll(state),
+        modifier = modifier
+            .fillMaxSize()
+            .verticalScroll(state),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -266,7 +265,7 @@ fun LoginScreenPreview() {
         Surface(
             color = MaterialTheme.colorScheme.background
         ) {
-            LoginScreen(onLoginComplete = { sessionId, userInfo -> })
+            LoginScreen(LoginUiState.None)
         }
     }
 }

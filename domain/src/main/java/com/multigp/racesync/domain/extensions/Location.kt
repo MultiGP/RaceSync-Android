@@ -3,7 +3,8 @@ package com.multigp.racesync.domain.extensions
 import com.google.android.gms.maps.model.LatLng
 
 fun LatLng.isWithInRadius(other: LatLng, radius: Double): Boolean {
-    return this.calculateDistance(other) > radius
+    val distance = this.calculateDistance(other)
+    return  distance <= radius
 }
 
 fun LatLng.calculateDistance(other: LatLng): Double {

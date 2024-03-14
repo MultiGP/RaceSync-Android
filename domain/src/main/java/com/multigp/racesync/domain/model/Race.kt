@@ -3,10 +3,12 @@ package com.multigp.racesync.domain.model
 import android.location.Location
 import androidx.annotation.Keep
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.google.android.gms.maps.model.LatLng
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.multigp.racesync.domain.extensions.calculateDistance
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.isWithInRadius
 import com.multigp.racesync.domain.extensions.toDate
@@ -101,7 +103,9 @@ data class Race(
     @field:SerializedName("childRaceCount")
     val childRaceCount: String?,
     @field:SerializedName("isJoined")
-    var isJoined: Boolean = false
+    var isJoined: Boolean = false,
+    @field:SerializedName("distance")
+    var distance: String? = "\u2014",
 ) : Serializable {
 
     val location: LatLng
@@ -129,6 +133,14 @@ data class Race(
                 .isWithInRadius(LatLng(curLocation.latitude, curLocation.longitude), radius)
         } else {
             false
+        }
+    }
+
+    fun calculateDistance(curLocation: Location): Double{
+        return if (latitude != null && longitude != null) {
+            LatLng(latitude, longitude).calculateDistance(LatLng(curLocation.latitude, curLocation.longitude))
+        }else{
+            0.0
         }
     }
 

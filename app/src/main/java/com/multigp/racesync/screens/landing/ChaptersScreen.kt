@@ -44,7 +44,7 @@ fun ChaptersScreen(
 
         is UiState.Success -> {
             val races = (uiState as UiState.Success).data
-            if (races.count() > 0) {
+            if (races.isNotEmpty()) {
                 LazyColumn {
                     items(items = races, key = { it.id }) { race ->
                         RaceCell(

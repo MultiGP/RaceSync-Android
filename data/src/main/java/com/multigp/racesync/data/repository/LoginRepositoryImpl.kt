@@ -30,11 +30,13 @@ class LoginRepositoryImpl(
         .catch { emit(Result.failure(it)) }
         .flowOn(Dispatchers.IO)
 
-    override suspend fun getLoginInfo(): Flow<Pair<String, UserInfo>> = flow {
+    override suspend fun getLoginInfo(): Flow<Pair<String?, UserInfo?>> = flow {
         val userInfo = dataStore.getUserInfo()
         val sessionId = dataStore.getSessionId()
         if (userInfo != null && sessionId != null) {
             emit(Pair(sessionId, userInfo))
+        }else{
+            emit(Pair(null, null))
         }
     }
         .catch { }

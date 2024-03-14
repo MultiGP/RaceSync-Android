@@ -22,4 +22,6 @@ interface RacesRepository {
     suspend fun joinRace(pilotId:String, raceId:String, aircraftId:String): Flow<Boolean>
 
     suspend fun resignFromRace(raceId:String): Flow<Boolean>
+
+    suspend fun calculateRaceDistance(race: Race)
 }

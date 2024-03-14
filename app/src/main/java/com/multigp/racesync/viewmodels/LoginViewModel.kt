@@ -5,7 +5,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.domain.model.requests.LoginRequest
-import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,42 +16,48 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-data class LoginUiState(
+data class LoginFormUiState(
     val email: String = "",
     val password: String = "",
     val isValidForm: Boolean = false,
-    val isLoginInProgress: Boolean = false,
-    val didLoginSucceed: Boolean = false,
-    val didLoginFailed: Boolean = false,
-    val loginError: String? = null,
-    val sessionId: String? = null,
-    val userInfo: UserInfo? = null,
 )
+
+sealed class LoginUiState {
+    object Initializing: LoginUiState()
+    object None : LoginUiState()
+    object Loading : LoginUiState()
+    data class Success(val data: Boolean) : LoginUiState()
+    data class Error(val message: String) : LoginUiState()
+}
+
 
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     val useCases: RaceSyncUseCases,
 ) : ViewModel() {
-    private val _uiState = MutableStateFlow(LoginUiState())
-    val uiState: StateFlow<LoginUiState> = _uiState.asStateFlow()
+
+    private val _formUiState = MutableStateFlow(LoginFormUiState())
+    val formUiState: StateFlow<LoginFormUiState> = _formUiState.asStateFlow()
+
+    private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Initializing)
+    val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
+            _loginUiState.value = LoginUiState.Initializing
             useCases.getLoginInfoUserCase()
                 .collect { (sessionId, userInfo) ->
-                    _uiState.update { curr ->
-                        curr.copy(
-                            didLoginSucceed = true,
-                            userInfo = userInfo,
-                            sessionId = sessionId
-                        )
+                    if(sessionId != null && userInfo != null) {
+                        _loginUiState.value = LoginUiState.Success(true)
+                    }else{
+                        _loginUiState.value = LoginUiState.None
                     }
                 }
         }
     }
 
     fun onEmailChanged(newValue: String): Unit {
-        _uiState.update { currentState ->
+        _formUiState.update { currentState ->
             currentState.copy(
                 email = newValue.trim(),
                 isValidForm = validateForm(newValue, currentState.password)
@@ -61,7 +66,7 @@ class LoginViewModel @Inject constructor(
     }
 
     fun onPasswordChanged(newValue: String): Unit {
-        _uiState.update { currentState ->
+        _formUiState.update { currentState ->
             currentState.copy(
                 password = newValue.trim(),
                 isValidForm = validateForm(currentState.email, newValue)
@@ -71,44 +76,25 @@ class LoginViewModel @Inject constructor(
 
     fun onLogin() {
         val request =
-            LoginRequest(BuildConfig.API_KEY, _uiState.value.email, _uiState.value.password)
+            LoginRequest(BuildConfig.API_KEY, _formUiState.value.email, _formUiState.value.password)
 
         viewModelScope.launch {
             viewModelScope.launch {
                 useCases.performLoginUseCase(request)
                     .onStart {
-                        _uiState.update { it.copy(isLoginInProgress = true) }
+                        _loginUiState.value = LoginUiState.Loading
                     }
                     .collect { result ->
                         result.fold(
                             onSuccess = { response ->
                                 if (response.status == 1) {
-                                    _uiState.update { curr ->
-                                        curr.copy(
-                                            isLoginInProgress = false,
-                                            didLoginSucceed = true,
-                                            sessionId = response.sessionId,
-                                            userInfo = response.data
-                                        )
-                                    }
+                                    _loginUiState.value = LoginUiState.Success(true)
                                 } else {
-                                    _uiState.update { curr ->
-                                        curr.copy(
-                                            isLoginInProgress = false,
-                                            didLoginFailed = true,
-                                            loginError = response.errorMessage()
-                                        )
-                                    }
+                                    _loginUiState.value = LoginUiState.Error(response.errorMessage())
                                 }
                             },
                             onFailure = { throwable ->
-                                _uiState.update { curr ->
-                                    curr.copy(
-                                        isLoginInProgress = false,
-                                        didLoginFailed = true,
-                                        loginError = throwable.localizedMessage
-                                    )
-                                }
+                                _loginUiState.value = LoginUiState.Error(throwable.localizedMessage ?: "Failed to login")
                             }
                         )
                     }
