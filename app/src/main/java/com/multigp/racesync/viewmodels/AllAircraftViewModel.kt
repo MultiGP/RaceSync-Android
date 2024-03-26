@@ -7,6 +7,7 @@ import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +34,7 @@ class AllAircraftViewModel @Inject constructor(
         Log.d("T", "Fetching aircraft for current user")
 
         viewModelScope.launch {
+            delay(5000)
             useCases.getAllAircraftUseCase()
                 .collect { aircrafts ->
                     _uiState.update { curr ->

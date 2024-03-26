@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -14,6 +15,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
@@ -88,7 +90,7 @@ fun TopBar(
         navigationIcon = {
             IconButton(onClick = { onGoBack()}) {
                 Icon(
-                    imageVector = Icons.Default.ArrowBack,
+                    imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "Back",
                     tint = Color.Black,
                     modifier = modifier.size(24.dp)
@@ -127,7 +129,6 @@ fun PilotBanner(
 ){
     Box (
         modifier = modifier
-            .height(150.dp)
             .fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
 
@@ -137,7 +138,7 @@ fun PilotBanner(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .background(Color.LightGray)
+                .background(Color.LightGray).fillMaxWidth().aspectRatio(1.9f)
 
         )
         AsyncImage(

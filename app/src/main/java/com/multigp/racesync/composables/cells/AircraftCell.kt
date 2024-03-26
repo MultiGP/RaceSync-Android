@@ -5,6 +5,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -43,6 +44,7 @@ fun AircraftCell(
             contentScale = ContentScale.Crop,
             modifier = modifier
                 .fillMaxWidth()
+                .aspectRatio(0.9f)
                 .clip(shape = RoundedCornerShape(10.dp))
         )
         Spacer(modifier = modifier.height(8.dp))

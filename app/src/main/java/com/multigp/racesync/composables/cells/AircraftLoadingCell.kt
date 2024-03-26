@@ -20,7 +20,7 @@ fun AircraftLoadingCell(
     Column{
         ComponentRectangle(modifier = modifier
             .fillMaxWidth()
-            .aspectRatio(1.78f)
+            .aspectRatio(0.75f)
             .clip(shape = RoundedCornerShape(10.dp)))
         Spacer(modifier = modifier.height(8.dp))
         ComponentRectangleLineLong(
