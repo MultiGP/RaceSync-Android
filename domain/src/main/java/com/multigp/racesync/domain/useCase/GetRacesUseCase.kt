@@ -1,8 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
-import android.location.Location
 import androidx.paging.PagingData
-import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
@@ -10,7 +8,7 @@ import kotlinx.coroutines.flow.first
 
 class GetRacesUseCase(
     private val racesRepository: RacesRepository,
-    private val loginInfoUserCase: GetLoginInfoUserCase
+    private val loginInfoUserCase: GetLoginInfoUseCase
 ) {
 
     suspend fun fetchNearbyRaces(radius: Double): Flow<PagingData<Race>> {

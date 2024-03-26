@@ -14,16 +14,20 @@ import com.multigp.racesync.screens.landing.LandingScreen
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
-fun LandingRoot() {
+fun LandingRoot(
+    modifier: Modifier = Modifier,
+    onLogout: () -> Unit = {}
+) {
     val navController = rememberNavController()
     val drawerState: DrawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     Surface(
-        modifier = Modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
     ) {
         LandingScreen(
             navController = navController,
-            drawerState = drawerState
+            drawerState = drawerState,
+            onLogout = onLogout
         )
     }
 }

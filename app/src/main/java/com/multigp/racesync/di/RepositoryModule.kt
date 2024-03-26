@@ -27,7 +27,8 @@ object RepositoryModule {
     fun provideLoginRepository(
         onboardingDataSource: OnboardingDataSource,
         dataStore: DataStoreManager,
-    ): LoginRepository = LoginRepositoryImpl(onboardingDataSource, dataStore)
+        apiKey: String,
+    ): LoginRepository = LoginRepositoryImpl(onboardingDataSource, dataStore, apiKey)
 
     @Provides
     fun provideProfileRepository(

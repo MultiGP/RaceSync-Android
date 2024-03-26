@@ -10,6 +10,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ data class LoginFormUiState(
 )
 
 sealed class LoginUiState {
-    object Initializing: LoginUiState()
+    object Initializing : LoginUiState()
     object None : LoginUiState()
     object Loading : LoginUiState()
     data class Success(val data: Boolean) : LoginUiState()
@@ -45,11 +46,11 @@ class LoginViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             _loginUiState.value = LoginUiState.Initializing
-            useCases.getLoginInfoUserCase()
+            useCases.getLoginInfoUseCase()
                 .collect { (sessionId, userInfo) ->
-                    if(sessionId != null && userInfo != null) {
+                    if (sessionId != null && userInfo != null) {
                         _loginUiState.value = LoginUiState.Success(true)
-                    }else{
+                    } else {
                         _loginUiState.value = LoginUiState.None
                     }
                 }
@@ -79,26 +80,32 @@ class LoginViewModel @Inject constructor(
             LoginRequest(BuildConfig.API_KEY, _formUiState.value.email, _formUiState.value.password)
 
         viewModelScope.launch {
-            viewModelScope.launch {
-                useCases.performLoginUseCase(request)
-                    .onStart {
-                        _loginUiState.value = LoginUiState.Loading
-                    }
-                    .collect { result ->
-                        result.fold(
-                            onSuccess = { response ->
-                                if (response.status == 1) {
-                                    _loginUiState.value = LoginUiState.Success(true)
-                                } else {
-                                    _loginUiState.value = LoginUiState.Error(response.errorMessage())
-                                }
-                            },
-                            onFailure = { throwable ->
-                                _loginUiState.value = LoginUiState.Error(throwable.localizedMessage ?: "Failed to login")
+            useCases.performLoginUseCase(request)
+                .onStart {
+                    _loginUiState.value = LoginUiState.Loading
+                }
+                .collect { result ->
+                    result.fold(
+                        onSuccess = { response ->
+                            if (response.status == 1) {
+                                _loginUiState.value = LoginUiState.Success(true)
+                            } else {
+                                _loginUiState.value = LoginUiState.Error(response.errorMessage())
                             }
-                        )
-                    }
-            }
+                        },
+                        onFailure = { throwable ->
+                            _loginUiState.value =
+                                LoginUiState.Error(throwable.localizedMessage ?: "Failed to login")
+                        }
+                    )
+                }
+        }
+    }
+
+    fun logout() {
+        viewModelScope.launch {
+            useCases.performLoginUseCase.logout().first()
+            _loginUiState.value = LoginUiState.None
         }
     }
 

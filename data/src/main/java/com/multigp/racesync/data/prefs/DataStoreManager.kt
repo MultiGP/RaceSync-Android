@@ -52,6 +52,14 @@ class DataStoreManager(val context: Context) {
         return Pair(radius, unit)
     }
 
+    suspend fun clearSession(){
+        context.dataStore.edit { preferences ->
+            preferences[KEY_USER_INFO] = ""
+            preferences[KEY_SESSION_ID] = ""
+            preferences[KEY_RADIUS_UNIT] = DEFAULT_RADIUS_UNIT
+            preferences[KEY_RADIUS_VALUE] = DEFAULT_RADIUS_VALUE
+        }
+    }
 
     companion object {
         private val KEY_USER_INFO = stringPreferencesKey("key_user_info")

@@ -44,6 +44,7 @@ import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.ProfileViewModel
+import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -99,7 +100,13 @@ fun HomeScreen(
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked,
                 onProfileClicked = onProfileClicked,
-                profileImage = profileUiState.profilePictureUrl
+                profileImage = when (profileUiState) {
+                    is UiState.Success -> {
+                        val profile = (profileUiState as UiState.Success).data
+                        profile.profilePictureUrl
+                    }
+                    else -> null
+                }
             )
         },
         floatingActionButton = {

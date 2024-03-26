@@ -6,7 +6,7 @@ import com.multigp.racesync.domain.repositories.ProfileRepository
 import com.multigp.racesync.domain.repositories.RacesRepository
 import com.multigp.racesync.domain.useCase.GetAllAircraftUseCase
 import com.multigp.racesync.domain.useCase.GetChaptersUseCase
-import com.multigp.racesync.domain.useCase.GetLoginInfoUserCase
+import com.multigp.racesync.domain.useCase.GetLoginInfoUseCase
 import com.multigp.racesync.domain.useCase.GetProfileUseCase
 import com.multigp.racesync.domain.useCase.GetRacesUseCase
 import com.multigp.racesync.domain.useCase.LoginUseCase
@@ -27,9 +27,9 @@ object UseCaseModule {
         profileRepository: ProfileRepository
     ) = RaceSyncUseCases(
         performLoginUseCase = LoginUseCase(loginRepository),
-        getLoginInfoUserCase = GetLoginInfoUserCase(loginRepository),
-        getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUserCase(loginRepository)),
-        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUserCase(loginRepository)),
+        getLoginInfoUseCase = GetLoginInfoUseCase(loginRepository),
+        getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUseCase(loginRepository)),
+        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUseCase(loginRepository)),
         getProfileUseCase = GetProfileUseCase(profileRepository),
         getAllAircraftUseCase = GetAllAircraftUseCase((profileRepository))
     )

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.multigp.racesync.navigation.Landing
 import com.multigp.racesync.navigation.LandingNavGraph
+import com.multigp.racesync.navigation.Logout
 import com.multigp.racesync.navigation.NavDestination
 import com.multigp.racesync.navigation.drawerMenu
 import kotlinx.coroutines.launch
@@ -42,7 +43,8 @@ import kotlinx.coroutines.launch
 fun LandingScreen(
     navController: NavHostController,
     drawerState: DrawerState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onLogout: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
     var selectedMenuItem by rememberSaveable {
@@ -63,8 +65,12 @@ fun LandingScreen(
                     scope.launch {
                         drawerState.close()
                     }
-                    selectedMenuItem = route
-                    navController.navigate(route)
+                    if (route == Logout.route){
+                        onLogout()
+                    }else {
+                        selectedMenuItem = route
+                        navController.navigate(route)
+                    }
                 }
             }
         }

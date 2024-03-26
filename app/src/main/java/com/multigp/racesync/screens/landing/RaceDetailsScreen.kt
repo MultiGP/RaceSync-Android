@@ -12,7 +12,6 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -33,13 +32,11 @@ import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.CustomMap
 import com.multigp.racesync.composables.JoinRaceUI
 import com.multigp.racesync.composables.ResignRaceUI
-import com.multigp.racesync.composables.bottombars.RaceDetailsBottomBar
 import com.multigp.racesync.composables.buttons.JoinButton
 import com.multigp.racesync.composables.buttons.ParticipantsButton
 import com.multigp.racesync.composables.cells.RaceDetailsCell
 import com.multigp.racesync.composables.text.HtmlText
 import com.multigp.racesync.composables.text.IconText
-import com.multigp.racesync.composables.topbars.RaceDetailsTopBar
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Aircraft
@@ -52,8 +49,7 @@ import com.multigp.racesync.viewmodels.UiState
 fun RaceDetailsScreen(
     raceId: String,
     modifier: Modifier = Modifier,
-    viewModel: LandingViewModel = hiltViewModel(),
-    onGoBack: () -> Unit = {}
+    viewModel: LandingViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.raceDetailsUiState.collectAsState()
     var showAircraftSheet by remember { mutableStateOf(false) }
@@ -78,115 +74,115 @@ fun RaceDetailsScreen(
         viewModel.fetchRace(raceId)
     }
 
-    Scaffold(
-        topBar = {
-            RaceDetailsTopBar(
-                title = stringResource(id = R.string.title_race_details),
-                onGoBack = onGoBack,
+    when (uiState) {
+        is UiState.Loading -> {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
             )
-        },
-        bottomBar = {
-            RaceDetailsBottomBar(onClickDetails = {}, onClickRoster = {})
-        }
-    )
-    { paddingValues ->
-        when (uiState) {
-            is UiState.Loading -> {
-                Box(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues = paddingValues)
-                )
-            }
-
-            is UiState.Success -> {
-                val race = (uiState as UiState.Success).data
-                RaceContentsScreen(
-                    race,
-                    modifier = Modifier.padding(paddingValues = paddingValues),
-                    onJoinRace = onJoinRace
-                )
-            }
-
-            is UiState.Error -> {
-                Box(
-                    modifier = modifier
-                        .fillMaxSize()
-                        .padding(paddingValues = paddingValues)
-                )
-            }
-
-            else -> {}
         }
 
-        if (showAircraftSheet) {
-            val aircraftUiState by viewModel.aircraftsUiState.collectAsState()
-            LaunchedEffect(Unit) {
-                viewModel.fetchAircrafts()
-            }
-            AircraftsSheet(
-                uiState = aircraftUiState,
+        is UiState.Success -> {
+            val race = (uiState as UiState.Success).data
+            RaceContentsScreen(
+                race,
                 modifier = modifier,
-                onAircraftClick = { aircraft ->
-                    selectedAircraft = aircraft
-                    showJoinRaceConfirmationDialog = true
-                },
-                onSheetDissmissed = { showAircraftSheet = false }
-            )
-        }
-        if (showJoinRaceConfirmationDialog) {
-            CustomAlertDialog(
-                title = stringResource(R.string.alert_join_race_title),
-                body = stringResource(
-                    R.string.alert_join_race_message,
-                    selectedAircraft?.name ?: ""
-                ),
-                confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
-                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-                onConfirm = {
-                    viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                },
-                onDismiss = {
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                },
-                onDismissRequest = {
-                    showJoinRaceConfirmationDialog = false
-                    showAircraftSheet = false
-                }
+                onJoinRace = onJoinRace
             )
         }
 
-        JoinRaceUI(
-            uiState = joinRaceUiState,
+        is UiState.Error -> {
+            Box(
+                modifier = modifier
+                    .fillMaxSize()
+            )
+        }
+
+        else -> {}
+    }
+
+    if (showAircraftSheet) {
+        val aircraftUiState by viewModel.aircraftsUiState.collectAsState()
+        LaunchedEffect(Unit) {
+            viewModel.fetchAircrafts()
+        }
+        AircraftsSheet(
+            uiState = aircraftUiState,
             modifier = modifier,
-            onProcessComplete = { viewModel.updateJoinRaceUiState(true) })
+            onAircraftClick = { aircraft ->
+                selectedAircraft = aircraft
+                showJoinRaceConfirmationDialog = true
+            },
+            onSheetDissmissed = { showAircraftSheet = false }
+        )
+    }
+    if (showJoinRaceConfirmationDialog) {
+        CustomAlertDialog(
+            title = stringResource(R.string.alert_join_race_title),
+            body = stringResource(
+                R.string.alert_join_race_message,
+                selectedAircraft?.name ?: ""
+            ),
+            confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
+            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+            onConfirm = {
+                viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
+            },
+            onDismiss = {
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
+            },
+            onDismissRequest = {
+                showJoinRaceConfirmationDialog = false
+                showAircraftSheet = false
+            }
+        )
+    }
 
-        if (showResignRaceDialog) {
-            CustomAlertDialog(
-                title = stringResource(R.string.alert_resign_race_title),
-                body = stringResource(R.string.alert_resign_race_message),
-                confirmButtonTitle = stringResource(R.string.alert_resign_race_lbl_btn_confirm),
-                dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-                onConfirm = {
-                    viewModel.resignFromRace((selectedRace?.id)!!)
-                    showResignRaceDialog = false
-                },
-                onDismiss = {
-                    showResignRaceDialog = false
-                },
-                onDismissRequest = {
-                    showResignRaceDialog = false
-                }
-            )
-        }
+    JoinRaceUI(
+        uiState = joinRaceUiState,
+        modifier = modifier,
+        onProcessComplete = { viewModel.updateJoinRaceUiState(true) })
 
-        ResignRaceUI(
-            uiState = resignRaceUiState,
-            modifier = modifier,
-            onProcessComplete = { viewModel.updateResignRaceUiState(true) })
+    if (showResignRaceDialog) {
+        CustomAlertDialog(
+            title = stringResource(R.string.alert_resign_race_title),
+            body = stringResource(R.string.alert_resign_race_message),
+            confirmButtonTitle = stringResource(R.string.alert_resign_race_lbl_btn_confirm),
+            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
+            onConfirm = {
+                viewModel.resignFromRace((selectedRace?.id)!!)
+                showResignRaceDialog = false
+            },
+            onDismiss = {
+                showResignRaceDialog = false
+            },
+            onDismissRequest = {
+                showResignRaceDialog = false
+            }
+        )
+    }
+
+    ResignRaceUI(
+        uiState = resignRaceUiState,
+        modifier = modifier,
+        onProcessComplete = { viewModel.updateResignRaceUiState(true) })
+}
+
+@Composable
+fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
+    Column(modifier = modifier.padding(top = 8.dp)) {
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Race Class", race.raceClassString ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Coordinator", race.ownerUserName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Chapter", race.chapterName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
+        RaceDetailsCell("Season", race.seasonName ?: "\u2014")
+        HorizontalDivider(color = Color.LightGray)
     }
 }
 
@@ -258,21 +254,6 @@ fun RaceContentsScreen(
             )
             RaceDetailsActions(race)
         }
-    }
-}
-
-@Composable
-fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
-    Column(modifier = modifier.padding(top = 8.dp)) {
-        HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Race Class", race.raceClassString ?: "\u2014")
-        HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Coordinator", race.ownerUserName ?: "\u2014")
-        HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Chapter", race.chapterName ?: "\u2014")
-        HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Season", race.seasonName ?: "\u2014")
-        HorizontalDivider(color = Color.LightGray)
     }
 }
 

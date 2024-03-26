@@ -9,83 +9,63 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.multigp.racesync.R
-import com.multigp.racesync.ui.theme.RaceSyncTheme
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.PagerState
+import com.multigp.racesync.navigation.TabItem
+import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalPagerApi::class)
 @Composable
 fun RaceDetailsBottomBar(
-    modifier: Modifier = Modifier,
-    onClickDetails: () -> Unit = {},
-    onClickRoster: () -> Unit = {}
+    tabs: List<TabItem>,
+    pagerState: PagerState,
+    modifier: Modifier = Modifier
 ) {
-    var selectedItem by remember { mutableStateOf(0) }
+    val scope = rememberCoroutineScope()
 
     BottomNavigation(
         modifier = Modifier.fillMaxWidth(),
         backgroundColor = MaterialTheme.colorScheme.background
     ) {
-        BottomNavigationItem(
-            selected = selectedItem == 0,
-            onClick = {
-                selectedItem = 0
-                onClickDetails()
-            },
-            icon = {
-                Icon(
-                    modifier = modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_bottom_bar_details),
-                    contentDescription = null,
-                    tint = if (selectedItem == 0) MaterialTheme.colorScheme.primary else Color.LightGray
-                )
-            },
-            label = {
-                Text(
-                    modifier = modifier.padding(top = 4.dp),
-                    text = "Details",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (selectedItem == 0) MaterialTheme.colorScheme.primary else Color.LightGray
-                )
-            }
-        )
-        BottomNavigationItem(
-            selected = selectedItem == 1,
-            onClick = {
-                selectedItem = 1
-                onClickRoster()
-            },
-            icon = {
-                Icon(
-                    modifier = modifier.size(24.dp),
-                    painter = painterResource(R.drawable.ic_bottom_roster),
-                    contentDescription = null,
-                    tint = if (selectedItem == 1) MaterialTheme.colorScheme.primary else Color.LightGray
-                )
-            },
-            label = {
-                Text(
-                    modifier = modifier.padding(top = 4.dp),
-                    text = "Roster",
-                    style = MaterialTheme.typography.bodySmall,
-                    color = if (selectedItem == 1) MaterialTheme.colorScheme.primary else Color.LightGray
-                )
-            }
-        )
+        tabs.forEachIndexed { index, tabItem ->
+            BottomNavigationItem(
+                selected = pagerState.currentPage == index,
+                onClick = {
+                    scope.launch {
+                        pagerState.animateScrollToPage(index)
+                    }
+                },
+                icon = {
+                    Icon(
+                        modifier = modifier.size(24.dp),
+                        painter = painterResource(tabItem.iconDefault),
+                        contentDescription = null,
+                        tint = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary else Color.LightGray
+                    )
+                },
+                label = {
+                    Text(
+                        modifier = modifier.padding(top = 4.dp),
+                        text = stringResource(id = tabItem.title),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = if (pagerState.currentPage == index) MaterialTheme.colorScheme.primary else Color.LightGray
+                    )
+                }
+            )
+        }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-fun RaceDetailsBottomBarPreview() {
-    RaceSyncTheme {
-        RaceDetailsBottomBar()
-    }
-}
+//@Preview(showBackground = true)
+//@Composable
+//fun RaceDetailsBottomBarPreview() {
+//    RaceSyncTheme {
+//        RaceDetailsBottomBar()
+//    }
+//}

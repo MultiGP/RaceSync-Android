@@ -8,4 +8,6 @@ import kotlinx.coroutines.flow.Flow
 interface LoginRepository {
     suspend fun login(body: LoginRequest): Flow<Result<BaseResponse2<UserInfo>>>
     suspend fun getLoginInfo(): Flow<Pair<String?, UserInfo?>>
+
+    suspend fun logout(): Flow<Boolean>
 }
