@@ -57,7 +57,7 @@ fun HomeScreenTopBar(
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
     onProfileClicked: () -> Unit = {},
-    profileImage: String
+    profileImage: String?
 ) {
 
 

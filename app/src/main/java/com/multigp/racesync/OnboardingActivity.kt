@@ -1,5 +1,6 @@
 package com.multigp.racesync
 
+import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -17,6 +18,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -46,6 +48,7 @@ fun RaceSyncApp(
 ) {
     val navController = rememberNavController()
     val loginUiState by viewModel.loginUiState.collectAsState()
+    val context = LocalContext.current
 
     RaceSyncTheme {
         when (loginUiState) {
@@ -65,7 +68,11 @@ fun RaceSyncApp(
             }
 
             is LoginUiState.Success -> {
-                LandingRoot()
+                LandingRoot(onLogout = {
+                    viewModel.logout()
+                    val intent = Intent(context, OnboardingActivity::class.java)
+                    context.startActivity(intent)
+                })
             }
 
             else -> {

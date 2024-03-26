@@ -150,7 +150,7 @@ object VisitMultiGP : NavDestination {
 object Logout : NavDestination {
     override val icon = Icons.Outlined.Logout
     override val title = "Logout"
-    override val route = "landing"
+    override val route = "logout"
     override val webUrl = null
 }
 

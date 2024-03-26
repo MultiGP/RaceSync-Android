@@ -13,6 +13,7 @@ import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.JoinRaceRequest
 import com.multigp.racesync.domain.model.requests.LoginRequest
+import com.multigp.racesync.domain.model.requests.LogoutRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import kotlinx.coroutines.flow.Flow
@@ -26,6 +27,12 @@ interface RaceSyncApi {
     suspend fun login(
         @Body request: LoginRequest
     ): BaseResponse2<UserInfo>
+
+
+    @POST("user/logout")
+    suspend fun logout(
+        @Body request: LogoutRequest
+    ): Response<BaseResponse<Any>>
 
     @POST("chapter/list")
     suspend fun fetchChapters(

@@ -13,64 +13,40 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-data class ProfileUiState(
-    val isLoading: Boolean = false,
-    val id: String = "",
-    val profileBackgroundUrl: String= "",
-    val profilePictureUrl: String= "",
-    val userName: String= "",
-    val displayName: String= "",
-    val raceCount: String= "",
-    val chapterCount: String= "",
-    val city: String= "",
-
-)
 
 @HiltViewModel
 class ProfileViewModel @Inject constructor(
     val useCases: RaceSyncUseCases
-): ViewModel(){
-    private val _uiState = MutableStateFlow(ProfileUiState())
-    val uiState: StateFlow<ProfileUiState> = _uiState.asStateFlow()
+) : ViewModel() {
+    private val _uiState = MutableStateFlow<UiState<Profile>>(UiState.None)
+    val uiState: StateFlow<UiState<Profile>> = _uiState.asStateFlow()
+
     var isDialogShown by mutableStateOf(false)
         private set
 
-    fun onShowQrCode(){
+    fun onShowQrCode() {
         isDialogShown = true
     }
 
-    fun onDismissDialog(){
+    fun onDismissDialog() {
         isDialogShown = false
     }
 
 
-    init{
+    init {
         Log.d("TAG", "Hello World")
         val apikey = BuildConfig.API_KEY
 
         viewModelScope.launch {
             useCases.getProfileUseCase(apikey)
-                .collect{
-                    val data = it.data!!
-                    val name = data.displayName
-                    _uiState.update { curr ->
-                        curr.copy(
-                            isLoading = false,
-                            displayName = name,
-                            profileBackgroundUrl = data.profileBackgroundUrl,
-                            profilePictureUrl =  data.profilePictureUrl,
-                            city = data.city,
-                            chapterCount = data.chapterCount + " Chapters",
-                            raceCount =  data.raceCount + " Races",
-                            userName = data.userName,
-                            id = data.id
-                        )
+                .collect { response ->
+                    if (response.status && response.data != null) {
+                        _uiState.value = UiState.Success(response.data!!)
+                    } else {
+                        _uiState.value = UiState.Error("Session Expired")
                     }
-
                 }
         }
     }

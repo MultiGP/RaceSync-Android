@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.first
 
 class GetChaptersUseCase(
     private val chaptersRepository: ChaptersRepository,
-    private val loginInfoUserCase: GetLoginInfoUserCase
+    private val loginInfoUserCase: GetLoginInfoUseCase
 ) {
     suspend operator fun invoke(): Flow<PagingData<Chapter>> {
         val loginInfo = loginInfoUserCase().first()

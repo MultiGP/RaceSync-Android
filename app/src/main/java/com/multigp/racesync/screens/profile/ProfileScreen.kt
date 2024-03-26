@@ -10,14 +10,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.outlined.QrCode
@@ -39,39 +36,51 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
 import com.multigp.racesync.composables.CustomDialog
-import com.multigp.racesync.navigation.AllAircraft
 import com.multigp.racesync.viewmodels.ProfileViewModel
+import com.multigp.racesync.viewmodels.UiState
 
 @Composable
 fun ProfileScreen(
     modifier: Modifier = Modifier,
-    viewModel : ProfileViewModel = hiltViewModel(),
+    viewModel: ProfileViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
     onAircraftClick: () -> Unit = {},
-){
+) {
     val profileUiState by viewModel.uiState.collectAsState()
-    Column(modifier.fillMaxSize()){
-        TopBar(name = profileUiState.userName,  viewModel = viewModel, onGoBack = onGoBack )
-        PilotBanner(profileImage = profileUiState.profilePictureUrl, backgroundImage = profileUiState.profileBackgroundUrl)
-        PilotInformation( chapterCount = profileUiState.chapterCount, raceCount = profileUiState.raceCount, name = profileUiState.displayName)
-        PilotLocation(city = profileUiState.city, onAircraftClick = {
-            onAircraftClick()
-        })
-    }
+    when(profileUiState){
+        is UiState.Success -> {
+            val profile = (profileUiState as UiState.Success).data
+            Column(modifier.fillMaxSize()) {
+                TopBar(name = profile.userName, viewModel = viewModel, onGoBack = onGoBack)
+                PilotBanner(
+                    profileImage = profile.profilePictureUrl,
+                    backgroundImage = profile.profileBackgroundUrl
+                )
+                PilotInformation(
+                    chapterCount = profile.chapterCount,
+                    raceCount = profile.raceCount,
+                    name = profile.displayName
+                )
+                PilotLocation(city = profile.city, onAircraftClick = {
+                    onAircraftClick()
+                })
+            }
 
-    if(viewModel.isDialogShown){
-        CustomDialog(
-            onDismiss = {
-                viewModel.onDismissDialog()
-            },
-            onConfirm = {
-                //viewmodel.buyItem()
-            },
-            pilotID = profileUiState.id
-        )
+            if (viewModel.isDialogShown) {
+                CustomDialog(
+                    onDismiss = {
+                        viewModel.onDismissDialog()
+                    },
+                    onConfirm = {
+                        //viewmodel.buyItem()
+                    },
+                    pilotID = profile.id
+                )
+            }
+        }
+        else -> {}
     }
 }
 
@@ -82,13 +91,13 @@ fun TopBar(
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
     viewModel: ProfileViewModel
-){
+) {
     TopAppBar(
         title = {
             Text(text = name)
         },
         navigationIcon = {
-            IconButton(onClick = { onGoBack()}) {
+            IconButton(onClick = { onGoBack() }) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Default.ArrowBack,
                     contentDescription = "Back",
@@ -98,7 +107,7 @@ fun TopBar(
             }
         },
         actions = {
-            IconButton(onClick = { viewModel.onShowQrCode()}) {
+            IconButton(onClick = { viewModel.onShowQrCode() }) {
                 Icon(
                     imageVector = Icons.Outlined.QrCode,
                     contentDescription = "QR Code",
@@ -126,8 +135,8 @@ fun PilotBanner(
     modifier: Modifier = Modifier,
     backgroundImage: String,
     profileImage: String
-){
-    Box (
+) {
+    Box(
         modifier = modifier
             .fillMaxWidth(),
         contentAlignment = Alignment.CenterStart
@@ -138,7 +147,9 @@ fun PilotBanner(
             contentDescription = null,
             contentScale = ContentScale.Crop,
             modifier = modifier
-                .background(Color.LightGray).fillMaxWidth().aspectRatio(1.9f)
+                .background(Color.LightGray)
+                .fillMaxWidth()
+                .aspectRatio(1.9f)
 
         )
         AsyncImage(
@@ -167,13 +178,13 @@ fun PilotInformation(
     name: String,
     modifier: Modifier = Modifier
 
-){
+) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
             .padding(10.dp)
-    ){
+    ) {
         Column {
             Text(text = name)
         }
@@ -191,11 +202,12 @@ fun PilotLocation(
     city: String,
     onAircraftClick: () -> Unit = {}
 
-){
-    Row(modifier = Modifier
-        .fillMaxWidth()
-    ){
-        Column (
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+    ) {
+        Column(
             modifier = Modifier
 
                 .padding(end = 10.dp),
@@ -213,7 +225,7 @@ fun PilotLocation(
             }
         }
 
-        Column (
+        Column(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(end = 10.dp),
@@ -221,7 +233,7 @@ fun PilotLocation(
             verticalArrangement = Arrangement.Center
 
         ) {
-            Button(onClick = { onAircraftClick()}) {
+            Button(onClick = { onAircraftClick() }) {
                 Text(text = "My Aircrafts")
             }
         }
