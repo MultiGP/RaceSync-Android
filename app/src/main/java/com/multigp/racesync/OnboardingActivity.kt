@@ -57,7 +57,7 @@ fun RaceSyncApp(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.ic_launcher_round),
+                        painter = painterResource(id = R.drawable.racesync_logo),
                         contentDescription = null,
                         contentScale = ContentScale.Inside
                     )
