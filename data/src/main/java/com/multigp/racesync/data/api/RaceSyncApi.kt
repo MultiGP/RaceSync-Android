@@ -5,6 +5,7 @@ import com.multigp.racesync.domain.model.AircraftResponse
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.Chapter
+import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.UserInfo
@@ -58,7 +59,7 @@ interface RaceSyncApi {
     @POST("user/profile")
     suspend fun fetchProfile(
         @Body request: ProfileRequest
-    ): BaseResponse<Profile>
+    ): Response<BaseResponse<Profile>>
 
 
     @POST("aircraft/list")
@@ -77,4 +78,11 @@ interface RaceSyncApi {
         @Query("id") raceId: String,
         @Body request: BaseRequest<Nothing>
     ): Response<BaseResponse<Any>>
+
+
+    @POST("race/getPilotsForRace")
+    suspend fun getPilotsForRace(
+        @Query("id") raceId: String,
+        @Body request: BaseRequest<Nothing>
+    ): Response<BaseResponse<List<Pilot>>>
 }

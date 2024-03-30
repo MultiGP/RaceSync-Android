@@ -11,6 +11,7 @@ import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.BaseResponse
+import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
@@ -21,9 +22,11 @@ import com.multigp.racesync.domain.model.requests.NearbyRaces
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
 
 @SuppressLint("MissingPermission")
@@ -36,6 +39,7 @@ class RacesRepositoryImpl(
 ) : RacesRepository {
     private val raceDao = raceSyncDB.raceDao()
     private val chapterDao = raceSyncDB.chapterDao()
+    private val pilotDao = raceSyncDB.pilotDao()
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
@@ -219,5 +223,29 @@ class RacesRepositoryImpl(
             }
         } catch (_: Exception) {
         }
+    }
+
+
+    override suspend fun getPilotsForRace(raceId: String): Flow<List<Pilot>> {
+        val request = BaseRequest<Nothing>(apiKey = apiKey, sessionId = dataStore.getSessionId()!!)
+        return flow {
+            val response = raceSyncApi.getPilotsForRace(raceId, request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        baseResponse.data?.let { pilots ->
+                            pilotDao.add(pilots)
+                            emit(pilots)
+                        }
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }
+            .flowOn(Dispatchers.IO)
     }
 }

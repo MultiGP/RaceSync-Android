@@ -59,8 +59,8 @@ fun ProfileScreen(
                     backgroundImage = profile.profileBackgroundUrl
                 )
                 PilotInformation(
-                    chapterCount = profile.chapterCount,
-                    raceCount = profile.raceCount,
+                    chapterCount = "${profile.chapterCount}",
+                    raceCount = "${profile.raceCount}",
                     name = profile.displayName
                 )
                 PilotLocation(city = profile.city, onAircraftClick = {

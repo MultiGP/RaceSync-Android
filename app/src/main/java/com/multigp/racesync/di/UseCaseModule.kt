@@ -29,7 +29,7 @@ object UseCaseModule {
         performLoginUseCase = LoginUseCase(loginRepository),
         getLoginInfoUseCase = GetLoginInfoUseCase(loginRepository),
         getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUseCase(loginRepository)),
-        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUseCase(loginRepository)),
+        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUseCase(loginRepository), GetProfileUseCase(profileRepository)),
         getProfileUseCase = GetProfileUseCase(profileRepository),
         getAllAircraftUseCase = GetAllAircraftUseCase((profileRepository))
     )

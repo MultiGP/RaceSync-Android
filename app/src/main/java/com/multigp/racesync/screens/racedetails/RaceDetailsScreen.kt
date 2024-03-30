@@ -1,10 +1,8 @@
-package com.multigp.racesync.screens.landing
+package com.multigp.racesync.screens.racedetails
 
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -47,22 +45,20 @@ import com.multigp.racesync.viewmodels.UiState
 
 @Composable
 fun RaceDetailsScreen(
-    raceId: String,
+    race: Race,
     modifier: Modifier = Modifier,
+    joinRaceUiState: UiState<Boolean>,
+    resignRaceUiState: UiState<Boolean>,
     viewModel: LandingViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.raceDetailsUiState.collectAsState()
     var showAircraftSheet by remember { mutableStateOf(false) }
     var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
     var showResignRaceDialog by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
     var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
 
-    val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
-    val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
-
-    val onJoinRace: (Race) -> Unit = { race ->
-        selectedRace = race
+    val onJoinRace: (Race) -> Unit = { raceToJoin ->
+        selectedRace = raceToJoin
         if (!race.isJoined) {
             showAircraftSheet = true
         } else {
@@ -70,36 +66,11 @@ fun RaceDetailsScreen(
         }
     }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchRace(raceId)
-    }
-
-    when (uiState) {
-        is UiState.Loading -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-            )
-        }
-
-        is UiState.Success -> {
-            val race = (uiState as UiState.Success).data
-            RaceContentsScreen(
-                race,
-                modifier = modifier,
-                onJoinRace = onJoinRace
-            )
-        }
-
-        is UiState.Error -> {
-            Box(
-                modifier = modifier
-                    .fillMaxSize()
-            )
-        }
-
-        else -> {}
-    }
+    RaceContentsScreen(
+        race,
+        modifier = modifier,
+        onJoinRace = onJoinRace
+    )
 
     if (showAircraftSheet) {
         val aircraftUiState by viewModel.aircraftsUiState.collectAsState()

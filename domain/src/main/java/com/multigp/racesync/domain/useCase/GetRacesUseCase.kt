@@ -1,14 +1,20 @@
 package com.multigp.racesync.domain.useCase
 
 import androidx.paging.PagingData
+import com.multigp.racesync.domain.model.Pilot
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.zip
 
 class GetRacesUseCase(
     private val racesRepository: RacesRepository,
-    private val loginInfoUserCase: GetLoginInfoUseCase
+    private val loginInfoUserCase: GetLoginInfoUseCase,
+    private val profileUseCase: GetProfileUseCase,
 ) {
 
     suspend fun fetchNearbyRaces(radius: Double): Flow<PagingData<Race>> {
@@ -40,16 +46,23 @@ class GetRacesUseCase(
 
     suspend fun fetchRaceFeedOptions() = racesRepository.fetchSearchRadius()
 
-    suspend fun joinRace(raceId:String, aircraftId:String): Flow<Boolean>{
+    suspend fun joinRace(raceId: String, aircraftId: String): Flow<Boolean> {
         val pilotId = loginInfoUserCase().first().second!!.id
         return racesRepository.joinRace(pilotId, raceId, aircraftId)
     }
 
-    suspend fun resignFromRace(raceId:String): Flow<Boolean>{
+    suspend fun resignFromRace(raceId: String): Flow<Boolean> {
         return racesRepository.resignFromRace(raceId)
     }
 
-    suspend fun calculateRaceDistace(race:Race){
+    suspend fun getPilotsForRace(raceId: String): Flow<Pair<Profile, List<Pilot>>> {
+        return racesRepository.getPilotsForRace(raceId)
+            .zip(profileUseCase()) { pilots, profile ->
+                Pair(profile, pilots)
+            }
+    }
+
+    suspend fun calculateRaceDistace(race: Race) {
         racesRepository.calculateRaceDistance(race)
     }
 }

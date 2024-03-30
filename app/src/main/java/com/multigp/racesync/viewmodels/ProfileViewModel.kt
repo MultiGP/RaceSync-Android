@@ -6,7 +6,6 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +19,7 @@ import javax.inject.Inject
 class ProfileViewModel @Inject constructor(
     val useCases: RaceSyncUseCases
 ) : ViewModel() {
+
     private val _uiState = MutableStateFlow<UiState<Profile>>(UiState.None)
     val uiState: StateFlow<UiState<Profile>> = _uiState.asStateFlow()
 
@@ -37,17 +37,15 @@ class ProfileViewModel @Inject constructor(
 
     init {
         Log.d("TAG", "Hello World")
-        val apikey = BuildConfig.API_KEY
-
         viewModelScope.launch {
-            useCases.getProfileUseCase(apikey)
-                .collect { response ->
-                    if (response.status && response.data != null) {
-                        _uiState.value = UiState.Success(response.data!!)
-                    } else {
-                        _uiState.value = UiState.Error("Session Expired")
+            try {
+                useCases.getProfileUseCase()
+                    .collect { profile ->
+                        _uiState.value = UiState.Success(profile)
                     }
-                }
+            }catch (exception: Exception){
+                _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
+            }
         }
     }
 }

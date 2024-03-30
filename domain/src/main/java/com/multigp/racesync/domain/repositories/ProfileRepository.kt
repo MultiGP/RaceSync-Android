@@ -8,7 +8,7 @@ import com.multigp.racesync.domain.model.requests.ProfileRequest
 import kotlinx.coroutines.flow.Flow
 
 interface ProfileRepository {
-    suspend fun fetchProfile(apikey: String): Flow<BaseResponse<Profile>>
+    suspend fun fetchProfile(): Flow<Profile>
 
     suspend fun fetchAllAircraft(): Flow<List<Aircraft>>
 }

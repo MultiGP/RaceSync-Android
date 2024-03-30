@@ -1,11 +1,7 @@
 package com.multigp.racesync.viewmodels
 
 import android.annotation.SuppressLint
-import android.location.Location
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
@@ -13,10 +9,11 @@ import androidx.paging.filter
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
+import com.multigp.racesync.domain.model.Pilot
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -53,6 +50,9 @@ class LandingViewModel @Inject constructor(
     private val _joineChapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
     val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
         _joineChapterRacesUiState.asStateFlow()
+
+    private val _racePilotsUiState = MutableStateFlow<UiState<Pair<Profile, List<Pilot>>>>(UiState.Loading)
+    val racePilotsUiState: StateFlow<UiState<Pair<Profile, List<Pilot>>>> = _racePilotsUiState.asStateFlow()
 
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
@@ -177,6 +177,20 @@ class LandingViewModel @Inject constructor(
                 }
             } catch (exception: Exception) {
                 _resignRaceUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
+            }
+        }
+    }
+
+    fun getPilotsForRace(raceId: String) {
+        viewModelScope.launch {
+            _racePilotsUiState.value = UiState.Loading
+            try {
+                useCases.getRacesUseCase.getPilotsForRace(raceId).collect {
+                    _racePilotsUiState.value = UiState.Success(it)
+                }
+            } catch (exception: Exception) {
+                _racePilotsUiState.value =
                     UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
             }
         }

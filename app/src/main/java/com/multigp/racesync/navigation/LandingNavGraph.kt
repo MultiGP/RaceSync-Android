@@ -13,7 +13,7 @@ import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
-import com.multigp.racesync.screens.landing.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
 import com.multigp.racesync.screens.profile.ProfileScreen
 
 @Composable

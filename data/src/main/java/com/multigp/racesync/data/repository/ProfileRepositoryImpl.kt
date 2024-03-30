@@ -1,6 +1,5 @@
 package com.multigp.racesync.data.repository
 
-import android.util.Log
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.prefs.DataStoreManager
@@ -12,9 +11,7 @@ import com.multigp.racesync.domain.model.requests.PilotData
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.repositories.ProfileRepository
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -27,17 +24,31 @@ class ProfileRepositoryImpl(
     private val apiKey: String
 ) : ProfileRepository {
     private val aircraftDao = raceSyncDB.aircraftDao()
-    override suspend fun fetchProfile(apikey: String): Flow<BaseResponse<Profile>> = flow {
-        val session = dataStore.getSessionId()
-        val profileRequest = ProfileRequest(apikey, session)
-
-        val response = raceSyncApi.fetchProfile(profileRequest)
-        emit(response)
-    }
-        .catch {
-
-            Log.d("tag", "Something went wrong")
+    private val profileDao = raceSyncDB.profileDao()
+    override suspend fun fetchProfile(): Flow<Profile> = flow {
+        val profiles = profileDao.getAll().first()
+        if (profiles.isNotEmpty()) {
+            emit(profiles.first())
+        } else {
+            val profileRequest = ProfileRequest(apiKey, dataStore.getSessionId())
+            val response = raceSyncApi.fetchProfile(profileRequest)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        baseResponse.data?.let { profile ->
+                            profileDao.add(profile)
+                            emit(profile)
+                        }
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
         }
+    }
         .flowOn(Dispatchers.IO)
 
     override suspend fun fetchAllAircraft(): Flow<List<Aircraft>> {
@@ -46,7 +57,7 @@ class ProfileRepositoryImpl(
 
         return flow {
             val aircrafts = aircraftDao.getAll().first()
-            if(aircrafts.isNotEmpty()) {
+            if (aircrafts.isNotEmpty()) {
                 emit(aircrafts)
             }
             val aircraftRequest = AircraftRequest(apiKey, session, pilotData)
