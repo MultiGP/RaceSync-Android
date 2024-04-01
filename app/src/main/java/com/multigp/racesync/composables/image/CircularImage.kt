@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -18,14 +19,16 @@ import com.multigp.racesync.R
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
-fun CircularLogo(
+fun CircularImage(
     @DrawableRes id: Int,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Inside,
+    colorFilter: ColorFilter? = null
 ) {
     Image(
         painter = painterResource(id),
         contentDescription = null,
-        contentScale = ContentScale.Inside,
+        contentScale = contentScale,
         modifier = modifier
             .size(64.dp)
             .clip(CircleShape)
@@ -34,7 +37,8 @@ fun CircularLogo(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.2f),
                 CircleShape
             )
-            .clipToBounds()
+            .clipToBounds(),
+        colorFilter = colorFilter
     )
 }
 
@@ -42,6 +46,6 @@ fun CircularLogo(
 @Composable
 fun CircularLogoPreview(){
     RaceSyncTheme {
-        CircularLogo(id = R.drawable.logo_powered_by)
+        CircularImage(id = R.drawable.logo_powered_by)
     }
 }

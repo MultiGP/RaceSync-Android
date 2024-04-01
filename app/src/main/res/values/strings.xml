@@ -60,4 +60,8 @@
     <string name="progress_join_race">Joining race, please wait…</string>
     <string name="progress_resign_race">Resigning from the race, please wait…</string>
 
+    <string name="progress_roster">Loading roster, please wait…</string>
+    <string name="placeholder_title_no_pilots">No Pilots Found</string>
+    <string name="placeholder_message_no_pilots">No pilot has joined the race yet.</string>
+
 </resources>

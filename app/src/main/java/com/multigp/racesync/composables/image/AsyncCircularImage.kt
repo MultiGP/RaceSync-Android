@@ -12,13 +12,13 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
-import com.multigp.racesync.R
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
-fun AsyncCircularLogo(
+fun AsyncCircularImage(
     url: String?,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    contentScale: ContentScale = ContentScale.Crop,
 ) {
     AsyncImage(
         model = url,
@@ -40,6 +40,6 @@ fun AsyncCircularLogo(
 @Composable
 fun AsyncCircularLogoPreview(){
     RaceSyncTheme {
-        AsyncCircularLogo(url = "https://multigp-storage-new.s3.us-east-2.amazonaws.com/chapter/543/mainImage-67.png")
+        AsyncCircularImage(url = "https://multigp-storage-new.s3.us-east-2.amazonaws.com/chapter/543/mainImage-67.png")
     }
 }

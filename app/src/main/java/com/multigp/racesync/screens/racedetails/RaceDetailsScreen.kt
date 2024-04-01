@@ -1,5 +1,8 @@
 package com.multigp.racesync.screens.racedetails
 
+import android.content.Context
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -20,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -164,6 +168,8 @@ fun RaceContentsScreen(
     onJoinRace: (Race) -> Unit = {}
 ) {
     val state = rememberScrollState()
+    val context = LocalContext.current
+
     Column(
         modifier = modifier.verticalScroll(state)
     ) {
@@ -171,7 +177,10 @@ fun RaceContentsScreen(
             location = race.location,
             markerTitle = race.name ?: "Unknow Race",
             markerSnippet = race.snippet,
-            modifier = Modifier.height(280.dp)
+            modifier = Modifier.height(280.dp),
+            onMapClick = {
+                launchMap(race, context)
+            }
         )
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
@@ -211,7 +220,8 @@ fun RaceContentsScreen(
                 modifier = Modifier.padding(top = 16.dp),
                 text = race.getFormattedAddress(),
                 icon = R.drawable.ic_place,
-                color = MaterialTheme.colorScheme.primary
+                color = MaterialTheme.colorScheme.primary,
+                onClick = { launchMap(race, context) }
             )
             Text(
                 modifier = Modifier.padding(top = 16.dp),
@@ -225,6 +235,14 @@ fun RaceContentsScreen(
             )
             RaceDetailsActions(race)
         }
+    }
+}
+
+fun launchMap(race: Race, context: Context) {
+    val uri = Uri.parse("google.navigation:q=${race.getFormattedAddress()}&mode=d")
+    val mapIntent = Intent(Intent.ACTION_VIEW, uri)
+    if (mapIntent.resolveActivity(context.packageManager) != null) {
+        context.startActivity(mapIntent)
     }
 }
 

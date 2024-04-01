@@ -9,8 +9,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.material3.Divider
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -25,8 +23,8 @@ import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.buttons.JoinButton
 import com.multigp.racesync.composables.buttons.ParticipantsButton
-import com.multigp.racesync.composables.image.AsyncCircularLogo
-import com.multigp.racesync.composables.image.CircularLogo
+import com.multigp.racesync.composables.image.AsyncCircularImage
+import com.multigp.racesync.composables.image.CircularImage
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Chapter
@@ -52,9 +50,9 @@ fun ChapterCell(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (chapter.mainImageFileName != null) {
-                AsyncCircularLogo(url = chapter.mainImageFileName)
+                AsyncCircularImage(url = chapter.mainImageFileName)
             } else {
-                CircularLogo(id = R.drawable.logo_powered_by)
+                CircularImage(id = R.drawable.logo_powered_by)
             }
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {

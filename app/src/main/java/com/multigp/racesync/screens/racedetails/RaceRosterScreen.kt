@@ -1,15 +1,32 @@
 package com.multigp.racesync.screens.racedetails
 
-import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.multigp.racesync.R
+import com.multigp.racesync.composables.PlaceholderScreen
+import com.multigp.racesync.composables.ProgressHUD
+import com.multigp.racesync.composables.cells.ProfileRosterCell
+import com.multigp.racesync.composables.cells.RosterCell
+import com.multigp.racesync.domain.model.Pilot
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.UiState
@@ -26,19 +43,63 @@ fun RaceRosterScreen(
         viewModel.getPilotsForRace(race.id)
     }
 
-    when(pilotsUiState){
+    when (pilotsUiState) {
         is UiState.Success -> {
             val (profile, pilots) = (pilotsUiState as UiState.Success).data
-            Box(
-                modifier = modifier.fillMaxSize(),
-                contentAlignment = Alignment.Center
-            ) {
-                Text("Roster data goes here - ${profile.displayName} - ${pilots.count()}")
+            if (pilots.isNotEmpty()) {
+                RosterScreenContens(profile, pilots)
+            } else {
+                PlaceholderScreen(
+                    title = stringResource(R.string.placeholder_title_no_pilots),
+                    message = stringResource(R.string.placeholder_message_no_pilots)
+                )
             }
         }
-        else -> {
-
+        is UiState.Loading -> {
+            ProgressHUD(
+                modifier = modifier,
+                text = R.string.progress_roster
+            )
         }
+
+        else -> {}
     }
 
+}
+
+@Composable
+fun RosterScreenContens(
+    profile: Profile,
+    pilots: List<Pilot>,
+    modifier: Modifier = Modifier
+) {
+    LazyColumn(
+        modifier = modifier
+            .fillMaxSize()
+            .background(Color.LightGray.copy(alpha = 0.3f))
+    ) {
+        pilots.firstOrNull() { it.pilotId == profile.id }?.let {
+            item {
+                ProfileRosterCell(
+                    profile = profile,
+                    pilot = pilots.first { it.pilotId == profile.id })
+            }
+        }
+        item {
+            Text(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+                    .padding(start = 8.dp),
+                text = "REGISTERED PILOTS",
+                textAlign = TextAlign.Start,
+                color = Color.Gray,
+                lineHeight = 48.sp,
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
+        items(pilots.filter { it.pilotId != profile.id }) { pilot ->
+            RosterCell(pilot = pilot, onPilotClick = {}, modifier = modifier)
+        }
+    }
 }

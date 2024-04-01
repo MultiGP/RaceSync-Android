@@ -1,6 +1,7 @@
 package com.multigp.racesync.composables.text
 
 import androidx.annotation.DrawableRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,6 +24,7 @@ fun IconText(
     @DrawableRes icon: Int,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondary,
+    onClick: () -> Unit = {}
 ) {
     Row(
         verticalAlignment = Alignment.CenterVertically
@@ -34,7 +36,7 @@ fun IconText(
             contentDescription = null
         )
         Text(
-            modifier = modifier.padding(start = 8.dp),
+            modifier = modifier.padding(start = 8.dp).clickable(onClick = onClick),
             text = text,
             color = color,
             style = MaterialTheme.typography.bodyLarge

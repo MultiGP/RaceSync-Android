@@ -28,7 +28,7 @@ fun ProgressHUD(
 ) {
     Surface(
         modifier = modifier.fillMaxSize(),
-        color = Color.Black.copy(alpha = 0.7f)
+        color = Color.Black.copy(alpha = 0.5f)
     ) {
         Box(
             modifier = modifier.fillMaxSize(),

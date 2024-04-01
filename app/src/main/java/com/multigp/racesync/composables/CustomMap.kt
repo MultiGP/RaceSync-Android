@@ -21,7 +21,8 @@ fun CustomMap(
     location: LatLng,
     markerTitle: String,
     modifier: Modifier = Modifier,
-    markerSnippet: String = ""
+    markerSnippet: String = "",
+    onMapClick: ((LatLng)->Unit)? = null
 ) {
     val cameraPositionState = rememberCameraPositionState {
         position = CameraPosition.fromLatLngZoom(location, 10f)
@@ -31,7 +32,8 @@ fun CustomMap(
         modifier = modifier.fillMaxWidth(),
         cameraPositionState = cameraPositionState,
         uiSettings = MapUiSettings(zoomControlsEnabled = false, mapToolbarEnabled = false),
-        properties = MapProperties(mapType = MapType.NORMAL)
+        properties = MapProperties(mapType = MapType.NORMAL),
+        onMapClick = onMapClick
     ) {
         Marker(
             state = MarkerState(position = location),
