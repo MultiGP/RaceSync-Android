@@ -30,6 +30,8 @@
     <string name="placeholder_message_no_nearby_races">No races found around your area</string>
     <string name="placeholder_message_no_chapters">No chapters found, please try again later.</string>
     <string name="placeholder_btn_title_search_nearby">Search Nearby Races</string>
+    <string name="placeholder_title_loaction_service_off">Location Service is Off</string>
+    <string name="placeholder_message_loaction_service_off">Please enable location service to load nearyby races</string>
 
 
     <string name="error_title_loading_races">Error Loading Races</string>

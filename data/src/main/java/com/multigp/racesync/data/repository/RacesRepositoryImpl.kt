@@ -43,6 +43,7 @@ class RacesRepositoryImpl(
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
+        val location = locationClient.lastLocation.await()
         return locationClient.lastLocation.await()?.let { location ->
             val raceRequest = RaceRequest(
                 joined = null,
