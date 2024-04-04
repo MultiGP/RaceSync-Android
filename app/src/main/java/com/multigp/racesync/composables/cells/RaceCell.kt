@@ -36,13 +36,8 @@ fun RaceCell(
     modifier: Modifier = Modifier,
     showDistance:Boolean = false,
     onClick: (Race) -> Unit = {},
-    onRaceAction: (Race) -> Unit = {},
-    getDistance: (Race) -> Unit = {}
+    onRaceAction: (Race) -> Unit = {}
 ) {
-    LaunchedEffect(Unit){
-        getDistance(race)
-    }
-
     Column(
         modifier = modifier.clickable(
             indication = LocalIndication.current,

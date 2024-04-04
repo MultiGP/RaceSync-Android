@@ -73,12 +73,7 @@ fun NearbyRacesScreen(
                         modifier = modifier,
                         showDistance = true,
                         onClick = onRaceSelected,
-                        onRaceAction = onJoinRace,
-                        getDistance = { race ->
-                            scope.launch {
-                                viewModel.getRaceDistance(race)
-                            }
-                        }
+                        onRaceAction = onJoinRace
                     )
                 }
             }

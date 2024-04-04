@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.repositories
 
+import android.location.Location
 import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.BaseResponse
@@ -25,10 +26,7 @@ interface RacesRepository {
 
     suspend fun resignFromRace(raceId:String): Flow<Boolean>
 
-    suspend fun calculateRaceDistance(race: Race)
-
-    suspend fun getPilotsForRace(raceId: String): Flow<List<Pilot>>
-
+    suspend fun calculateRaceDistance(race: Race, currentLocation: Location)
 
     suspend fun fetchRaceView(raceId: String): Flow<RaceView>
 

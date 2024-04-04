@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
+import androidx.paging.map
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
@@ -18,6 +19,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -54,11 +56,6 @@ class LandingViewModel @Inject constructor(
     val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
         _joineChapterRacesUiState.asStateFlow()
 
-    private val _racePilotsUiState =
-        MutableStateFlow<UiState<Pair<Profile, List<Pilot>>>>(UiState.Loading)
-    val racePilotsUiState: StateFlow<UiState<Pair<Profile, List<Pilot>>>> =
-        _racePilotsUiState.asStateFlow()
-
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
 
@@ -77,6 +74,7 @@ class LandingViewModel @Inject constructor(
             locationClient.lastLocation.await()?.let { curLocation ->
                 val searchRadius = useCases.getRacesUseCase.fetchSearchRadius()
                 val racesPagingData = useCases.getRacesUseCase.fetchNearbyRaces(searchRadius)
+                val (radius, unit) = useCases.getRacesUseCase.fetchRaceFeedOptions().first()
                 racesPagingData
                     .cachedIn(viewModelScope)
                     .collect { pagingData ->
@@ -84,6 +82,10 @@ class LandingViewModel @Inject constructor(
                             .filter { it.isUpcoming }
                             .filter { race ->
                                 race.isWithInSearchRadius(curLocation, searchRadius)
+                            }
+                            .map {race ->
+                                useCases.getRacesUseCase.calculateRaceDistace(race, curLocation)
+                                race
                             }
                     }
             }
@@ -193,20 +195,6 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun getPilotsForRace(raceId: String) {
-        viewModelScope.launch {
-            _racePilotsUiState.value = UiState.Loading
-            try {
-                useCases.getRacesUseCase.getPilotsForRace(raceId).collect {
-                    _racePilotsUiState.value = UiState.Success(it)
-                }
-            } catch (exception: Exception) {
-                _racePilotsUiState.value =
-                    UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
-            }
-        }
-    }
-
     fun updateJoinRaceUiState(isClosed: Boolean = true) {
         if (isClosed) {
             _joinRaceUiState.value = UiState.None
@@ -218,9 +206,4 @@ class LandingViewModel @Inject constructor(
             _resignRaceUiState.value = UiState.None
         }
     }
-
-    suspend fun getRaceDistance(race: Race) {
-        useCases.getRacesUseCase.calculateRaceDistace(race)
-    }
-
 }

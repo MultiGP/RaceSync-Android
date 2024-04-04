@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
+import android.location.Location
 import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
@@ -55,13 +56,6 @@ class GetRacesUseCase(
         return racesRepository.resignFromRace(raceId)
     }
 
-    suspend fun getPilotsForRace(raceId: String): Flow<Pair<Profile, List<Pilot>>> {
-        return racesRepository.getPilotsForRace(raceId)
-            .zip(profileUseCase()) { pilots, profile ->
-                Pair(profile, pilots)
-            }
-    }
-
 
     suspend fun fetchRaceView(raceId: String): Flow<Triple<Profile, Race, RaceView>> {
         return racesRepository.fetchRaceView(raceId)
@@ -73,7 +67,7 @@ class GetRacesUseCase(
     }
 
 
-    suspend fun calculateRaceDistace(race: Race) {
-        racesRepository.calculateRaceDistance(race)
+    suspend fun calculateRaceDistace(race: Race, currentLocation: Location) {
+        racesRepository.calculateRaceDistance(race, currentLocation)
     }
 }

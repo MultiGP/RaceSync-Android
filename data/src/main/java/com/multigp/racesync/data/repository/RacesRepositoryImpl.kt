@@ -1,6 +1,7 @@
 package com.multigp.racesync.data.repository
 
 import android.annotation.SuppressLint
+import android.location.Location
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
@@ -11,7 +12,6 @@ import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.BaseResponse
-import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.domain.model.requests.BaseRequest
@@ -44,7 +44,6 @@ class RacesRepositoryImpl(
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
-        val location = locationClient.lastLocation.await()
         return locationClient.lastLocation.await()?.let { location ->
             val raceRequest = RaceRequest(
                 joined = null,
@@ -211,10 +210,10 @@ class RacesRepositoryImpl(
         }
     }
 
-    override suspend fun calculateRaceDistance(race: Race) {
+    override suspend fun calculateRaceDistance(race: Race, currentLocation: Location) {
         try {
-            locationClient.lastLocation.await()?.let { location ->
-                val distance = race.calculateDistance(location)
+            if(race.distance == null) {
+                val distance = race.calculateDistance(currentLocation)
                 val (_, unit) = dataStore.getSearchRadius()
                 if (unit == "mi") {
                     race.distance = String.format("%.2f mi", distance * 0.621371)
@@ -227,31 +226,7 @@ class RacesRepositoryImpl(
         }
     }
 
-
-    override suspend fun getPilotsForRace(raceId: String): Flow<List<Pilot>> {
-        val request = BaseRequest<Nothing>(apiKey = apiKey, sessionId = dataStore.getSessionId()!!)
-        return flow {
-            val response = raceSyncApi.getPilotsForRace(raceId, request)
-            if (response.isSuccessful) {
-                response.body()?.let { baseResponse ->
-                    if (baseResponse.status) {
-                        baseResponse.data?.let { pilots ->
-                            pilotDao.add(pilots)
-                            emit(pilots)
-                        }
-                    } else {
-                        throw Exception(baseResponse.errorMessage())
-                    }
-                }
-            } else {
-                val errorResponse = BaseResponse.convertFromErrorResponse(response)
-                throw Exception(errorResponse.statusDescription)
-            }
-        }
-            .flowOn(Dispatchers.IO)
-    }
-
-    override suspend fun fetchRaceView(raceId: String): Flow<RaceView>{
+    override suspend fun fetchRaceView(raceId: String): Flow<RaceView> {
         val request = BaseRequest<Nothing>(apiKey = apiKey, sessionId = dataStore.getSessionId()!!)
         return flow {
             val response = raceSyncApi.fetchRaceView(raceId, request)

@@ -80,13 +80,6 @@ interface RaceSyncApi {
         @Body request: BaseRequest<Nothing>
     ): Response<BaseResponse<Any>>
 
-
-    @POST("race/getPilotsForRace")
-    suspend fun getPilotsForRace(
-        @Query("id") raceId: String,
-        @Body request: BaseRequest<Nothing>
-    ): Response<BaseResponse<List<Pilot>>>
-
     @POST("race/view")
     suspend fun fetchRaceView(
         @Query("id") raceId: String,
