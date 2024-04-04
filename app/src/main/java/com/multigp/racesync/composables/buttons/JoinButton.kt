@@ -24,7 +24,11 @@ fun JoinButton(
     onClick: () -> Unit = {}
 ) {
     OutlinedButton(
-        onClick = onClick,
+        onClick = {
+            if(status != "Closed") {
+                onClick()
+            }
+        },
         shape = MaterialTheme.shapes.small,
         contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
         colors = ButtonDefaults.buttonColors(
