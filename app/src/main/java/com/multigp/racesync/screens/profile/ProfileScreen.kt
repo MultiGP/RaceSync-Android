@@ -27,6 +27,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -40,6 +41,7 @@ import coil.compose.AsyncImage
 import com.multigp.racesync.composables.CustomDialog
 import com.multigp.racesync.viewmodels.ProfileViewModel
 import com.multigp.racesync.viewmodels.UiState
+import get
 
 @Composable
 fun ProfileScreen(
@@ -49,11 +51,17 @@ fun ProfileScreen(
     onAircraftClick: () -> Unit = {},
 ) {
     val profileUiState by viewModel.uiState.collectAsState()
+    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+
     when(profileUiState){
         is UiState.Success -> {
             val profile = (profileUiState as UiState.Success).data
             Column(modifier.fillMaxSize()) {
-                TopBar(name = profile.userName, viewModel = viewModel, onGoBack = onGoBack)
+                TopBar(
+                    name = profile.userName,
+                    viewModel = viewModel,
+                    onGoBack = {multipleEventsCutter.processEvent(onGoBack)}
+                )
                 PilotBanner(
                     profileImage = profile.profilePictureUrl,
                     backgroundImage = profile.profileBackgroundUrl

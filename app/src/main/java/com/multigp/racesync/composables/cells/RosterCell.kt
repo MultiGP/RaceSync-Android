@@ -27,15 +27,17 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.composables.image.CircularImage
 import com.multigp.racesync.domain.model.Pilot
+import com.multigp.racesync.domain.model.RaceEntry
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
 fun RosterCell(
-    pilot: Pilot,
+    raceEntry: RaceEntry,
     modifier: Modifier = Modifier,
-    onPilotClick: (Pilot) -> Unit = {}
+    onClick: (RaceEntry) -> Unit = {}
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
         Row(
@@ -45,14 +47,13 @@ fun RosterCell(
                 .clickable(
                     indication = LocalIndication.current,
                     interactionSource = remember { MutableInteractionSource() },
-                    onClick = { onPilotClick(pilot) },
+                    onClick = { onClick(raceEntry) },
                 ),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CircularImage(
-                id = R.drawable.ic_person_placeholder,
+            AsyncCircularImage(
+                url = raceEntry.profilePictureUrl,
                 contentScale = ContentScale.Fit,
-                colorFilter = ColorFilter.tint(Color.LightGray),
                 modifier = modifier.size(48.dp)
             )
 
@@ -62,21 +63,21 @@ fun RosterCell(
                     .weight(1.0f)
             ) {
                 Text(
-                    text = pilot.userName,
+                    text = raceEntry.userName ?: "—",
                     fontWeight = FontWeight.Bold,
                     color = MaterialTheme.colorScheme.secondary
                 )
                 Text(
-                    text = "${pilot.firstName} ${pilot.lastName}",
+                    text = "${raceEntry.firstName} ${raceEntry.lastName}",
                     color = Color.Gray
                 )
             }
 
             Text(
-                text = "5695",
-                color = MaterialTheme.colorScheme.surface,
+                text = raceEntry.bandChannel,
+                color = raceEntry.channelTextColor,
                 modifier = modifier
-                    .background(Color.Gray, shape = MaterialTheme.shapes.large)
+                    .background(raceEntry.color, shape = MaterialTheme.shapes.large)
                     .padding(vertical = 2.dp, horizontal = 12.dp)
             )
 
@@ -89,16 +90,5 @@ fun RosterCell(
             }
         }
         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
-    }
-}
-
-
-@Preview
-@Composable
-fun RosterCellPreview() {
-    RaceSyncTheme {
-        val pilot =
-            Pilot(pilotId = "1234", firstName = "Farooq", lastName = "Zaman", userName = "fzaman82")
-        RosterCell(pilot = pilot)
     }
 }

@@ -5,6 +5,7 @@ import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.RaceView
 import kotlinx.coroutines.flow.Flow
 
 interface RacesRepository {
@@ -27,4 +28,8 @@ interface RacesRepository {
     suspend fun calculateRaceDistance(race: Race)
 
     suspend fun getPilotsForRace(raceId: String): Flow<List<Pilot>>
+
+
+    suspend fun fetchRaceView(raceId: String): Flow<RaceView>
+
 }

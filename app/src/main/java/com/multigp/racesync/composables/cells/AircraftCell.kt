@@ -49,7 +49,7 @@ fun AircraftCell(
         )
         Spacer(modifier = modifier.height(8.dp))
         Text(
-            text = aircraft.name ?: "\u2014",
+            text = aircraft.name ?: "—",
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.bodyLarge,
             maxLines = 1,

@@ -4,11 +4,11 @@ import androidx.paging.PagingData
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.zip
 
 class GetRacesUseCase(
@@ -61,6 +61,17 @@ class GetRacesUseCase(
                 Pair(profile, pilots)
             }
     }
+
+
+    suspend fun fetchRaceView(raceId: String): Flow<Triple<Profile, Race, RaceView>> {
+        return racesRepository.fetchRaceView(raceId)
+            .combine(profileUseCase()) { raceView, profile ->
+                Pair(profile, raceView)
+            }.combine(fetchRace(raceId)){(profile, raceView), race ->
+                Triple(profile, race, raceView)
+            }
+    }
+
 
     suspend fun calculateRaceDistace(race: Race) {
         racesRepository.calculateRaceDistance(race)

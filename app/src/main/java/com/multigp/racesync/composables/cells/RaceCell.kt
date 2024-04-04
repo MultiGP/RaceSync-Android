@@ -64,7 +64,7 @@ fun RaceCell(
             Spacer(modifier = modifier.padding(start = 8.dp))
             Column(modifier = modifier.weight(1.0f)) {
                 Text(
-                    text = race.startDate?.toDate()?.formatDate() ?: "\u2014",
+                    text = race.startDate?.toDate()?.formatDate() ?: "—",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f)
                 )
@@ -78,7 +78,7 @@ fun RaceCell(
                     maxLines = 1
                 )
                 Text(
-                    text = if(!showDistance) race.chapterName else race.distance ?: "\u2014",
+                    text = if(!showDistance) race.chapterName else race.distance ?: "—",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.9f),
                     modifier = modifier.padding(top = 4.dp),
@@ -87,7 +87,7 @@ fun RaceCell(
                 )
             }
             Column {
-                JoinButton(race.isJoined, onClick = {onRaceAction(race)})
+                JoinButton(race.isJoined, race.status, onClick = {onRaceAction(race)})
                 ParticipantsButton(text = "" + race.participantCount, onClick = {})
             }
         }

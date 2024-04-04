@@ -13,6 +13,7 @@ import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.JoinRaceRequest
@@ -237,6 +238,28 @@ class RacesRepositoryImpl(
                         baseResponse.data?.let { pilots ->
                             pilotDao.add(pilots)
                             emit(pilots)
+                        }
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }
+            .flowOn(Dispatchers.IO)
+    }
+
+    override suspend fun fetchRaceView(raceId: String): Flow<RaceView>{
+        val request = BaseRequest<Nothing>(apiKey = apiKey, sessionId = dataStore.getSessionId()!!)
+        return flow {
+            val response = raceSyncApi.fetchRaceView(raceId, request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        baseResponse.data?.let { raceView ->
+                            emit(raceView)
                         }
                     } else {
                         throw Exception(baseResponse.errorMessage())

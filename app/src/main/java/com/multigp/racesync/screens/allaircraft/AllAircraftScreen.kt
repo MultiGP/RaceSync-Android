@@ -11,6 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -20,6 +21,7 @@ import com.multigp.racesync.composables.topbars.RaceDetailsTopBar
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.navigation.AllAircraft
 import com.multigp.racesync.viewmodels.AllAircraftViewModel
+import get
 
 @Composable
 fun AllAircraftScreen(
@@ -29,6 +31,8 @@ fun AllAircraftScreen(
     onAircraftClick: (Aircraft) -> Unit = {}
 ) {
     val allAircraftUiState by viewModel.uiState.collectAsState()
+    val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+
     LaunchedEffect(Unit) {
         viewModel.fetchAllAircraft()
     }
@@ -38,7 +42,7 @@ fun AllAircraftScreen(
     ) {
         RaceDetailsTopBar(
             title = AllAircraft.title,
-            onGoBack = onGoBack
+            onGoBack = {multipleEventsCutter.processEvent(onGoBack)}
         )
         AllAircraftGrid(
             aircraftList = allAircraftUiState.allAircraft,

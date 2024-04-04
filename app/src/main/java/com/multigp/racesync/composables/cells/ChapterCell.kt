@@ -80,7 +80,7 @@ fun ChapterCell(
                 )
             }
             Column {
-                JoinButton(chapter.isJoined, onClick = {})
+                JoinButton(chapter.isJoined, "Open", onClick = {})
                 ParticipantsButton(text = "" + chapter.memberCount, onClick = {})
             }
         }

@@ -12,6 +12,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -41,8 +42,10 @@ class LandingViewModel @Inject constructor(
     private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
 
-    private val _raceDetailsUiState = MutableStateFlow<UiState<Race>>(UiState.Loading)
-    val raceDetailsUiState: StateFlow<UiState<Race>> = _raceDetailsUiState.asStateFlow()
+    private val _raceDetailsUiState =
+        MutableStateFlow<UiState<Triple<Profile, Race, RaceView>>>(UiState.Loading)
+    val raceDetailsUiState: StateFlow<UiState<Triple<Profile, Race, RaceView>>> =
+        _raceDetailsUiState.asStateFlow()
 
     private val _chapterDetailsUiState = MutableStateFlow<UiState<Chapter>>(UiState.Loading)
     val chapterDetailsUiState: StateFlow<UiState<Chapter>> = _chapterDetailsUiState.asStateFlow()
@@ -51,8 +54,10 @@ class LandingViewModel @Inject constructor(
     val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
         _joineChapterRacesUiState.asStateFlow()
 
-    private val _racePilotsUiState = MutableStateFlow<UiState<Pair<Profile, List<Pilot>>>>(UiState.Loading)
-    val racePilotsUiState: StateFlow<UiState<Pair<Profile, List<Pilot>>>> = _racePilotsUiState.asStateFlow()
+    private val _racePilotsUiState =
+        MutableStateFlow<UiState<Pair<Profile, List<Pilot>>>>(UiState.Loading)
+    val racePilotsUiState: StateFlow<UiState<Pair<Profile, List<Pilot>>>> =
+        _racePilotsUiState.asStateFlow()
 
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
@@ -109,10 +114,15 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchRace(raceId: String) {
+    fun fetchRaceView(raceId: String) {
         viewModelScope.launch {
-            useCases.getRacesUseCase.fetchRace(raceId).collect { race ->
-                _raceDetailsUiState.value = UiState.Success(race)
+            try {
+                _raceDetailsUiState.value = UiState.Loading
+                useCases.getRacesUseCase.fetchRaceView(raceId).collect { data ->
+                    _raceDetailsUiState.value = UiState.Success(data)
+                }
+            } catch (exception: Exception) {
+                _raceDetailsUiState.value = UiState.Error(exception.localizedMessage ?: "")
             }
         }
     }
@@ -148,8 +158,9 @@ class LandingViewModel @Inject constructor(
                     .collect { aircrafts ->
                         _aircraftsUiState.value = UiState.Success(aircrafts)
                     }
-            }catch (exception:Exception){
-                _aircraftsUiState.value = UiState.Error(exception.localizedMessage ?: "Failed to load aircrafts")
+            } catch (exception: Exception) {
+                _aircraftsUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to load aircrafts")
             }
         }
     }
@@ -196,19 +207,19 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun updateJoinRaceUiState(isClosed: Boolean = true){
-        if(isClosed) {
+    fun updateJoinRaceUiState(isClosed: Boolean = true) {
+        if (isClosed) {
             _joinRaceUiState.value = UiState.None
         }
     }
 
-    fun updateResignRaceUiState(isClosed: Boolean = true){
-        if(isClosed) {
+    fun updateResignRaceUiState(isClosed: Boolean = true) {
+        if (isClosed) {
             _resignRaceUiState.value = UiState.None
         }
     }
 
-    suspend fun getRaceDistance(race: Race){
+    suspend fun getRaceDistance(race: Race) {
         useCases.getRacesUseCase.calculateRaceDistace(race)
     }
 

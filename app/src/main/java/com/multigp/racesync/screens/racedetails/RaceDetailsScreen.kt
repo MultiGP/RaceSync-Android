@@ -42,14 +42,16 @@ import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Aircraft
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.UiState
 
 @Composable
 fun RaceDetailsScreen(
-    race: Race,
+    data: Triple<Profile, Race, RaceView>,
     modifier: Modifier = Modifier,
     joinRaceUiState: UiState<Boolean>,
     resignRaceUiState: UiState<Boolean>,
@@ -60,6 +62,8 @@ fun RaceDetailsScreen(
     var showResignRaceDialog by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
     var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
+
+    val (profile, race, raceView) = data
 
     val onJoinRace: (Race) -> Unit = { raceToJoin ->
         selectedRace = raceToJoin
@@ -150,13 +154,13 @@ fun RaceDetailsScreen(
 fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Race Class", race.raceClassString ?: "\u2014")
+        RaceDetailsCell("Race Class", race.raceClassString ?: "—")
         HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Coordinator", race.ownerUserName ?: "\u2014")
+        RaceDetailsCell("Coordinator", race.ownerUserName ?: "—")
         HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Chapter", race.chapterName ?: "\u2014")
+        RaceDetailsCell("Chapter", race.chapterName ?: "—")
         HorizontalDivider(color = Color.LightGray)
-        RaceDetailsCell("Season", race.seasonName ?: "\u2014")
+        RaceDetailsCell("Season", race.seasonName ?: "—")
         HorizontalDivider(color = Color.LightGray)
     }
 }
@@ -199,20 +203,20 @@ fun RaceContentsScreen(
                     IconText(
                         modifier = Modifier.padding(top = 12.dp),
                         text = race.startDate?.toDate()?.formatDate("EEE, MMM d\n@ h:mm a")
-                            ?: "\u2014",
+                            ?: "—",
                         icon = R.drawable.ic_race_start
                     )
                     IconText(
                         modifier = Modifier.padding(top = 12.dp),
                         text = race.endDate?.toDate()?.formatDate("EEE, MMM d\n@ h:mm a")
-                            ?: "\u2014",
+                            ?: "—",
                         icon = R.drawable.ic_race_stop
                     )
                 }
                 Column(
                     verticalArrangement = Arrangement.Center
                 ) {
-                    JoinButton(race.isJoined, onClick = { onJoinRace(race) })
+                    JoinButton(race.isJoined, race.status, onClick = { onJoinRace(race) })
                     ParticipantsButton(text = "" + race.participantCount, onClick = {})
                 }
             }

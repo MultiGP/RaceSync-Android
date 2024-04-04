@@ -24,13 +24,14 @@ import androidx.compose.ui.unit.dp
 import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
+import com.multigp.racesync.domain.model.RaceEntry
 
 @Composable
 fun ProfileRosterCell(
     profile: Profile,
-    pilot: Pilot,
+    raceEntry: RaceEntry,
     modifier: Modifier = Modifier,
-    onPilotClick: (Pilot) -> Unit = {}
+    onClick: (RaceEntry) -> Unit = {}
 ) {
     Column(modifier = modifier.background(MaterialTheme.colorScheme.surface)) {
         HorizontalDivider(thickness = 1.dp, color = Color.LightGray)
@@ -41,7 +42,7 @@ fun ProfileRosterCell(
                 .clickable(
                     indication = LocalIndication.current,
                     interactionSource = remember { MutableInteractionSource() },
-                    onClick = { onPilotClick(pilot) },
+                    onClick = { onClick(raceEntry) },
                 ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
@@ -58,7 +59,7 @@ fun ProfileRosterCell(
                     color = Color.Gray
                 )
                 Text(
-                    text = "Race Band",
+                    text = raceEntry.bandName,
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )
@@ -70,7 +71,7 @@ fun ProfileRosterCell(
                     color = Color.Gray
                 )
                 Text(
-                    text = "5 (5806)",
+                    text = "${raceEntry.channel}(${raceEntry.frequency})",
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )

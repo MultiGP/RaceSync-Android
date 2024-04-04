@@ -1,5 +1,6 @@
 package com.multigp.racesync.domain.model
 
+import android.graphics.Color
 import android.location.Location
 import androidx.annotation.Keep
 import androidx.room.Entity
@@ -105,7 +106,7 @@ data class Race(
     @field:SerializedName("isJoined")
     var isJoined: Boolean = false,
     @field:SerializedName("distance")
-    var distance: String? = "\u2014",
+    var distance: String? = "—",
 ) : Serializable {
 
     val location: LatLng
