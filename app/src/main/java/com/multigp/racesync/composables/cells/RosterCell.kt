@@ -73,13 +73,15 @@ fun RosterCell(
                 )
             }
 
-            Text(
-                text = raceEntry.bandChannel,
-                color = raceEntry.channelTextColor,
-                modifier = modifier
-                    .background(raceEntry.color, shape = MaterialTheme.shapes.large)
-                    .padding(vertical = 2.dp, horizontal = 12.dp)
-            )
+            if(raceEntry.bandChannel.isNotEmpty()) {
+                Text(
+                    text = raceEntry.bandChannel,
+                    color = raceEntry.channelTextColor,
+                    modifier = modifier
+                        .background(raceEntry.color, shape = MaterialTheme.shapes.large)
+                        .padding(vertical = 2.dp, horizontal = 12.dp)
+                )
+            }
 
             IconButton(onClick = {}) {
                 Image(

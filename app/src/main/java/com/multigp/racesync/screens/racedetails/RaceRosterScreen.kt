@@ -37,7 +37,7 @@ fun RaceRosterScreen(
 ) {
     val (profile, race, raceView) = data
     if (raceView.entries.isNotEmpty()) {
-        RosterScreenContens(profile, raceView.entries)
+        RosterScreenContens(profile, raceView.entries.sortedBy { it.userName })
     } else {
         PlaceholderScreen(
             title = stringResource(R.string.placeholder_title_no_pilots),

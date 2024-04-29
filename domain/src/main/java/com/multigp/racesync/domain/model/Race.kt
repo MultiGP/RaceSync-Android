@@ -107,6 +107,10 @@ data class Race(
     var isJoined: Boolean = false,
     @field:SerializedName("distance")
     var distance: String? = "—",
+    @field:SerializedName("officialStatus")
+    val officialStatus: Int = 0,
+    @field:SerializedName("isChapterRace")
+    var isChapterRace: Boolean = false
 ) : Serializable {
 
     val location: LatLng

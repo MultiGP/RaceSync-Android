@@ -106,7 +106,7 @@ data class RaceView(
     @SerializedName("registrationRaceId")
     val registrationRaceId: Any,
     @SerializedName("schedule")
-    val schedule: RaceSchedule,
+    val schedule: Any,
     @SerializedName("scoringDisabled")
     val scoringDisabled: String,
     @SerializedName("scoringFormat")
@@ -154,7 +154,7 @@ data class RaceEntry(
     @SerializedName("band")
     val band: String?,
     @SerializedName("channel")
-    val channel: String?,
+    val channel: String? = "",
     @SerializedName("dateAdded")
     val dateAdded: String?,
     @SerializedName("dateModified")
@@ -164,7 +164,7 @@ data class RaceEntry(
     @SerializedName("firstName")
     val firstName: String?,
     @SerializedName("frequency")
-    val frequency: String?,
+    val frequency: String? = "",
     @SerializedName("group")
     val group: String?,
     @SerializedName("groupSlot")
@@ -195,20 +195,33 @@ data class RaceEntry(
             return if (band != null && channel != null) {
                 "$band$channel"
             } else {
-                frequency ?: "—"
+                frequency ?: ""
             }
         }
 
     val bandName: String
         get() = if (band != null && band == "R") "Race Band" else (band ?: "—")
 
+    val channelFrequency: String?
+        get() {
+            return if ((channel ?: "").isEmpty() && (frequency ?: "").isEmpty()) {
+                "—"
+            } else if ((channel ?: "").isNotEmpty() && (frequency ?: "").isEmpty()) {
+                channel
+            } else if ((channel ?: "").isEmpty() && (frequency ?: "").isNotEmpty()) {
+                "($frequency)"
+            } else {
+                "$channel($frequency)"
+            }
+        }
+
     val color: Color
-        get() = when ("$band$channel"){
+        get() = when ("$band$channel") {
             "R1" -> Color(0xff00ff15) //Green
             "R2" -> Color(0xff0095ff) //Blue
-            "R3" -> Color(0xff00ffff) //Cyan
+            "R3" -> Color(0xffe59be9) //pink
             "R4" -> Color(0xffff9500) //Brown
-            "R5" -> Color(0xffffff00) //Yellow
+            "R5" -> Color(0xff00ff15) //Green
             "R6" -> Color(0xff6a00ff) //Blue2
             "R7" -> Color(0xffff00ff) //Magenta
             "R8" -> Color(0xffff0040) //Red
@@ -216,8 +229,9 @@ data class RaceEntry(
         }
 
     val channelTextColor: Color
-        get() = when("$band$channel"){
-            "R1", "R3", "R5" -> Color.Black
+        get() = when ("$band$channel") {
+            "R1", "R5" -> Color.Black
+            "R6", "R2", "R3" -> Color.White
             else -> Color.DarkGray
         }
 }

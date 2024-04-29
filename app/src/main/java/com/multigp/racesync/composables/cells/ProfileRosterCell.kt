@@ -71,7 +71,7 @@ fun ProfileRosterCell(
                     color = Color.Gray
                 )
                 Text(
-                    text = "${raceEntry.channel}(${raceEntry.frequency})",
+                    text = "${raceEntry.channelFrequency}",
                     color = MaterialTheme.colorScheme.secondary,
                     fontWeight = FontWeight.Bold
                 )

@@ -25,6 +25,9 @@ interface RaceDao {
     @Query("SELECT * FROM races WHERE isJoined = :isJoined")
     fun getJoinedRaces(isJoined: Boolean): PagingSource<Int, Race>
 
+    @Query("SELECT * FROM races WHERE isChapterRace = :isChapterRace")
+    fun getChapterRaces(isChapterRace: Boolean): List<Race>
+
     @Query("DELETE FROM races")
     suspend fun deleteAllRaces()
 

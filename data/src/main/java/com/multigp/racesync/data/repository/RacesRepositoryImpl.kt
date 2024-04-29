@@ -25,6 +25,7 @@ import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -111,6 +112,10 @@ class RacesRepositoryImpl(
 
         return flow {
             //Fetch joined chapters
+            val chapterRaces = raceDao.getChapterRaces(true)
+            if (chapterRaces.isNotEmpty()){
+                emit(chapterRaces)
+            }
             val response = raceSyncApi.fetchChapters(0, 25, request)
             if (response.status) {
                 response.data?.let { chapters ->
@@ -134,11 +139,14 @@ class RacesRepositoryImpl(
                         .flatMap { it.data!! }
                         .filter { it.isUpcoming }
                     val uniqueRaces = races.distinctBy { it.id }
+                    uniqueRaces.forEach {
+                        it.isChapterRace = true
+                    }
                     raceDao.addRaces(uniqueRaces)
                     emit(uniqueRaces)
                 } ?: emit(emptyList())
             }
-        }
+        }.flowOn(Dispatchers.IO)
     }
 
 

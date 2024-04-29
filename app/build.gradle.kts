@@ -43,9 +43,11 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
+//            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
+            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
         debug {
+//            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
             buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
     }
