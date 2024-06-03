@@ -23,8 +23,8 @@ android {
         applicationId = "com.multigp.racesync"
         minSdk = 24
         targetSdk = 34
-        versionCode = 5
-        versionName = "0.0.5"
+        versionCode = 6
+        versionName = "0.0.6"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,21 +43,29 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-//            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
-            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://www.multigp.com/mgp/multigpwebservice/\""
+            )
+//            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
         debug {
-//            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
-            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
+            buildConfigField(
+                "String",
+                "BASE_URL",
+                "\"https://www.multigp.com/mgp/multigpwebservice/\""
+            )
+//            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-    kotlinOptions {
-        jvmTarget = "1.8"
-    }
+//    kotlinOptions {
+//        jvmTarget = "11"
+//    }
     buildFeatures {
         compose = true
     }
@@ -86,8 +94,8 @@ dependencies {
     implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.7.0")
     implementation("androidx.navigation:navigation-compose:2.7.6")
     implementation(platform("androidx.compose:compose-bom:2023.03.00"))
-    implementation ("com.github.SmartToolFactory:Compose-Colorful-Sliders:1.2.2")
-    implementation ("androidx.compose.material:material-icons-extended")
+    implementation("com.github.SmartToolFactory:Compose-Colorful-Sliders:1.2.2")
+    implementation("androidx.compose.material:material-icons-extended")
 
 
     implementation("io.coil-kt:coil-compose:2.5.0")
@@ -133,7 +141,7 @@ dependencies {
     //Webview
     implementation("com.google.accompanist:accompanist-webview:0.35.0-alpha")
 
-    implementation ("com.google.zxing:core:3.5.1")
+    implementation("com.google.zxing:core:3.5.1")
 
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")
@@ -149,6 +157,7 @@ hilt {
     enableAggregatingTask = true
 }
 
-kapt {
-    correctErrorTypes = true
-}
+//
+//kapt {
+//    correctErrorTypes = true
+//}
