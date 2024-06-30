@@ -13,8 +13,9 @@ import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
-import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.profile.ProfileScreen
+import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
 
 @Composable
 fun LandingNavGraph(
@@ -127,9 +128,13 @@ fun LandingNavGraph(
         ) { navBackStackEntry ->
             navBackStackEntry.arguments?.getString(RaceDetails.raceIdArg)
                 ?.let { raceId ->
-                    RaceDetailsContainerScreen(raceId, onGoBack = {
-                        navController.popBackStack()
-                    })
+                    RaceDetailsContainerScreen(
+                        raceId = raceId,
+                        onGoBack = { navController.popBackStack() },
+                        onPilotSelected = { pilotUserName ->
+                            navController.navigate(route = "pilot_info/${pilotUserName}")
+                        }
+                    )
                 }
         }
         composable(
@@ -139,6 +144,19 @@ fun LandingNavGraph(
             navBackStackEntry.arguments?.getString(ChapterDetails.chapterIdArg)
                 ?.let { chapterId ->
                     ChapterDetailsScreen(chapterId)
+                }
+        }
+
+        composable(
+            route = PilotInfo.routeWithArgs,
+            arguments = PilotInfo.arguments
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(PilotInfo.pilotIdArg)
+                ?.let { pilotUserName ->
+                    PilotInfoContainerScreen(
+                        pilotUserName = pilotUserName,
+                        onGoBack = { navController.popBackStack() }
+                    )
                 }
         }
     }

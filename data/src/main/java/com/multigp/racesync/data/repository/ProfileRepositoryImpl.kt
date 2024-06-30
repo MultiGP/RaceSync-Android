@@ -7,12 +7,15 @@ import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.requests.AircraftRequest
+import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.PilotData
 import com.multigp.racesync.domain.model.requests.ProfileRequest
+import com.multigp.racesync.domain.model.requests.SearchRequest
 import com.multigp.racesync.domain.repositories.ProfileRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -50,6 +53,37 @@ class ProfileRepositoryImpl(
         }
     }
         .flowOn(Dispatchers.IO)
+
+
+    override suspend fun fetchProfile(pilotName: String) = flow {
+        val profile = profileDao.get(pilotName).firstOrNull()
+        if (profile != null) {
+            emit(profile)
+        }else{
+            val request = BaseRequest(apiKey, SearchRequest(pilotName), dataStore.getSessionId()!!)
+            val response = raceSyncApi.searchUser(request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        baseResponse.data?.let { profile ->
+                            profileDao.add(profile)
+                            emit(profile)
+                        }
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }
+    }
+        .flowOn(Dispatchers.IO)
+
+    suspend override fun getPilotId(pilotUserName: String): String?{
+        return profileDao.get(pilotUserName).firstOrNull()?.id
+    }
 
     override suspend fun fetchAllAircraft(): Flow<List<Aircraft>> {
         val session = dataStore.getSessionId()

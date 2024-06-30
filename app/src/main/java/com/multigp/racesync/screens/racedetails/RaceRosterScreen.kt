@@ -33,11 +33,16 @@ import com.multigp.racesync.viewmodels.UiState
 fun RaceRosterScreen(
     data: Triple<Profile, Race, RaceView>,
     modifier: Modifier = Modifier,
-    viewModel: LandingViewModel = hiltViewModel()
+    viewModel: LandingViewModel = hiltViewModel(),
+    onPilotSelected: (String) -> Unit = {}
 ) {
     val (profile, race, raceView) = data
     if (raceView.entries.isNotEmpty()) {
-        RosterScreenContens(profile, raceView.entries.sortedBy { it.userName })
+        RosterScreenContens(
+            profile = profile,
+            entries = raceView.entries.sortedBy { it.userName },
+            modifier = modifier,
+            onPilotSelected = onPilotSelected)
     } else {
         PlaceholderScreen(
             title = stringResource(R.string.placeholder_title_no_pilots),
@@ -51,7 +56,8 @@ fun RaceRosterScreen(
 fun RosterScreenContens(
     profile: Profile,
     entries: List<RaceEntry>,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onPilotSelected: (String) -> Unit = {}
 ) {
     LazyColumn(
         modifier = modifier
@@ -79,7 +85,7 @@ fun RosterScreenContens(
             )
         }
         items(entries.filter { it.pilotId != profile.id }) { entry ->
-            RosterCell(raceEntry = entry, onClick = {}, modifier = modifier)
+            RosterCell(raceEntry = entry, onClick = {onPilotSelected(entry.userName!!) }, modifier = modifier)
         }
     }
 }

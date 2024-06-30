@@ -71,7 +71,7 @@ fun ProfileScreen(
                     raceCount = "${profile.raceCount}",
                     name = profile.displayName
                 )
-                PilotLocation(city = profile.city, onAircraftClick = {
+                PilotLocation(city = profile.city ?: "", onAircraftClick = {
                     onAircraftClick()
                 })
             }

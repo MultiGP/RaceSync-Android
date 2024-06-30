@@ -30,6 +30,7 @@ fun RaceDetailsContainerScreen(
     raceId: String,
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
+    onPilotSelected: (String) -> Unit = {},
     onGoBack: () -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
@@ -71,7 +72,7 @@ fun RaceDetailsContainerScreen(
                 ) { page ->
                     when (page) {
                         0 -> RaceDetailsScreen(data, modifier, joinRaceUiState, resignRaceUiState)
-                        1 -> RaceRosterScreen(data, modifier)
+                        1 -> RaceRosterScreen(data, modifier, onPilotSelected = onPilotSelected)
                     }
                 }
             }

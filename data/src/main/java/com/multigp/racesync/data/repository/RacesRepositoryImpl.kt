@@ -25,7 +25,6 @@ import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -91,6 +90,30 @@ class RacesRepositoryImpl(
         ).flow
     }
 
+    override suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {
+        val raceRequest = RaceRequest(
+            joined = JoinedRaces(pilotId = pilotId)
+        )
+        val request = BaseRequest(
+            apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
+        )
+        return flow {
+            val response = raceSyncApi.fetchRaces2(0, 50, request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        emit(baseResponse.data!!)
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }.flowOn(Dispatchers.IO)
+    }
+
     override suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>> {
         /*
             Three steps involved to fetch joined chapter races
@@ -113,7 +136,7 @@ class RacesRepositoryImpl(
         return flow {
             //Fetch joined chapters
             val chapterRaces = raceDao.getChapterRaces(true)
-            if (chapterRaces.isNotEmpty()){
+            if (chapterRaces.isNotEmpty()) {
                 emit(chapterRaces)
             }
             val response = raceSyncApi.fetchChapters(0, 25, request)
@@ -220,7 +243,7 @@ class RacesRepositoryImpl(
 
     override suspend fun calculateRaceDistance(race: Race, currentLocation: Location) {
         try {
-            if(race.distance == null) {
+            if (race.distance == null) {
                 val distance = race.calculateDistance(currentLocation)
                 val (_, unit) = dataStore.getSearchRadius()
                 if (unit == "mi") {

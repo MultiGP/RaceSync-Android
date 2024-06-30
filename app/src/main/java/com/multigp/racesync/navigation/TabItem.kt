@@ -51,7 +51,16 @@ sealed class TabItem(
             R.string.tab_title_race_roster,
             null
         )
+
+    object PilotRace : TabItem(
+        R.drawable.ic_pilot_race_outlined,
+        R.drawable.ic_pilot_race,
+        R.string.tab_title_pilot_races,
+        null
+    )
+
 }
 
 val landingTabs = listOf(TabItem.Joined, TabItem.Nearby, TabItem.Chapters)
 val raceDetailTabs = listOf(TabItem.RaceDetails, TabItem.RaceRoster)
+val pilotInfoTabs = listOf(TabItem.PilotRace, TabItem.Chapters)

@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.Flow
 
 interface ProfileRepository {
     suspend fun fetchProfile(): Flow<Profile>
-
+    suspend fun fetchProfile(pilotName: String): Flow<Profile>
+    suspend fun getPilotId(pilotUserName: String): String?
     suspend fun fetchAllAircraft(): Flow<List<Aircraft>>
 }

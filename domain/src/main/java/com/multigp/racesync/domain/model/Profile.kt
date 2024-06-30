@@ -22,7 +22,7 @@ data class Profile(
     @field:SerializedName("chapterIds")
     val chapterIds: List<String>,
     @field:SerializedName("city")
-    val city: String,
+    val city: String?,
     @field:SerializedName("country")
     val country: String,
     @field:SerializedName("dateAdded")
@@ -42,21 +42,28 @@ data class Profile(
     @field:SerializedName("lastName")
     val lastName: String,
     @field:SerializedName("latitude")
-    val latitude: String,
+    val latitude: Double?,
     @field:SerializedName("longitude")
-    val longitude: String,
+    val longitude: Double?,
     @field:SerializedName("phoneNumber")
-    val phoneNumber: String,
+    val phoneNumber: String?,
     @field:SerializedName("profileBackgroundUrl")
     val profileBackgroundUrl: String,
     @field:SerializedName("profilePictureUrl")
     val profilePictureUrl: String,
     @field:SerializedName("raceCount")
-    val raceCount: Int,
+    val raceCount: Int? = 0,
     @field:SerializedName("state")
-    val state: String,
+    val state: String? = "",
     @field:SerializedName("userName")
     val userName: String,
     @field:SerializedName("zip")
-    val zip: String
-)
+    val zip: String? = null
+){
+    fun getFormattedAddress(): String {
+        val components = mutableListOf<String>()
+        city?.let { components.add(it) }
+        state?.let { components.add(it) }
+        return components.joinToString(separator = ", ")
+    }
+}

@@ -111,6 +111,18 @@ object ChapterDetails : NavDestination {
     )
 }
 
+object PilotInfo : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "Pilot Details"
+    override val route = "pilot_info"
+    override val webUrl = null
+    const val pilotIdArg = "pilotUserName"
+    val routeWithArgs = "${route}/{${pilotIdArg}}"
+    val arguments = listOf(
+        navArgument(pilotIdArg) { type = NavType.StringType }
+    )
+}
+
 object TrackDesign : NavDestination {
     override val icon = Icons.Outlined.EditRoad
     override val title = "MultiGP Track Designs"

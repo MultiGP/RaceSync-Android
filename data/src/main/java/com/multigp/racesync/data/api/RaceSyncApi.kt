@@ -18,6 +18,7 @@ import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.requests.LogoutRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
+import com.multigp.racesync.domain.model.requests.SearchRequest
 import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.Body
@@ -51,6 +52,13 @@ interface RaceSyncApi {
         @Body request: BaseRequest<RaceRequest>
     ): BaseResponse<List<Race>>
 
+    @POST("race/list")
+    suspend fun fetchRaces2(
+        @Query("currentPage") page: Int,
+        @Query("pageSize") pageSize: Int,
+        @Body request: BaseRequest<RaceRequest>
+    ): Response<BaseResponse<List<Race>>>
+
     @POST("race/listForChapter")
     suspend fun fetchRacesForChapter(
         @Query("chapterId") chapterId: String,
@@ -62,6 +70,10 @@ interface RaceSyncApi {
         @Body request: ProfileRequest
     ): Response<BaseResponse<Profile>>
 
+    @POST("user/search")
+    suspend fun searchUser(
+        @Body request: BaseRequest<SearchRequest>
+    ): Response<BaseResponse<Profile>>
 
     @POST("aircraft/list")
     suspend fun fetchAllAircraft(

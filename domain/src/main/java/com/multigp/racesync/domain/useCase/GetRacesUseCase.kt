@@ -27,6 +27,14 @@ class GetRacesUseCase(
         return racesRepository.fetchRaces(loginInfo.second!!.id)
     }
 
+    suspend fun fetchPilotRaces(pilotUserName:String): Flow<List<Race>> {
+        profileUseCase.getPilotId(pilotUserName)?.let {pilotId ->
+            return racesRepository.fetchPilotRaces(pilotId)
+        } ?: kotlin.run {
+            throw Exception("Invalid pilot username")
+        }
+    }
+
     suspend fun fetchJoinedChapterRaces(): Flow<List<Race>> {
         val loginInfo = loginInfoUserCase().first()
         return racesRepository.fetchJoinedChapterRaces(loginInfo.second!!.id)
