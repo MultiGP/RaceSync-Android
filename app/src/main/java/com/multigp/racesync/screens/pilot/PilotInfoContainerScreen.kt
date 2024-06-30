@@ -29,6 +29,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.capitalize
+import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
@@ -72,11 +74,17 @@ fun PilotInfoContainerScreen(
 
     Scaffold(
         topBar = {
-            PilotInfoTopBar(
-                title = "Farooq Zaman",
-                countryName = "Pakistan",
-                onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
-            )
+            when(uiState){
+                is UiState.Success ->{
+                    val data = (uiState as UiState.Success).data
+                    PilotInfoTopBar(
+                        title = data.userName,
+                        countryCode = data.country.capitalize(Locale.current),
+                        onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
+                    )
+                }
+                else -> {}
+            }
         }
     ) { paddingValues ->
         when (uiState) {

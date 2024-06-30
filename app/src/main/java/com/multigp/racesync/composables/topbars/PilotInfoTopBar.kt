@@ -19,14 +19,14 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 @Composable
 fun PilotInfoTopBar(
     title: String,
-    countryName:String,
+    countryCode:String,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
     onClickAction2: () -> Unit = {}
 ) {
     TopAppBar(
         title = {
-            TextWithFlag(text = title, countryName = countryName)
+            TextWithFlag(text = title, countryCode = countryCode)
         },
         navigationIcon = {
             IconButton(onClick = { onGoBack() }) {
@@ -55,6 +55,6 @@ fun PilotInfoTopBar(
 @Composable
 fun PilotInfoTopBarPreview(){
     RaceSyncTheme {
-        PilotInfoTopBar(title = "Farooq Zaman", countryName = "Pakistan")
+        PilotInfoTopBar(title = "Farooq Zaman", countryCode = "PK")
     }
 }

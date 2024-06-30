@@ -11,11 +11,10 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 @Composable
 fun TextWithFlag(
     text: String,
-    countryName: String,
+    countryCode: String,
     modifier: Modifier = Modifier
 ){
-    val countryCode = countryNameToCode[countryName]
-    val emoji = countryCode?.let { getCountryEmoji(it) } ?: "🏳️"
+    val emoji = getCountryEmoji(countryCode)
     Text(text = "$text $emoji")
 }
 
@@ -24,6 +23,6 @@ fun TextWithFlag(
 @Composable
 fun TextWithFlagPreview() {
     RaceSyncTheme {
-        TextWithFlag(text = "Farooq Zaman", countryName="Pakistan")
+        TextWithFlag(text = "Farooq Zaman", countryCode="PK")
     }
 }
