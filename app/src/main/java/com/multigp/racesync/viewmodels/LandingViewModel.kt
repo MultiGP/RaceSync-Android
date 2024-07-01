@@ -1,6 +1,7 @@
 package com.multigp.racesync.viewmodels
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
@@ -38,6 +39,9 @@ class LandingViewModel @Inject constructor(
     private val locationClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
+    private val _uiState = MutableStateFlow<UiState<Profile>>(UiState.None)
+    val uiState: StateFlow<UiState<Profile>> = _uiState.asStateFlow()
+
     private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
 
@@ -67,6 +71,20 @@ class LandingViewModel @Inject constructor(
 
     private val _resignRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
+
+    init {
+        Log.d("TAG", "Hello World")
+        viewModelScope.launch {
+            try {
+                useCases.getProfileUseCase()
+                    .collect { profile ->
+                        _uiState.value = UiState.Success(profile)
+                    }
+            }catch (exception: Exception){
+                _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
+            }
+        }
+    }
 
     @SuppressLint("MissingPermission")
     fun fetchNearbyRaces() {

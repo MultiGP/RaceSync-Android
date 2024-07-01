@@ -43,7 +43,6 @@ import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
-import com.multigp.racesync.viewmodels.ProfileViewModel
 import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
@@ -54,9 +53,8 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    profileViewModel: ProfileViewModel = hiltViewModel(),
     onMenuClicked: () -> Unit = {},
-    onProfileClicked: () -> Unit = {},
+    onProfileClicked: (String) -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
@@ -70,7 +68,7 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
-    val profileUiState by profileViewModel.uiState.collectAsState()
+    val profileUiState by viewModel.uiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -99,12 +97,17 @@ fun HomeScreen(
                 tabs = landingTabs,
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked,
-                onProfileClicked = onProfileClicked,
+                onProfileClicked = {
+                    (profileUiState as? UiState.Success)?.data?.let {
+                        onProfileClicked(it.userName)
+                    }
+                },
                 profileImage = when (profileUiState) {
                     is UiState.Success -> {
                         val profile = (profileUiState as UiState.Success).data
                         profile.profilePictureUrl
                     }
+
                     else -> null
                 }
             )

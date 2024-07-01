@@ -22,7 +22,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -38,6 +40,7 @@ import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.CustomDialog
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.image.AsyncCircularImage
@@ -62,6 +65,7 @@ fun PilotInfoContainerScreen(
     onRaceSelected: (Race) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
+    var showQRCodeDialog by remember { mutableStateOf(false) }
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
     val uiState by viewModel.uiState.collectAsState()
 
@@ -71,17 +75,16 @@ fun PilotInfoContainerScreen(
 
     Scaffold(
         topBar = {
-            when (uiState) {
-                is UiState.Success -> {
-                    val data = (uiState as UiState.Success).data
-                    PilotInfoTopBar(
-                        title = data.userName,
-                        countryCode = data.country.capitalize(Locale.current),
-                        onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
-                    )
-                }
-
-                else -> {}
+            (uiState as? UiState.Success)?.data?.let { (profile, userInfo) ->
+                PilotInfoTopBar(
+                    title = profile.userName,
+                    countryCode = profile.country.capitalize(Locale.current),
+                    isLoggedInUser = profile.id == userInfo.id,
+                    onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
+                    onClickShowQRCode = {
+                        showQRCodeDialog = true
+                    }
+                )
             }
         }
     ) { paddingValues ->
@@ -94,7 +97,7 @@ fun PilotInfoContainerScreen(
             }
 
             is UiState.Success -> {
-                val data = (uiState as UiState.Success).data
+                val (profile, userInfo) = (uiState as UiState.Success).data
                 Column(modifier = modifier.padding(paddingValues)) {
                     Box(
                         modifier = modifier.fillMaxWidth(),
@@ -103,7 +106,7 @@ fun PilotInfoContainerScreen(
                         Image(
                             modifier = modifier.aspectRatio(1.7778f),
                             painter = rememberAsyncImagePainter(
-                                model = data.profileBackgroundUrl,
+                                model = profile.profileBackgroundUrl,
                                 placeholder = painterResource(id = R.drawable.pilot_profile_placeholder),
                                 error = painterResource(id = R.drawable.pilot_profile_placeholder)
                             ),
@@ -114,19 +117,19 @@ fun PilotInfoContainerScreen(
                             modifier = modifier
                                 .size(120.dp)
                                 .offset(y = 30.dp),
-                            url = data.profilePictureUrl
+                            url = profile.profilePictureUrl
                         )
                     }
                     Row(modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
                         IconText(
-                            text = "${data.raceCount} Races",
+                            text = "${profile.raceCount} Races",
                             icon = R.drawable.icn_race_small,
                             modifier = modifier.size(24.dp, 16.dp),
                             color = Color.DarkGray
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         IconText(
-                            text = "${data.chapterCount} Chapters",
+                            text = "${profile.chapterCount} Chapters",
                             icon = R.drawable.icn_chapter_small,
                             modifier = modifier.size(24.dp, 16.dp),
                             color = Color.DarkGray
@@ -134,7 +137,7 @@ fun PilotInfoContainerScreen(
                     }
                     Text(
                         modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        text = data.displayName,
+                        text = profile.displayName,
                         style = MaterialTheme.typography.bodyLarge
                     )
                     Row(
@@ -143,13 +146,13 @@ fun PilotInfoContainerScreen(
                     ) {
                         IconText(
                             modifier = modifier.size(24.dp),
-                            text = data.getFormattedAddress(),
+                            text = profile.getFormattedAddress(),
                             icon = R.drawable.ic_place,
                             color = MaterialTheme.colorScheme.primary
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Button(
-                            onClick = { onClickAircrafts(data.id) },
+                            onClick = { onClickAircrafts(profile.id) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0, 0, 128),
                                 contentColor = MaterialTheme.colorScheme.surface
@@ -179,6 +182,17 @@ fun PilotInfoContainerScreen(
                             1 -> PilotChaptersTabView(pilotUserName, viewModel)
                         }
                     }
+                }
+                if (showQRCodeDialog){
+                    CustomDialog(
+                        onDismiss = {
+                           showQRCodeDialog = false
+                        },
+                        onConfirm = {
+                            //viewmodel.buyItem()
+                        },
+                        pilotID = profile.id
+                    )
                 }
             }
 

@@ -2,30 +2,21 @@ package com.multigp.racesync.screens.landing
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.multigp.racesync.R
-import com.multigp.racesync.composables.topbars.CommonTopBar
+import com.multigp.racesync.composables.PilotBanner
 import com.multigp.racesync.composables.topbars.RaceDetailsTopBar
-import com.multigp.racesync.domain.model.Aircraft
-import com.multigp.racesync.navigation.AllAircraft
-import com.multigp.racesync.screens.profile.PilotBanner
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.AircraftViewModel
-import dagger.hilt.android.lifecycle.HiltViewModel
 
 @Composable
 fun AircraftDetailsScreen(

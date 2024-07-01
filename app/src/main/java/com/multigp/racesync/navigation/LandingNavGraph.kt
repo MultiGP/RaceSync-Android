@@ -14,7 +14,6 @@ import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
-import com.multigp.racesync.screens.profile.ProfileScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
 
 @Composable
@@ -31,8 +30,8 @@ fun LandingNavGraph(
         composable(route = Landing.route) {
             HomeScreen(
                 onMenuClicked = onMenuClicked,
-                onProfileClicked = {
-                    navController.navigate(ProfileDetails.route)
+                onProfileClicked = {pilotUserName ->
+                    navController.navigate(route = "pilot_info/${pilotUserName}")
                 },
                 onRaceSelected = { race ->
                     navController.navigate("${RaceDetails.route}/${race.id}")
@@ -83,16 +82,6 @@ fun LandingNavGraph(
                 statWebUrl = VisitMultiGP.webUrl,
                 title = VisitMultiGP.title
             )
-        }
-
-        composable(route = ProfileDetails.route) {
-            ProfileScreen(
-                onGoBack = {
-                    navController.popBackStack()
-                },
-                onAircraftClick = { pilotId ->
-                    navController.navigate(route = "allaircraft/${pilotId}")
-                })
         }
 
         composable(

@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
+import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,8 +19,8 @@ class PilotViewModel @Inject constructor(
     val useCases: RaceSyncUseCases,
 ) : ViewModel() {
 
-    private val _uiState = MutableStateFlow<UiState<Profile>>(UiState.None)
-    val uiState: StateFlow<UiState<Profile>> = _uiState.asStateFlow()
+    private val _uiState = MutableStateFlow<UiState<Pair<Profile, UserInfo>>>(UiState.None)
+    val uiState: StateFlow<UiState<Pair<Profile, UserInfo>>> = _uiState.asStateFlow()
 
     private val _racesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
     val racesUiState: StateFlow<UiState<List<Race>>> = _racesUiState.asStateFlow()

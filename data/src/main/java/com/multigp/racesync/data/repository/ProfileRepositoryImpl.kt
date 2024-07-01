@@ -56,9 +56,10 @@ class ProfileRepositoryImpl(
 
 
     override suspend fun fetchProfile(pilotName: String) = flow {
+        val userInfo = dataStore.getUserInfo()!!
         val profile = profileDao.get(pilotName).firstOrNull()
         if (profile != null) {
-            emit(profile)
+            emit(Pair(profile, userInfo))
         }else{
             val request = BaseRequest(apiKey, SearchRequest(pilotName), dataStore.getSessionId()!!)
             val response = raceSyncApi.searchUser(request)
@@ -67,7 +68,7 @@ class ProfileRepositoryImpl(
                     if (baseResponse.status) {
                         baseResponse.data?.let { profile ->
                             profileDao.add(profile)
-                            emit(profile)
+                            emit(Pair(profile, userInfo))
                         }
                     } else {
                         throw Exception(baseResponse.errorMessage())
