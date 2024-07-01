@@ -176,7 +176,11 @@ fun PilotInfoContainerScreen(
                             0 -> PilotRacesTabView(
                                 pilotUserName,
                                 viewModel,
-                                onRaceSelected = {}
+                                onRaceSelected = {
+                                    if(profile.id == userInfo.id){
+                                        onRaceSelected(it)
+                                    }
+                                }
                             )
 
                             1 -> PilotChaptersTabView(pilotUserName, viewModel)
