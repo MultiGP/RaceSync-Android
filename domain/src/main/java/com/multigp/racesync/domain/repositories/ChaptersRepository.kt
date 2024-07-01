@@ -10,4 +10,6 @@ interface ChaptersRepository {
     suspend fun fetchChapters(pilotId:String): Flow<PagingData<Chapter>>
 
     fun fetchChapter(chapterId: String): Flow<Chapter>
+
+    suspend fun fetchPilotChapters(pilotId: String): Flow<List<Chapter>>
 }

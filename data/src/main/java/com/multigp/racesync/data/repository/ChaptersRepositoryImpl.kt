@@ -10,15 +10,16 @@ import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.ChapterRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
+import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.JoinedChapters
-import com.multigp.racesync.domain.model.requests.JoinedRaces
-import com.multigp.racesync.domain.model.requests.RaceRequest
-import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.ChaptersRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 
 @SuppressLint("MissingPermission")
 class ChaptersRepositoryImpl(
@@ -56,4 +57,30 @@ class ChaptersRepositoryImpl(
     }
 
     override fun fetchChapter(chapterId: String) = chapterDao.getChapter(chapterId)
+
+    override suspend fun fetchPilotChapters(pilotId: String): Flow<List<Chapter>> {
+        val request = BaseRequest(
+            data = ChaptersRequest(
+                joined = JoinedChapters(pilotId = pilotId)
+            ),
+            sessionId = dataStore.getSessionId()!!,
+            apiKey = apiKey
+        )
+
+        return flow {
+            val response = raceSyncApi.fetchChapters2(0, 50, request)
+            if (response.isSuccessful) {
+                response.body()?.let { baseResponse ->
+                    if (baseResponse.status) {
+                        emit(baseResponse.data!!)
+                    } else {
+                        throw Exception(baseResponse.errorMessage())
+                    }
+                }
+            } else {
+                val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                throw Exception(errorResponse.statusDescription)
+            }
+        }.flowOn(Dispatchers.IO)
+    }
 }

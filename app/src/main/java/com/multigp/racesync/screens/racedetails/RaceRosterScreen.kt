@@ -64,11 +64,13 @@ fun RosterScreenContens(
             .fillMaxSize()
             .background(Color.LightGray.copy(alpha = 0.3f))
     ) {
-        entries.firstOrNull() { it.pilotId == profile.id }?.let {
+        entries.firstOrNull() { it.pilotId == profile.id }?.let {pilotEntry ->
             item {
                 ProfileRosterCell(
                     profile = profile,
-                    raceEntry = entries.first { it.pilotId == profile.id })
+                    raceEntry = pilotEntry,
+                    onClick = {onPilotSelected(pilotEntry.userName!!)}
+                )
             }
         }
         item {

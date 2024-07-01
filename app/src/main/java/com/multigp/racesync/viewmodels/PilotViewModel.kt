@@ -2,6 +2,7 @@ package com.multigp.racesync.viewmodels
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
@@ -22,6 +23,10 @@ class PilotViewModel @Inject constructor(
 
     private val _racesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
     val racesUiState: StateFlow<UiState<List<Race>>> = _racesUiState.asStateFlow()
+
+    private val _chaptersUiState = MutableStateFlow<UiState<List<Chapter>>>(UiState.Loading)
+    val chaptersUiState: StateFlow<UiState<List<Chapter>>> = _chaptersUiState.asStateFlow()
+
 
     fun fetchPilotProfile(pilotName: String) {
         viewModelScope.launch {
@@ -46,7 +51,22 @@ class PilotViewModel @Inject constructor(
                     }
             } catch (exception: Exception) {
                 _racesUiState.value =
-                    UiState.Error(exception.localizedMessage ?: "Failed to load aircrafts")
+                    UiState.Error(exception.localizedMessage ?: "Failed to load races")
+            }
+        }
+    }
+
+    fun fetchChapters(pilotUserName: String) {
+        viewModelScope.launch {
+            _chaptersUiState.value = UiState.Loading
+            try {
+                useCases.getChaptersUseCase.fetchPilotChapters(pilotUserName)
+                    .collect { races ->
+                        _chaptersUiState.value = UiState.Success(races)
+                    }
+            } catch (exception: Exception) {
+                _chaptersUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to load chapters")
             }
         }
     }

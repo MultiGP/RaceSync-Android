@@ -91,12 +91,14 @@ class RacesRepositoryImpl(
     }
 
     override suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {
-        val raceRequest = RaceRequest(
-            joined = JoinedRaces(pilotId = pilotId)
-        )
         val request = BaseRequest(
-            apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
+            apiKey = apiKey,
+            data = RaceRequest(
+                joined = JoinedRaces(pilotId = pilotId)
+            ),
+            sessionId = dataStore.getSessionId()!!
         )
+
         return flow {
             val response = raceSyncApi.fetchRaces2(0, 50, request)
             if (response.isSuccessful) {
