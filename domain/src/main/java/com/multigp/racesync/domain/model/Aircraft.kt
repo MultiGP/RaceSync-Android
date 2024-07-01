@@ -67,5 +67,7 @@ data class Aircraft(
     @field:SerializedName("videoTransmitterPower")
     val videoTransmitterPower: String?,
     @field:SerializedName("wingSize")
-    val wingSize: Double?
+    val wingSize: Double?,
+    @field:SerializedName("pilotId")
+    var pilotId: Int?
 )

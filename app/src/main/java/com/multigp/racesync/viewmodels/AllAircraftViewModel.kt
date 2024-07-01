@@ -30,12 +30,12 @@ class AllAircraftViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(AllAircraftUiState())
     val uiState: StateFlow<AllAircraftUiState> = _uiState.asStateFlow()
 
-    fun fetchAllAircraft() {
+    fun fetchAllAircraft(pilotId: String) {
         Log.d("T", "Fetching aircraft for current user")
 
         viewModelScope.launch {
             delay(5000)
-            useCases.getAllAircraftUseCase()
+            useCases.getAllAircraftUseCase(pilotId)
                 .collect { aircrafts ->
                     _uiState.update { curr ->
                         curr.copy(isLoading = false, allAircraft = aircrafts)

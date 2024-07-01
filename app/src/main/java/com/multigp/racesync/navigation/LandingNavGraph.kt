@@ -90,19 +90,26 @@ fun LandingNavGraph(
                 onGoBack = {
                     navController.popBackStack()
                 },
-                onAircraftClick = {
-                    navController.navigate(route = "allaircraft")
+                onAircraftClick = { pilotId ->
+                    navController.navigate(route = "allaircraft/${pilotId}")
                 })
         }
 
-        composable(route = AllAircraft.route) { navBackStackEntry ->
-            AllAircraftScreen(
-                onAircraftClick = { aircraft ->
-                    navController.navigate(route = "aircraft/${aircraft.id}")
-                },
-                onGoBack = {
-                    navController.popBackStack()
-                })
+        composable(
+            route = AllAircraft.routeWithArgs,
+            arguments = AllAircraft.arguments
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(AllAircraft.pilotIdArg)
+                ?.let { pilotId ->
+                    AllAircraftScreen(
+                        pilotId,
+                        onAircraftClick = { aircraft ->
+                            navController.navigate(route = "aircraft/${aircraft.id}")
+                        },
+                        onGoBack = {
+                            navController.popBackStack()
+                        })
+                }
         }
 
         composable(
@@ -155,7 +162,10 @@ fun LandingNavGraph(
                 ?.let { pilotUserName ->
                     PilotInfoContainerScreen(
                         pilotUserName = pilotUserName,
-                        onGoBack = { navController.popBackStack() }
+                        onGoBack = { navController.popBackStack() },
+                        onClickAircrafts = { pilotId ->
+                            navController.navigate(route = "allaircraft/${pilotId}")
+                        }
                     )
                 }
         }

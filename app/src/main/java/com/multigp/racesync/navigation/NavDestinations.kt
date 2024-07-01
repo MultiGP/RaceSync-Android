@@ -76,7 +76,11 @@ object AllAircraft : NavDestination {
     override val title = "My Aircrafts"
     override val route = "allaircraft"
     override val webUrl = null
-
+    const val pilotIdArg = "pilotId"
+    val routeWithArgs = "${route}/{${pilotIdArg}}"
+    val arguments = listOf(
+        navArgument(pilotIdArg) { type = NavType.StringType }
+    )
 }
 
 object AircraftDetails : NavDestination {

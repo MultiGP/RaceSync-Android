@@ -12,4 +12,5 @@ interface ProfileRepository {
     suspend fun fetchProfile(pilotName: String): Flow<Profile>
     suspend fun getPilotId(pilotUserName: String): String?
     suspend fun fetchAllAircraft(): Flow<List<Aircraft>>
+    suspend fun fetchPilotAircrafts(pilotId: String): Flow<List<Aircraft>>
 }

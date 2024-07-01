@@ -40,17 +40,11 @@ import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.ProgressHUD
-import com.multigp.racesync.composables.buttons.getContainerColor
-import com.multigp.racesync.composables.buttons.getContentColor
 import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.composables.topbars.HomeScreenTabs
 import com.multigp.racesync.composables.topbars.PilotInfoTopBar
-import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.navigation.pilotInfoTabs
-import com.multigp.racesync.screens.landing.ChaptersScreen
-import com.multigp.racesync.screens.landing.JoinedRacesScreen
-import com.multigp.racesync.screens.landing.NearbyRacesScreen
 import com.multigp.racesync.viewmodels.PilotViewModel
 import com.multigp.racesync.viewmodels.UiState
 import get
@@ -62,7 +56,8 @@ fun PilotInfoContainerScreen(
     pilotUserName: String,
     modifier: Modifier = Modifier,
     viewModel: PilotViewModel = hiltViewModel(),
-    onGoBack: () -> Unit = {}
+    onGoBack: () -> Unit = {},
+    onClickAircrafts: (String) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
@@ -74,8 +69,8 @@ fun PilotInfoContainerScreen(
 
     Scaffold(
         topBar = {
-            when(uiState){
-                is UiState.Success ->{
+            when (uiState) {
+                is UiState.Success -> {
                     val data = (uiState as UiState.Success).data
                     PilotInfoTopBar(
                         title = data.userName,
@@ -83,6 +78,7 @@ fun PilotInfoContainerScreen(
                         onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
                     )
                 }
+
                 else -> {}
             }
         }
@@ -151,7 +147,7 @@ fun PilotInfoContainerScreen(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Button(
-                            onClick = {},
+                            onClick = {onClickAircrafts(data.id)},
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0, 0, 128),
                                 contentColor = MaterialTheme.colorScheme.surface

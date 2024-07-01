@@ -25,6 +25,7 @@ import get
 
 @Composable
 fun AllAircraftScreen(
+    pilotId: String,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {},
     viewModel: AllAircraftViewModel = hiltViewModel(),
@@ -34,7 +35,7 @@ fun AllAircraftScreen(
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
 
     LaunchedEffect(Unit) {
-        viewModel.fetchAllAircraft()
+        viewModel.fetchAllAircraft(pilotId)
     }
 
     Column(

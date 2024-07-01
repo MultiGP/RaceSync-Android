@@ -15,6 +15,9 @@ interface AircraftDao {
     @Query("SELECT * FROM aircrafts")
     fun getAll(): Flow<List<Aircraft>>
 
+    @Query("SELECT * FROM aircrafts WHERE pilotId = :pilotId")
+    fun getAircrafts(pilotId: Int): Flow<List<Aircraft>>
+
     @Query("SELECT * FROM aircrafts WHERE id = :aircraftId")
     fun get(aircraftId: String): Flow<Aircraft>
 

@@ -48,7 +48,7 @@ fun ProfileScreen(
     modifier: Modifier = Modifier,
     viewModel: ProfileViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
-    onAircraftClick: () -> Unit = {},
+    onAircraftClick: (String) -> Unit = {},
 ) {
     val profileUiState by viewModel.uiState.collectAsState()
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
@@ -72,7 +72,7 @@ fun ProfileScreen(
                     name = profile.displayName
                 )
                 PilotLocation(city = profile.city ?: "", onAircraftClick = {
-                    onAircraftClick()
+                    onAircraftClick(profile.id)
                 })
             }
 

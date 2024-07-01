@@ -86,11 +86,15 @@ class ProfileRepositoryImpl(
     }
 
     override suspend fun fetchAllAircraft(): Flow<List<Aircraft>> {
+        return fetchPilotAircrafts(dataStore.getUserInfo()?.id ?: "")
+    }
+
+    override suspend fun fetchPilotAircrafts(pilotId: String): Flow<List<Aircraft>> {
         val session = dataStore.getSessionId()
-        val pilotData = PilotData((dataStore.getUserInfo()?.id ?: "").toInt(), false)
+        val pilotData = PilotData(pilotId.toInt(), false)
 
         return flow {
-            val aircrafts = aircraftDao.getAll().first()
+            val aircrafts = aircraftDao.getAircrafts(pilotId.toInt()).first()
             if (aircrafts.isNotEmpty()) {
                 emit(aircrafts)
             }
@@ -98,6 +102,7 @@ class ProfileRepositoryImpl(
             val response = raceSyncApi.fetchAllAircraft(aircraftRequest)
             if (response.status) {
                 response.data?.let { aircrafts ->
+                    aircrafts.forEach { it.pilotId = pilotId.toInt() }
                     aircraftDao.add(aircrafts)
                     emit(aircrafts)
                 } ?: emit(emptyList())
