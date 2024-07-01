@@ -2,6 +2,7 @@ package com.multigp.racesync.composables.buttons
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -20,12 +21,13 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 fun ParticipantsButton(
     text:String,
     modifier: Modifier = Modifier,
+    paddingValues: PaddingValues = PaddingValues(start = 12.dp, end = 12.dp),
     onClick: () -> Unit = {}
 ) {
     Button(
         onClick = onClick,
         shape = MaterialTheme.shapes.small,
-        contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
+        contentPadding = paddingValues,
         colors = ButtonDefaults.buttonColors(
             containerColor = MaterialTheme.colorScheme.secondaryContainer,
             contentColor = MaterialTheme.colorScheme.secondary

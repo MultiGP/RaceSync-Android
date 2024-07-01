@@ -165,6 +165,9 @@ fun LandingNavGraph(
                         onGoBack = { navController.popBackStack() },
                         onClickAircrafts = { pilotId ->
                             navController.navigate(route = "allaircraft/${pilotId}")
+                        },
+                        onRaceSelected = { race ->
+                            navController.navigate("${RaceDetails.route}/${race.id}")
                         }
                     )
                 }

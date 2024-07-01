@@ -47,7 +47,8 @@ class PilotViewModel @Inject constructor(
             try {
                 useCases.getRacesUseCase.fetchPilotRaces(pilotUserName)
                     .collect { races ->
-                        _racesUiState.value = UiState.Success(races)
+                        val sortedRaces = races.sortedByDescending { it.formattedStartDate }
+                        _racesUiState.value = UiState.Success(sortedRaces)
                     }
             } catch (exception: Exception) {
                 _racesUiState.value =

@@ -44,6 +44,7 @@ import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.composables.topbars.HomeScreenTabs
 import com.multigp.racesync.composables.topbars.PilotInfoTopBar
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.pilotInfoTabs
 import com.multigp.racesync.viewmodels.PilotViewModel
 import com.multigp.racesync.viewmodels.UiState
@@ -57,7 +58,8 @@ fun PilotInfoContainerScreen(
     modifier: Modifier = Modifier,
     viewModel: PilotViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
-    onClickAircrafts: (String) -> Unit = {}
+    onClickAircrafts: (String) -> Unit = {},
+    onRaceSelected: (Race) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
@@ -147,7 +149,7 @@ fun PilotInfoContainerScreen(
                         )
                         Spacer(modifier = Modifier.weight(1f))
                         Button(
-                            onClick = {onClickAircrafts(data.id)},
+                            onClick = { onClickAircrafts(data.id) },
                             colors = ButtonDefaults.buttonColors(
                                 containerColor = Color(0, 0, 128),
                                 contentColor = MaterialTheme.colorScheme.surface
@@ -168,7 +170,12 @@ fun PilotInfoContainerScreen(
                         itemSpacing = 16.dp
                     ) { page ->
                         when (page) {
-                            0 -> PilotRacesTabView(pilotUserName, viewModel)
+                            0 -> PilotRacesTabView(
+                                pilotUserName,
+                                viewModel,
+                                onRaceSelected = {}
+                            )
+
                             1 -> PilotChaptersTabView(pilotUserName, viewModel)
                         }
                     }

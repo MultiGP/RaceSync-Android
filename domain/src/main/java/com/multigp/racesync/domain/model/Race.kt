@@ -129,6 +129,9 @@ data class Race(
     val snippet: String
         get() = "Race will be held at ${startDate?.toDate()?.formatDate()}"
 
+    val formattedStartDate: Date?
+        get() = startDate?.toDate()
+
     val isUpcoming: Boolean
         get() = (startDate?.toDate()?.compareTo(Date()) ?: -1) >= 0
 

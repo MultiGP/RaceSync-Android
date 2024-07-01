@@ -10,8 +10,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
-import com.multigp.racesync.composables.cells.ChapterCell
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
+import com.multigp.racesync.composables.cells.PilotChapterCell
 import com.multigp.racesync.viewmodels.PilotViewModel
 import com.multigp.racesync.viewmodels.UiState
 
@@ -35,10 +35,10 @@ fun PilotChaptersTabView(
                 }
             }
             is UiState.Success -> {
-                val races = (chaptersUiState as UiState.Success).data
-                items(items = races, key = { it.id }) { race ->
-                    ChapterCell(
-                        race,
+                val chapters = (chaptersUiState as UiState.Success).data
+                items(items = chapters, key = { it.id }) { chapter ->
+                    PilotChapterCell(
+                        chapter,
                         modifier = modifier,
                         onClick = {}
                     )

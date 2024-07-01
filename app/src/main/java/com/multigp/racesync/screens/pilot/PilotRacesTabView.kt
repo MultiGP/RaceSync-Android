@@ -16,7 +16,9 @@ import androidx.paging.LoadState
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.cells.ChapterLoadingCell
+import com.multigp.racesync.composables.cells.PilotRaceCell
 import com.multigp.racesync.composables.cells.RaceCell
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.viewmodels.PilotViewModel
 import com.multigp.racesync.viewmodels.UiState
 
@@ -24,7 +26,8 @@ import com.multigp.racesync.viewmodels.UiState
 fun PilotRacesTabView(
     pilotUserName: String,
     viewModel: PilotViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onRaceSelected: (Race) -> Unit = {},
 ) {
     val racesUiState by viewModel.racesUiState.collectAsState()
 
@@ -41,10 +44,10 @@ fun PilotRacesTabView(
             is UiState.Success -> {
                 val races = (racesUiState as UiState.Success).data
                 items(items = races, key = { it.id }) { race ->
-                    RaceCell(
+                    PilotRaceCell(
                         race,
                         modifier = modifier,
-                        onClick = {},
+                        onClick = onRaceSelected,
                         onRaceAction = {}
                     )
                 }
