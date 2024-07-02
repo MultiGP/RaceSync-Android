@@ -1,8 +1,5 @@
 package com.multigp.racesync.screens.racedetails
 
-import android.content.Context
-import android.content.Intent
-import android.net.Uri
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,7 +23,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -64,6 +60,8 @@ fun RaceDetailsScreen(
     var showAircraftSheet by remember { mutableStateOf(false) }
     var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
     var showResignRaceDialog by remember { mutableStateOf(false) }
+    var showRaceMap by remember { mutableStateOf(false) }
+    var showMapOptionsSheet by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
     var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
 
@@ -81,7 +79,8 @@ fun RaceDetailsScreen(
     RaceContentsScreen(
         race,
         modifier = modifier,
-        onJoinRace = onJoinRace
+        onJoinRace = onJoinRace,
+        onShowMap = { showRaceMap = true }
     )
 
     if (showAircraftSheet) {
@@ -99,6 +98,28 @@ fun RaceDetailsScreen(
             onSheetDissmissed = { showAircraftSheet = false }
         )
     }
+
+    if (showRaceMap) {
+        MapsBottomSheet(
+            race = race,
+            modifier = modifier,
+            onSheetDissmissed = { showRaceMap = false },
+            onSelectMapOption = {
+                showMapOptionsSheet = true
+            }
+        )
+    }
+
+    if (showMapOptionsSheet) {
+        MapOptionsBottomSheet(
+            race = race,
+            modifier = modifier,
+            onSheetDissmissed = {
+                showMapOptionsSheet = false
+            },
+        )
+    }
+
     if (showJoinRaceConfirmationDialog) {
         CustomAlertDialog(
             title = stringResource(R.string.alert_join_race_title),
@@ -173,10 +194,10 @@ fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
 fun RaceContentsScreen(
     race: Race,
     modifier: Modifier = Modifier,
-    onJoinRace: (Race) -> Unit = {}
+    onJoinRace: (Race) -> Unit = {},
+    onShowMap: () -> Unit = {},
 ) {
     val state = rememberScrollState()
-    val context = LocalContext.current
 
     Column(
         modifier = modifier.verticalScroll(state)
@@ -186,17 +207,17 @@ fun RaceContentsScreen(
             markerTitle = race.name ?: "Unknow Race",
             markerSnippet = race.snippet,
             modifier = Modifier.height(280.dp),
-            onMapClick = {
-                launchMap(race, context)
-            }
+            onMapClick = { onShowMap() }
         )
         Column(modifier = Modifier.padding(16.dp)) {
             Row(
                 verticalAlignment = Alignment.Top
             ) {
-                if(race.officialStatus == 2) {
+                if (race.officialStatus == 2) {
                     Image(
-                        modifier = modifier.size(28.dp).padding(end = 8.dp, top = 8.dp),
+                        modifier = modifier
+                            .size(28.dp)
+                            .padding(end = 8.dp, top = 8.dp),
                         painter = painterResource(R.drawable.ic_tropy),
                         contentDescription = null
                     )
@@ -240,7 +261,7 @@ fun RaceContentsScreen(
                 text = race.getFormattedAddress(),
                 icon = R.drawable.ic_place,
                 color = MaterialTheme.colorScheme.primary,
-                onClick = { launchMap(race, context) }
+                onClick = { onShowMap() }
             )
             Text(
                 modifier = Modifier.padding(top = 16.dp),
@@ -254,14 +275,6 @@ fun RaceContentsScreen(
             )
             RaceDetailsActions(race)
         }
-    }
-}
-
-fun launchMap(race: Race, context: Context) {
-    val uri = Uri.parse("google.navigation:q=${race.getFormattedAddress()}&mode=d")
-    val mapIntent = Intent(Intent.ACTION_VIEW, uri)
-    if (mapIntent.resolveActivity(context.packageManager) != null) {
-        context.startActivity(mapIntent)
     }
 }
 

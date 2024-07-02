@@ -68,4 +68,8 @@
     <string name="placeholder_title_no_pilots">No pilots Found</string>
     <string name="placeholder_message_no_pilots">No pilot has joined the race yet.</string>
 
+    <string name="map_option_google">Open in Google Maps</string>
+    <string name="map_option_waze">Open in Waze</string>
+    <string name="map_option_copy_coordinates">Copy Coordinates</string>
+
 </resources>

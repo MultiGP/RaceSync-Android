@@ -116,6 +116,10 @@ data class Race(
     val location: LatLng
         get() = LatLng(latitude ?: 0.0, longitude ?: 0.0)
 
+
+    val strLocation: String
+        get() = "${latitude ?: 0.0},${longitude ?: 0.0}"
+
     fun getFormattedAddress(): String {
         val components = mutableListOf<String>()
         address?.let { components.add(it) }
