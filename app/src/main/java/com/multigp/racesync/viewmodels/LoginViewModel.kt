@@ -4,6 +4,7 @@ import android.text.TextUtils
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.BuildConfig
+import com.multigp.racesync.R
 import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -26,7 +27,7 @@ data class LoginFormUiState(
 sealed class LoginUiState {
     object Initializing : LoginUiState()
     object None : LoginUiState()
-    object Loading : LoginUiState()
+    data class Loading(val messageId: Int) : LoginUiState()
     data class Success(val data: Boolean) : LoginUiState()
     data class Error(val message: String) : LoginUiState()
 }
@@ -82,7 +83,7 @@ class LoginViewModel @Inject constructor(
         viewModelScope.launch {
             useCases.performLoginUseCase(request)
                 .onStart {
-                    _loginUiState.value = LoginUiState.Loading
+                    _loginUiState.value = LoginUiState.Loading(R.string.hud_login_progress)
                 }
                 .collect { result ->
                     result.fold(
@@ -104,8 +105,14 @@ class LoginViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
-            useCases.performLoginUseCase.logout().first()
-            _loginUiState.value = LoginUiState.None
+            try {
+                _loginUiState.value = LoginUiState.Loading(R.string.hud_logout_progress)
+                useCases.performLoginUseCase.logout().first()
+                _loginUiState.value = LoginUiState.None
+            }catch (exception: Exception){
+                useCases.performLoginUseCase.clearSession()
+                _loginUiState.value = LoginUiState.None
+            }
         }
     }
 

@@ -77,7 +77,8 @@ fun PasswordTextField(
         },
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = keyboardType,
-            imeAction = imeAction
+            imeAction = imeAction,
+            showKeyboardOnFocus = true
         )
     )
 }

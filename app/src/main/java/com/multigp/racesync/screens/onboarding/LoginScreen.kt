@@ -87,7 +87,7 @@ fun LoginScreen(
                 is LoginUiState.Loading -> {
                     ProgressHUD(
                         modifier = modifier,
-                        text = R.string.hud_login_progress
+                        text = loginUiState.messageId
                     )
                 }
                 is LoginUiState.Error -> {
@@ -189,7 +189,7 @@ fun LoginForm(
             modifier = modifier
                 .fillMaxWidth()
                 .height(56.dp),
-            imeAction = ImeAction.Done,
+            imeAction = ImeAction.Next,
             keyboardType = KeyboardType.Password,
             onPasswordChanged = onPasswordChanged
         )

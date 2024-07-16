@@ -18,6 +18,7 @@
     <string name="title_screen_design_tracks">MultiGP Track Designs</string>
     <string name="title_screen_obs_build_guide">Obstacles Build Guide</string>
     <string name="hud_login_progress">Login in progress, please wait…</string>
+    <string name="hud_logout_progress">Logging out, please wait…</string>
     <string name="landing_loading_chapters">Loading chapters, please wait...</string>
 
     <string name="permissions_location_title">Location Services</string>

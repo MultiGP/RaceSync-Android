@@ -10,4 +10,6 @@ interface LoginRepository {
     suspend fun getLoginInfo(): Flow<Pair<String?, UserInfo?>>
 
     suspend fun logout(): Flow<Boolean>
+
+    suspend fun clearSession()
 }

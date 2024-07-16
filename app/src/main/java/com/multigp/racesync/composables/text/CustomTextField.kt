@@ -50,7 +50,8 @@ fun CustomTextField(
         },
         keyboardOptions = KeyboardOptions.Default.copy(
             keyboardType = keyboardType,
-            imeAction = imeAction
+            imeAction = imeAction,
+            showKeyboardOnFocus = true
         )
     )
 }

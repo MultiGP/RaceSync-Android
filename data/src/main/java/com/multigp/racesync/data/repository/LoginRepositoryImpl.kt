@@ -65,4 +65,8 @@ class LoginRepositoryImpl(
             throw Exception(errorResponse.statusDescription)
         }
     }
+
+    override suspend fun clearSession(){
+        dataStore.clearSession()
+    }
 }
