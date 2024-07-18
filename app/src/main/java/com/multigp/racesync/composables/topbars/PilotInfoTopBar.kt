@@ -54,12 +54,12 @@ fun PilotInfoTopBar(
                     )
                 }
             }
-            IconButton(onClick = { onClickShare() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_share),
-                    contentDescription = "Share Pilot"
-                )
-            }
+//            IconButton(onClick = { onClickShare() }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.ic_share),
+//                    contentDescription = "Share Pilot"
+//                )
+//            }
         }
     )
 }

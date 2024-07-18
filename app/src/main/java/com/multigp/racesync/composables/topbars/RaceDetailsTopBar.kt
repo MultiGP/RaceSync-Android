@@ -39,18 +39,18 @@ fun RaceDetailsTopBar(
             containerColor = MaterialTheme.colorScheme.surface
         ),
         actions = {
-            IconButton(onClick = { onClickAction1() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_add_to_calendar),
-                    contentDescription = "Save to calendar"
-                )
-            }
-            IconButton(onClick = { onClickAction2() }) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_share),
-                    contentDescription = "Share Race"
-                )
-            }
+//            IconButton(onClick = { onClickAction1() }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.ic_add_to_calendar),
+//                    contentDescription = "Save to calendar"
+//                )
+//            }
+//            IconButton(onClick = { onClickAction2() }) {
+//                Icon(
+//                    painter = painterResource(id = R.drawable.ic_share),
+//                    contentDescription = "Share Race"
+//                )
+//            }
         }
     )
 }

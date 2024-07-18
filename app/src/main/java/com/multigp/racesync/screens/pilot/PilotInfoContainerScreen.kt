@@ -2,16 +2,22 @@ package com.multigp.racesync.screens.pilot
 
 import MultipleEventsCutter
 import android.annotation.SuppressLint
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
@@ -27,7 +33,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -41,12 +51,17 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.CustomDialog
+import com.multigp.racesync.composables.CustomTabRow
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.ProgressHUD
+import com.multigp.racesync.composables.cells.ChapterLoadingCell
+import com.multigp.racesync.composables.cells.PilotChapterCell
+import com.multigp.racesync.composables.cells.PilotRaceCell
 import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.composables.topbars.HomeScreenTabs
 import com.multigp.racesync.composables.topbars.PilotInfoTopBar
+import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.pilotInfoTabs
 import com.multigp.racesync.viewmodels.PilotViewModel
@@ -54,7 +69,7 @@ import com.multigp.racesync.viewmodels.UiState
 import get
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
-@OptIn(ExperimentalPagerApi::class)
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun PilotInfoContainerScreen(
     pilotUserName: String,
@@ -64,13 +79,18 @@ fun PilotInfoContainerScreen(
     onClickAircrafts: (String) -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
 ) {
-    val pagerState = rememberPagerState()
+    var currentTab by remember { mutableStateOf(0) }
     var showQRCodeDialog by remember { mutableStateOf(false) }
     val multipleEventsCutter = remember { MultipleEventsCutter.get() }
+
     val uiState by viewModel.uiState.collectAsState()
+    val racesUiState by viewModel.racesUiState.collectAsState()
+    val chaptersUiState by viewModel.chaptersUiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.fetchPilotProfile(pilotUserName)
+        viewModel.fetchRaces(pilotUserName)
+        viewModel.fetchChapters(pilotUserName)
     }
 
     Scaffold(
@@ -98,99 +118,87 @@ fun PilotInfoContainerScreen(
 
             is UiState.Success -> {
                 val (profile, userInfo) = (uiState as UiState.Success).data
-                Column(modifier = modifier.padding(paddingValues)) {
-                    Box(
-                        modifier = modifier.fillMaxWidth(),
-                        contentAlignment = Alignment.BottomCenter
-                    ) {
-                        Image(
-                            modifier = modifier.aspectRatio(1.7778f),
-                            painter = rememberAsyncImagePainter(
-                                model = profile.profileBackgroundUrl,
-                                placeholder = painterResource(id = R.drawable.pilot_profile_placeholder),
-                                error = painterResource(id = R.drawable.pilot_profile_placeholder)
-                            ),
-                            contentScale = ContentScale.Crop,
-                            contentDescription = "Pilot profile background"
-                        )
-                        AsyncCircularImage(
-                            modifier = modifier
-                                .size(120.dp)
-                                .offset(y = 30.dp),
-                            url = profile.profilePictureUrl
-                        )
+                LazyColumn(
+                    modifier = modifier
+                        .padding(paddingValues)
+                ) {
+                    item {
+                        PilotInformationView(profile, modifier, onClickAircrafts)
                     }
-                    Row(modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp)) {
-                        IconText(
-                            text = "${profile.raceCount} Races",
-                            icon = R.drawable.icn_race_small,
-                            modifier = modifier.size(24.dp, 16.dp),
-                            color = Color.DarkGray
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconText(
-                            text = "${profile.chapterCount} Chapters",
-                            icon = R.drawable.icn_chapter_small,
-                            modifier = modifier.size(24.dp, 16.dp),
-                            color = Color.DarkGray
-                        )
+                    stickyHeader {
+                        CustomTabRow(tabs = pilotInfoTabs, currentTab = currentTab, onClickTab = {index ->
+                            currentTab = index
+                        })
                     }
-                    Text(
-                        modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        text = profile.displayName,
-                        style = MaterialTheme.typography.bodyLarge
-                    )
-                    Row(
-                        modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        IconText(
-                            modifier = modifier.size(24.dp),
-                            text = profile.getFormattedAddress(),
-                            icon = R.drawable.ic_place,
-                            color = MaterialTheme.colorScheme.primary
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Button(
-                            onClick = { onClickAircrafts(profile.id) },
-                            colors = ButtonDefaults.buttonColors(
-                                containerColor = Color(0, 0, 128),
-                                contentColor = MaterialTheme.colorScheme.surface
-                            )
-                        ) {
-                            Text(text = "Aircrafts")
+                    if (currentTab == 0){
+                        when(racesUiState){
+                            is UiState.Loading -> {
+                                item {
+                                    ChapterLoadingCell()
+                                }
+                            }
+                            is UiState.Success -> {
+                                val races = (racesUiState as UiState.Success).data
+                                items(items = races, key = { it.id }) { race ->
+                                    PilotRaceCell(
+                                        race,
+                                        modifier = modifier,
+                                        onClick = onRaceSelected,
+                                        onRaceAction = {}
+                                    )
+                                }
+                            }
+                            is UiState.Error -> {
+                                val errorMessage = (racesUiState as UiState.Error).message
+                                item {
+                                    PlaceholderScreen(
+                                        modifier = modifier,
+                                        title = stringResource(R.string.error_title_loading_races),
+                                        message = errorMessage ?: "",
+                                        isError = true
+                                    )
+                                }
+                            }
+                            else -> {}
                         }
                     }
-                    HorizontalDivider(
-                        modifier = modifier.padding(top = 8.dp),
-                        thickness = 1.dp,
-                        color = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                    HomeScreenTabs(tabs = pilotInfoTabs, pagerState = pagerState)
-                    HorizontalPager(
-                        state = pagerState,
-                        count = pilotInfoTabs.size,
-                        itemSpacing = 16.dp
-                    ) { page ->
-                        when (page) {
-                            0 -> PilotRacesTabView(
-                                pilotUserName,
-                                viewModel,
-                                onRaceSelected = {
-                                    if(profile.id == userInfo.id){
-                                        onRaceSelected(it)
-                                    }
-                                }
-                            )
 
-                            1 -> PilotChaptersTabView(pilotUserName, viewModel)
+                    if(currentTab == 1){
+                        when(chaptersUiState){
+                            is UiState.Loading -> {
+                                item {
+                                    ChapterLoadingCell()
+                                }
+                            }
+                            is UiState.Success -> {
+                                val chapters = (chaptersUiState as UiState.Success).data
+                                items(items = chapters, key = { it.id }) { chapter ->
+                                    PilotChapterCell(
+                                        chapter,
+                                        modifier = modifier,
+                                        onClick = {}
+                                    )
+                                }
+                            }
+                            is UiState.Error -> {
+                                val errorMessage = (chaptersUiState as UiState.Error).message
+                                item {
+                                    PlaceholderScreen(
+                                        modifier = modifier,
+                                        title = stringResource(R.string.error_title_loading_chapters),
+                                        message = errorMessage ?: "",
+                                        isError = true
+                                    )
+                                }
+                            }
+                            else -> {}
                         }
                     }
                 }
-                if (showQRCodeDialog){
+                if (showQRCodeDialog) {
                     CustomDialog(
                         onDismiss = {
-                           showQRCodeDialog = false
+                            showQRCodeDialog = false
                         },
                         onConfirm = {
                             //viewmodel.buyItem()
