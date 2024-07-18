@@ -89,8 +89,6 @@ fun PilotInfoContainerScreen(
 
     LaunchedEffect(Unit) {
         viewModel.fetchPilotProfile(pilotUserName)
-        viewModel.fetchRaces(pilotUserName)
-        viewModel.fetchChapters(pilotUserName)
     }
 
     Scaffold(

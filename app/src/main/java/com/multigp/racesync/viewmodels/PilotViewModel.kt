@@ -35,6 +35,8 @@ class PilotViewModel @Inject constructor(
                 _uiState.value = UiState.Loading
                 useCases.getProfileUseCase(pilotName).collect {
                     _uiState.value = UiState.Success(it)
+                    fetchRaces(pilotName)
+                    fetchChapters(pilotName)
                 }
             } catch (exception: Exception) {
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "")
