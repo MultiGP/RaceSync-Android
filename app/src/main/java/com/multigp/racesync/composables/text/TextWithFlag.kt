@@ -14,7 +14,7 @@ fun TextWithFlag(
     countryCode: String,
     modifier: Modifier = Modifier
 ){
-    val emoji = getCountryEmoji(countryCode)
+    val emoji =  if (countryCode.isNotEmpty())getCountryEmoji(countryCode) else ""
     Text(text = "$text $emoji")
 }
 

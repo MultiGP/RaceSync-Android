@@ -1,21 +1,21 @@
 {
   "project_info": {
-    "project_number": "659241406847",
-    "project_id": "racesync-multigp",
-    "storage_bucket": "racesync-multigp.appspot.com"
+    "project_number": "740109634296",
+    "project_id": "multigp-race-sync-staging",
+    "storage_bucket": "multigp-race-sync-staging.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:659241406847:android:6c0aaaf555cfe931a38a4a",
+        "mobilesdk_app_id": "1:740109634296:android:537ec1eaeb5e8d14e8890d",
         "android_client_info": {
-          "package_name": "com.multigp.racesync"
+          "package_name": "com.multigp.racesync.staging"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAx0fQywKBKgFXqK_zl_74IidOFLdOBF6o"
+          "current_key": "AIzaSyBe6pjk0LrNRnp_cUGvXuaLjGN0wmbcpcg"
         }
       ],
       "services": {

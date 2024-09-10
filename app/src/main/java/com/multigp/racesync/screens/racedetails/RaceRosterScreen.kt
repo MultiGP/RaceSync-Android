@@ -37,19 +37,18 @@ fun RaceRosterScreen(
     onPilotSelected: (String) -> Unit = {}
 ) {
     val (profile, race, raceView) = data
-    if (raceView.entries.isNotEmpty()) {
+    raceView.entries?.let {entries ->
         RosterScreenContens(
             profile = profile,
-            entries = raceView.entries.sortedBy { it.userName },
+            entries = entries.sortedBy { it.userName },
             modifier = modifier,
             onPilotSelected = onPilotSelected)
-    } else {
+    } ?: run {
         PlaceholderScreen(
             title = stringResource(R.string.placeholder_title_no_pilots),
             message = stringResource(R.string.placeholder_message_no_pilots)
         )
     }
-
 }
 
 @Composable

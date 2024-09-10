@@ -12,7 +12,11 @@ data class RaceRequest(
     @SerializedName("past")
     val past: PastRaces? = null,
     @SerializedName("name")
-    val name:String? = null
+    val name:String? = null,
+    @SerializedName("id")
+    val id:String? = null,
+    @SerializedName("chapterId")
+    val chapterId:List<String>? = null
 )
 
 data class JoinedRaces(

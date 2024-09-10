@@ -11,6 +11,7 @@ import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
+import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
@@ -25,7 +26,9 @@ import com.multigp.racesync.domain.model.requests.UpcomingRaces
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.tasks.await
@@ -40,7 +43,7 @@ class RacesRepositoryImpl(
 ) : RacesRepository {
     private val raceDao = raceSyncDB.raceDao()
     private val chapterDao = raceSyncDB.chapterDao()
-    private val pilotDao = raceSyncDB.pilotDao()
+    private val profileDao = raceSyncDB.profileDao()
 
     @OptIn(ExperimentalPagingApi::class)
     override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
@@ -124,58 +127,64 @@ class RacesRepositoryImpl(
             3. Fetch each race using name as search string
         */
 
-        val request = BaseRequest(
-            data = ChaptersRequest(JoinedChapters(pilotId = pilotId)),
-            sessionId = dataStore.getSessionId()!!,
-            apiKey = apiKey
-        )
-
-        val raceRequest = BaseRequest<Any>(
+        val profile = profileDao.getProfile(id = pilotId).first()
+        val raceRequest = BaseRequest(
             apiKey = apiKey,
-            sessionId = dataStore.getSessionId()!!
+            sessionId = dataStore.getSessionId()!!,
+            data = RaceRequest(
+                upComing = UpcomingRaces(orderByDistance = false),
+                chapterId = profile.chapterIds
+            )
         )
 
         return flow {
             //Fetch joined chapters
             val chapterRaces = raceDao.getChapterRaces(true)
             if (chapterRaces.isNotEmpty()) {
+                chapterRaces.sortedBy { it.startDate!!.toDate() }
                 emit(chapterRaces)
             }
-            val response = raceSyncApi.fetchChapters(0, 25, request)
-            if (response.status) {
-                response.data?.let { chapters ->
-                    chapterDao.addChapters(chapters)
-                    val races = chapters.map { chapter ->
-                        //Fetch race list for each chapter -> return name and id only
-                        raceSyncApi.fetchRacesForChapter(chapter.id, raceRequest)
-                    }
-                        .filter { it.status && it.data != null }
-                        .flatMap { it.data!! }
-                        .map {
-                            val singleRaceRequest = BaseRequest(
-                                data = RaceRequest(name = it.name),
-                                sessionId = dataStore.getSessionId()!!,
-                                apiKey = apiKey
-                            )
-                            //Fetch complete race details
-                            raceSyncApi.fetchRaces(0, 1, singleRaceRequest)
-                        }
-                        .filter { it.status && it.data != null }
-                        .flatMap { it.data!! }
-                        .filter { it.isUpcoming }
-                    val uniqueRaces = races.distinctBy { it.id }
-                    uniqueRaces.forEach {
-                        it.isChapterRace = true
-                    }
-                    raceDao.addRaces(uniqueRaces)
-                    emit(uniqueRaces)
-                } ?: emit(emptyList())
+
+            val races = profile.chapterIds.map { chapterId ->
+                raceSyncApi.fetchRaces(page = 0, pageSize = 25, raceRequest)
             }
+                .filter { it.status && it.data != null }
+                .flatMap { it.data!! }
+                .filter { it.isTodayOrUpcoming }
+                .sortedBy { it.startDate!!.toDate() }
+
+            val uniqueRaces = races.distinctBy { it.id }
+            uniqueRaces.forEach {
+                it.isChapterRace = true
+            }
+            raceDao.addRaces(uniqueRaces)
+            emit(uniqueRaces)
         }.flowOn(Dispatchers.IO)
     }
 
 
-    override fun fetchRace(raceId: String) = raceDao.getRace(raceId)
+    override suspend fun fetchRace(raceId: String): Flow<Race> {
+        return flow {
+            val race = raceDao.getRace(raceId).firstOrNull()
+            if (race != null) {
+                emit(race)
+            } else {
+                val singleRaceRequest = BaseRequest(
+                    data = RaceRequest(id = raceId),
+                    sessionId = dataStore.getSessionId()!!,
+                    apiKey = apiKey
+                )
+                //Fetch complete race details
+                val response = raceSyncApi.fetchRaces(0, 1, singleRaceRequest)
+                if (response.status) {
+                    val data = response.data ?: emptyList()
+                    if (data.isNotEmpty()) {
+                        emit(data[0])
+                    }
+                }
+            }
+        }.flowOn(Dispatchers.IO)
+    }
 
     override suspend fun saveSearchRadius(radius: Double, unit: String) {
         dataStore.saveSearchRadius(radius, unit)

@@ -26,6 +26,7 @@ fun IconText(
     @DrawableRes icon: Int,
     modifier: Modifier = Modifier,
     color: Color = MaterialTheme.colorScheme.secondary,
+    maxLines: Int = 1,
     onClick: () -> Unit = {}
 ) {
     Row(
@@ -40,6 +41,7 @@ fun IconText(
         Text(
             modifier = Modifier.padding(start = 8.dp).clickable(onClick = onClick),
             text = text,
+            maxLines = maxLines,
             color = color,
             style = MaterialTheme.typography.bodyLarge
         )

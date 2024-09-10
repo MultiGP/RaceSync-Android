@@ -23,8 +23,8 @@ android {
         applicationId = "com.multigp.racesync"
         minSdk = 24
         targetSdk = 34
-        versionCode = 9
-        versionName = "0.0.9"
+        versionCode = 14
+        versionName = "0.1.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -43,22 +43,27 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
-//            buildConfigField(
-//                "String",
-//                "BASE_URL",
-//                "\"https://www.multigp.com/mgp/multigpwebservice/\""
-//            )
-            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
         debug {
-//            buildConfigField(
-//                "String",
-//                "BASE_URL",
-//                "\"https://www.multigp.com/mgp/multigpwebservice/\""
-//            )
-            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
         }
     }
+
+    flavorDimensions.add("default")
+
+    productFlavors {
+        create("staging") {
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            resValue("string", "app_name", "RaceSync-Staging")
+            buildConfigField("String", "BASE_URL", "\"https://dev.multigp.com/mgp/multigpwebservice/\"")
+        }
+        create("production") {
+            resValue("string", "app_name", "RaceSync")
+            buildConfigField("String", "BASE_URL", "\"https://www.multigp.com/mgp/multigpwebservice/\"")
+        }
+    }
+
+
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
@@ -66,6 +71,8 @@ android {
 //    kotlinOptions {
 //        jvmTarget = "11"
 //    }
+
+
     buildFeatures {
         compose = true
     }

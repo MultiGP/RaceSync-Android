@@ -1,6 +1,7 @@
 package com.multigp.racesync.screens.pilot
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -13,6 +14,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,11 +82,18 @@ fun PilotInformationView(
             modifier = modifier.padding(horizontal = 12.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            IconText(
+            Icon(
                 modifier = modifier.size(24.dp),
+                painter = painterResource(id = R.drawable.ic_place),
+                tint = MaterialTheme.colorScheme.primary,
+                contentDescription = null
+            )
+            Text(
+                modifier = Modifier.padding(start = 8.dp).fillMaxWidth(0.6f),
                 text = profile.getFormattedAddress(),
-                icon = R.drawable.ic_place,
-                color = MaterialTheme.colorScheme.primary
+                maxLines = 3,
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.bodyLarge
             )
             Spacer(modifier = Modifier.weight(1f))
             Button(

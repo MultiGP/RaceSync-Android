@@ -59,6 +59,7 @@ fun LandingScreen(
 
     ModalNavigationDrawer(
         drawerState = drawerState,
+        gesturesEnabled = false,
         drawerContent = {
             ModalDrawerSheet {
                 DrawerContent(menus = drawerMenu, selectedMenuItem = selectedMenuItem) { route ->

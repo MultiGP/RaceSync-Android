@@ -40,7 +40,7 @@ class GetRacesUseCase(
         return racesRepository.fetchJoinedChapterRaces(loginInfo.second!!.id)
     }
 
-    fun fetchRace(raceId: String): Flow<Race> {
+    suspend fun fetchRace(raceId: String): Flow<Race> {
         return racesRepository.fetchRace(raceId)
     }
 

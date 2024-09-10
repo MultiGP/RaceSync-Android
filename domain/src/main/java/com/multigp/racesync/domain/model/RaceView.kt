@@ -56,7 +56,7 @@ data class RaceView(
     @SerializedName("endDate")
     val endDate: String,
     @SerializedName("entries")
-    val entries: List<RaceEntry>,
+    val entries: List<RaceEntry>?,
     @SerializedName("itineraryContent")
     val itineraryContent: String,
     @SerializedName("latitude")

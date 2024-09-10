@@ -18,7 +18,7 @@ interface RacesRepository {
 
     suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>>
 
-    fun fetchRace(raceId: String): Flow<Race>
+    suspend fun fetchRace(raceId: String): Flow<Race>
 
     suspend fun saveSearchRadius(radius: Double, unit:String)
 

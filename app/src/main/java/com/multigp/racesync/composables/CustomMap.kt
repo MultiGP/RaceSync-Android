@@ -25,7 +25,7 @@ fun CustomMap(
     onMapClick: ((LatLng)->Unit)? = null
 ) {
     val cameraPositionState = rememberCameraPositionState {
-        position = CameraPosition.fromLatLngZoom(location, 10f)
+        position = CameraPosition.fromLatLngZoom(location, 14f)
     }
 
     GoogleMap(

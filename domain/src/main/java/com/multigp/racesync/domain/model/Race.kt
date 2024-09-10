@@ -11,6 +11,7 @@ import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import com.multigp.racesync.domain.extensions.calculateDistance
 import com.multigp.racesync.domain.extensions.formatDate
+import com.multigp.racesync.domain.extensions.getDateAfterMidnight
 import com.multigp.racesync.domain.extensions.isWithInRadius
 import com.multigp.racesync.domain.extensions.toDate
 import java.io.Serializable
@@ -138,6 +139,9 @@ data class Race(
 
     val isUpcoming: Boolean
         get() = (startDate?.toDate()?.compareTo(Date()) ?: -1) >= 0
+
+    val isTodayOrUpcoming: Boolean
+        get() = (startDate?.toDate()?.compareTo(getDateAfterMidnight()) ?: -1) > 0
 
     fun isWithInSearchRadius(curLocation: Location, radius: Double): Boolean {
         return if (latitude != null && longitude != null) {

@@ -1,5 +1,4 @@
 <resources>
-    <string name="app_name">RaceSync</string>
     <string name="login_title">Login with MultiGP</string>
     <string name="login_email_placeholder">Email</string>
     <string name="login_password_placeholder">Password</string>

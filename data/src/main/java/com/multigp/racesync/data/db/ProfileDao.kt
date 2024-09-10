@@ -18,6 +18,9 @@ interface ProfileDao {
     @Query("SELECT * FROM profiles WHERE userName = :userName")
     fun get(userName: String): Flow<Profile>
 
+    @Query("SELECT * FROM profiles WHERE id = :id")
+    fun getProfile(id: String): Flow<Profile>
+
     @Query("DELETE FROM profiles")
     suspend fun deleteAll()
 }
