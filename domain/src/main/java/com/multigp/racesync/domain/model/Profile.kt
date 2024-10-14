@@ -34,7 +34,7 @@ data class Profile(
     @field:SerializedName("firstName")
     val firstName: String,
     @field:SerializedName("homeChapterId")
-    val homeChapterId: String,
+    val homeChapterId: String?,
     @field:SerializedName("isPublic")
     val isPublic: Boolean,
     @field:SerializedName("language")

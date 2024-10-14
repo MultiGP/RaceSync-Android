@@ -127,38 +127,39 @@ class RacesRepositoryImpl(
             3. Fetch each race using name as search string
         */
 
-        val profile = profileDao.getProfile(id = pilotId).first()
-        val raceRequest = BaseRequest(
-            apiKey = apiKey,
-            sessionId = dataStore.getSessionId()!!,
-            data = RaceRequest(
-                upComing = UpcomingRaces(orderByDistance = false),
-                chapterId = profile.chapterIds
-            )
-        )
-
         return flow {
-            //Fetch joined chapters
-            val chapterRaces = raceDao.getChapterRaces(true)
-            if (chapterRaces.isNotEmpty()) {
-                chapterRaces.sortedBy { it.startDate!!.toDate() }
-                emit(chapterRaces)
-            }
+            profileDao.getProfile(id = pilotId).firstOrNull()?.let { profile->
+                val raceRequest = BaseRequest(
+                    apiKey = apiKey,
+                    sessionId = dataStore.getSessionId()!!,
+                    data = RaceRequest(
+                        upComing = UpcomingRaces(orderByDistance = false),
+                        chapterId = profile.chapterIds
+                    )
+                )
 
-            val races = profile.chapterIds.map { chapterId ->
-                raceSyncApi.fetchRaces(page = 0, pageSize = 25, raceRequest)
-            }
-                .filter { it.status && it.data != null }
-                .flatMap { it.data!! }
-                .filter { it.isTodayOrUpcoming }
-                .sortedBy { it.startDate!!.toDate() }
+                //Fetch joined chapters
+                val chapterRaces = raceDao.getChapterRaces(true)
+                if (chapterRaces.isNotEmpty()) {
+                    chapterRaces.sortedBy { it.startDate!!.toDate() }
+                    emit(chapterRaces)
+                }
 
-            val uniqueRaces = races.distinctBy { it.id }
-            uniqueRaces.forEach {
-                it.isChapterRace = true
-            }
-            raceDao.addRaces(uniqueRaces)
-            emit(uniqueRaces)
+                val races = profile.chapterIds.map { chapterId ->
+                    raceSyncApi.fetchRaces(page = 0, pageSize = 25, raceRequest)
+                }
+                    .filter { it.status && it.data != null }
+                    .flatMap { it.data!! }
+                    .filter { it.isTodayOrUpcoming }
+                    .sortedBy { it.startDate!!.toDate() }
+
+                val uniqueRaces = races.distinctBy { it.id }
+                uniqueRaces.forEach {
+                    it.isChapterRace = true
+                }
+                raceDao.addRaces(uniqueRaces)
+                emit(uniqueRaces)
+            } ?: kotlin.run { emit(emptyList<Race>()) }
         }.flowOn(Dispatchers.IO)
     }
 

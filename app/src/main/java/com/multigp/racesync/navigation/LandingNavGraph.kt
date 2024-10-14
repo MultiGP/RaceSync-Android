@@ -92,9 +92,10 @@ fun LandingNavGraph(
                 ?.let { pilotId ->
                     AllAircraftScreen(
                         pilotId,
-                        onAircraftClick = { aircraft ->
-                            navController.navigate(route = "aircraft/${aircraft.id}")
-                        },
+//                        onAircraftClick = { aircraft ->
+//                            navController.navigate(route = "aircraft/${aircraft.id}")
+//                        },
+                        onAircraftClick = {},
                         onGoBack = {
                             navController.popBackStack()
                         })

@@ -34,21 +34,25 @@ class ProfileRepositoryImpl(
             emit(profiles.first())
         } else {
             val profileRequest = ProfileRequest(apiKey, dataStore.getSessionId())
-            val response = raceSyncApi.fetchProfile(profileRequest)
-            if (response.isSuccessful) {
-                response.body()?.let { baseResponse ->
-                    if (baseResponse.status) {
-                        baseResponse.data?.let { profile ->
-                            profileDao.add(profile)
-                            emit(profile)
+            try{
+                val response = raceSyncApi.fetchProfile(profileRequest)
+                if (response.isSuccessful) {
+                    response.body()?.let { baseResponse ->
+                        if (baseResponse.status) {
+                            baseResponse.data?.let { profile ->
+                                profileDao.add(profile)
+                                emit(profile)
+                            }
+                        } else {
+                            throw Exception(baseResponse.errorMessage())
                         }
-                    } else {
-                        throw Exception(baseResponse.errorMessage())
                     }
+                } else {
+                    val errorResponse = BaseResponse.convertFromErrorResponse(response)
+                    throw Exception(errorResponse.statusDescription)
                 }
-            } else {
-                val errorResponse = BaseResponse.convertFromErrorResponse(response)
-                throw Exception(errorResponse.statusDescription)
+            }catch (exception: Exception){
+                throw exception
             }
         }
     }

@@ -32,12 +32,13 @@ fun RaceDetailsCell(
             text = label,
             color = MaterialTheme.colorScheme.secondary,
             style = MaterialTheme.typography.bodyLarge,
-            modifier = modifier.weight(1.0f)
+            modifier = modifier.weight(0.3f)
         )
         Text(
             text = value,
             color = Color.Gray,
             style = MaterialTheme.typography.bodyLarge,
+            modifier = modifier.weight(0.7f)
         )
         Icon(
             painter = painterResource(id = R.drawable.ic_arrow_forward),
@@ -52,6 +53,6 @@ fun RaceDetailsCell(
 @Composable
 fun RaceDetailsCell() {
     RaceSyncTheme {
-        RaceDetailsCell("Race Class", "Tiny Whoop Class")
+        RaceDetailsCell("Season", "Indian National Open FPV 2024 Season")
     }
 }
