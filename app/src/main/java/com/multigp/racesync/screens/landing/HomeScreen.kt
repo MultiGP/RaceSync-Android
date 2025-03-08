@@ -54,6 +54,7 @@ fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
     onMenuClicked: () -> Unit = {},
+    onChapterClicked: (String?) -> Unit = {},
     onProfileClicked: (String) -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
 ) {
@@ -69,6 +70,7 @@ fun HomeScreen(
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
     val profileUiState by viewModel.uiState.collectAsState()
+    val chapterUiState by viewModel.chapterDetailsUiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -97,6 +99,19 @@ fun HomeScreen(
                 tabs = landingTabs,
                 pagerState = pagerState,
                 onMenuClicked = onMenuClicked,
+                onChapterClicked = {
+                    (profileUiState as? UiState.Success)?.data?.let {
+                        onChapterClicked(it.homeChapterId)
+                    }
+                },
+                chapterImage = when (chapterUiState) {
+                    is UiState.Success -> {
+                        val chapter = (chapterUiState as UiState.Success).data
+                        chapter.mainImageFileName
+                    }
+
+                    else -> null
+                },
                 onProfileClicked = {
                     (profileUiState as? UiState.Success)?.data?.let {
                         onProfileClicked(it.userName)

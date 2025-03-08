@@ -30,7 +30,10 @@ fun LandingNavGraph(
         composable(route = Landing.route) {
             HomeScreen(
                 onMenuClicked = onMenuClicked,
-                onProfileClicked = {pilotUserName ->
+                onChapterClicked = { chapterID ->
+                    navController.navigate(route = "chapter_details/${chapterID}")
+                },
+                onProfileClicked = { pilotUserName ->
                     navController.navigate(route = "pilot_info/${pilotUserName}")
                 },
                 onRaceSelected = { race ->

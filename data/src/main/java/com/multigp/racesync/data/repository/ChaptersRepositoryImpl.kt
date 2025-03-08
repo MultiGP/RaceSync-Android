@@ -72,7 +72,9 @@ class ChaptersRepositoryImpl(
             if (response.isSuccessful) {
                 response.body()?.let { baseResponse ->
                     if (baseResponse.status) {
-                        emit(baseResponse.data!!)
+                        val listOfChapters = baseResponse.data!!
+                        chapterDao.addChapters(listOfChapters)
+                        emit(listOfChapters)
                     } else {
                         throw Exception(baseResponse.errorMessage())
                     }

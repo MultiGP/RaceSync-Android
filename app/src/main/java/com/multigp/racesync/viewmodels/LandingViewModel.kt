@@ -74,11 +74,16 @@ class LandingViewModel @Inject constructor(
 
     init {
         Log.d("TAG", "Hello World")
+        initializeUserProfile()
+    }
+
+    private fun initializeUserProfile(){
         viewModelScope.launch {
             try {
                 useCases.getProfileUseCase()
                     .collect { profile ->
                         _uiState.value = UiState.Success(profile)
+                        profile.homeChapterId?.let { fetchChapter(it) }
                     }
             }catch (exception: Exception){
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")

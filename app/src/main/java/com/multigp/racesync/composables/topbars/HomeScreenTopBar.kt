@@ -4,6 +4,8 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -45,6 +47,8 @@ fun HomeScreenTopBar(
     pagerState: PagerState,
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
+    onChapterClicked: () -> Unit = {},
+    chapterImage: String?,
     onProfileClicked: () -> Unit = {},
     profileImage: String?
 ) {
@@ -74,26 +78,32 @@ fun HomeScreenTopBar(
                         contentDescription = null
                     )
                 }
-                AsyncImage(
-                    model = profileImage,
-                    contentDescription = null,
-                    contentScale = ContentScale.Inside,
-                    modifier = modifier
-                        .clickable(
-                            onClick = {
-                                onProfileClicked()
-                            }
-                        )
-
-                        .padding(10.dp)
-                        .height(25.dp)
-                        .width(25.dp)
-                        .clip(CircleShape)
-                        .align(Alignment.CenterEnd),
-                )
-
-
+                Row(
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    AsyncImage(
+                        model = chapterImage,
+                        contentDescription = null,
+                        contentScale = ContentScale.Inside,
+                        modifier = Modifier
+                            .clickable { onChapterClicked() }
+                            .padding(10.dp)
+                            .size(25.dp)
+                            .clip(CircleShape)
+                    )
+                    AsyncImage(
+                        model = profileImage,
+                        contentDescription = null,
+                        contentScale = ContentScale.Inside,
+                        modifier = Modifier
+                            .clickable { onProfileClicked() }
+                            .padding(10.dp)
+                            .size(25.dp)
+                            .clip(CircleShape)
+                    )
+                }
             }
+
             HomeScreenTabs(
                 tabs = tabs,
                 pagerState = pagerState,
