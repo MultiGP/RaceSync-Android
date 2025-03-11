@@ -1,5 +1,5 @@
 <resources>
-    <string name="login_title">Login with MultiGP</string>
+    <string name="login_title">Login with a MultiGP account</string>
     <string name="login_email_placeholder">Email</string>
     <string name="login_password_placeholder">Password</string>
     <string name="login_forgot_password">Forgot your password?</string>
