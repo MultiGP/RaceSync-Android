@@ -70,7 +70,7 @@ fun HomeScreen(
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
     val profileUiState by viewModel.uiState.collectAsState()
-    val chapterUiState by viewModel.chapterDetailsUiState.collectAsState()
+    val homeChapterImageUiState by viewModel.homeChapterImageUiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -104,12 +104,8 @@ fun HomeScreen(
                         onChapterClicked(it.homeChapterId)
                     }
                 },
-                chapterImage = when (chapterUiState) {
-                    is UiState.Success -> {
-                        val chapter = (chapterUiState as UiState.Success).data
-                        chapter.mainImageFileName
-                    }
-
+                chapterImage = when (val homeChapterImage = homeChapterImageUiState) {
+                    is UiState.Success -> homeChapterImage.data
                     else -> null
                 },
                 onProfileClicked = {
