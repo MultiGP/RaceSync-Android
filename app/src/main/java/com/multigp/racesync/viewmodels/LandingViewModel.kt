@@ -11,7 +11,6 @@ import androidx.paging.map
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
-import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
@@ -53,8 +52,14 @@ class LandingViewModel @Inject constructor(
     val raceDetailsUiState: StateFlow<UiState<Triple<Profile, Race, RaceView>>> =
         _raceDetailsUiState.asStateFlow()
 
+    private val _chaptersUiState = MutableStateFlow<UiState<List<Chapter>>>(UiState.Loading)
+    val chaptersUiState: StateFlow<UiState<List<Chapter>>> = _chaptersUiState.asStateFlow()
+
     private val _chapterDetailsUiState = MutableStateFlow<UiState<Chapter>>(UiState.Loading)
     val chapterDetailsUiState: StateFlow<UiState<Chapter>> = _chapterDetailsUiState.asStateFlow()
+
+    private val _homeChapterImageUiState = MutableStateFlow<UiState<String?>>(UiState.Loading)
+    val homeChapterImageUiState: StateFlow<UiState<String?>> = _homeChapterImageUiState.asStateFlow()
 
     private val _joineChapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
     val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
@@ -83,7 +88,7 @@ class LandingViewModel @Inject constructor(
                 useCases.getProfileUseCase()
                     .collect { profile ->
                         _uiState.value = UiState.Success(profile)
-                        profile.homeChapterId?.let { fetchChapter(it) }
+                        fetchPilotHomeChapter(profile.userName, profile.homeChapterId)
                     }
             }catch (exception: Exception){
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
@@ -152,10 +157,38 @@ class LandingViewModel @Inject constructor(
         }
     }
 
+    fun fetchPilotChapters(pilotUserName: String) {
+        viewModelScope.launch {
+            _chaptersUiState.value = UiState.Loading
+            try {
+                useCases.getChaptersUseCase.fetchPilotChapters(pilotUserName)
+                    .collect { races ->
+                        _chaptersUiState.value = UiState.Success(races)
+                    }
+            } catch (exception: Exception) {
+                _chaptersUiState.value =
+                    UiState.Error(exception.localizedMessage ?: "Failed to load chapters")
+            }
+        }
+    }
+
     fun fetchChapter(chapterId: String) {
         viewModelScope.launch {
             useCases.getChaptersUseCase(chapterId).collect { chapter ->
                 _chapterDetailsUiState.value = UiState.Success(chapter)
+            }
+        }
+    }
+
+    fun fetchPilotHomeChapter(pilotUserName: String, homeChapterId: String?) {
+        viewModelScope.launch {
+            fetchPilotChapters(pilotUserName)
+            homeChapterId?.let { id ->
+                useCases.getChaptersUseCase(id).collect { chapter ->
+                    _homeChapterImageUiState.value = UiState.Success(chapter?.mainImageFileName ?: "")
+                }
+            } ?: run {
+                _homeChapterImageUiState.value = UiState.Success("")
             }
         }
     }
