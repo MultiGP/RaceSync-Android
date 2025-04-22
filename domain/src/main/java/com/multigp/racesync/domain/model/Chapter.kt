@@ -38,6 +38,8 @@ data class Chapter(
     val longitude: Double?,
     @field:SerializedName("mainImageFileName")
     val mainImageFileName: String?,
+    @field:SerializedName("backgroundFileName")
+    val backgroundFileName: String?,
     @field:SerializedName("meetupUrl")
     val meetupUrl: String?,
     @field:SerializedName("name")
@@ -60,6 +62,8 @@ data class Chapter(
     val youtubeUrl: String?,
     @field:SerializedName("zip")
     val zip: String?,
+    @field:SerializedName("raceCount")
+    val raceCount: Int?,
     @field:SerializedName("memberCount")
     val memberCount: Int?,
     @field:SerializedName("isJoined")
@@ -72,5 +76,12 @@ data class Chapter(
                     "{\"id\":\"2057\",\"name\":\"Underground.KL FPV Drone Racing\",\"urlName\":\"Underground.KL-FPV-Drone-Racing\",\"requestedName\":\"\",\"description\":\"Community driven FPV drone racing group based in KL \\/ Selangor, Malaysia, \",\"type\":\"1\",\"mainImageFileName\":\"https:\\/\\/multigp-storage-new.s3.us-east-2.amazonaws.com\\/chapter\\/2057\\/mainImage-766.png\",\"backgroundFileName\":\"backgroundImage-724.png\",\"url\":\"\",\"facebookUrl\":\"https:\\/\\/www.facebook.com\\/groups\\/405213875212259\",\"googleUrl\":\"\",\"twitterUrl\":\"\",\"youtubeUrl\":\"\",\"instagramUrl\":\"\",\"meetupUrl\":\"\",\"latitude\":\"2.9843828\",\"longitude\":\"101.5675132\",\"ownerId\":\"35533\",\"address\":\"PH FPV Drone Racing Track\",\"phone\":\"+60 12-221 8454\",\"city\":\"Selangor\",\"state\":\"Kuala Lumpur\",\"zip\":\"47180\",\"country\":\"MY\",\"isApproved\":\"1\",\"tier\":\"5\",\"division\":null,\"league\":\"0\",\"isPro\":\"0\",\"dateAdded\":\"2024-02-12 08:15:54\",\"dateModified\":null,\"ownerId2\":null,\"ownerId3\":null,\"raceEntryCount\":\"21\",\"raceCount\":\"2\",\"memberCount\":\"21\",\"isJoined\":true,\"ownerUserName\":\"Barracuda\"}"
                 return Gson().fromJson(chapterData, Chapter::class.java)
             }
+    }
+
+    fun getFormattedAddress(): String {
+        val components = mutableListOf<String>()
+        city?.let { components.add(it) }
+        state?.let { components.add(it) }
+        return components.joinToString(separator = ", ")
     }
 }

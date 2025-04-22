@@ -14,6 +14,7 @@
     <string name="tab_title_race_details">Details</string>
     <string name="tab_title_race_roster">Roster</string>
     <string name="tab_title_pilot_races">Races</string>
+    <string name="tab_title_chapter_members">Members</string>
     <string name="title_screen_design_tracks">MultiGP Track Designs</string>
     <string name="title_screen_obs_build_guide">Obstacles Build Guide</string>
     <string name="hud_login_progress">Login in progress, please wait…</string>
@@ -65,6 +66,8 @@
 
     <string name="progress_race_details">Loading race details, please wait…</string>
     <string name="error_title_race_details">Error loading race details</string>
+    <string name="progress_chapter_details">Loading chapter details, please wait…</string>
+    <string name="error_title_chapter_details">Error loading chapter details</string>
     <string name="placeholder_title_no_pilots">No pilots Found</string>
     <string name="placeholder_message_no_pilots">No pilot has joined the race yet.</string>
 

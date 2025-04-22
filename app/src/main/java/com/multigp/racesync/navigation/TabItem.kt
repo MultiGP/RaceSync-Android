@@ -59,8 +59,16 @@ sealed class TabItem(
         null
     )
 
+    object Members : TabItem(
+        R.drawable.ic_tab_join_outlined,
+        R.drawable.ic_tab_join,
+        R.string.tab_title_chapter_members,
+        null
+    )
+
 }
 
 val landingTabs = listOf(TabItem.Joined, TabItem.Nearby, TabItem.Chapters)
 val raceDetailTabs = listOf(TabItem.RaceDetails, TabItem.RaceRoster)
 val pilotInfoTabs = listOf(TabItem.PilotRace, TabItem.Chapters)
+val chapterTabs = listOf(TabItem.RaceDetails, TabItem.Members)

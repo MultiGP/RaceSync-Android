@@ -8,8 +8,8 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
+import com.multigp.racesync.screens.chapter.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
-import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
