@@ -12,12 +12,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -30,6 +32,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -47,11 +50,13 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.text.CustomTextField
 import com.multigp.racesync.composables.text.PasswordTextField
+import com.multigp.racesync.domain.model.ShakingState
+import com.multigp.racesync.domain.model.shakable
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LoginFormUiState
 import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
-import com.multigp.racesync.viewmodels.UiState
+import kotlinx.coroutines.launch
 
 @Composable
 fun LoginScreen(
@@ -64,41 +69,51 @@ fun LoginScreen(
     val formUiState by loginViewModel.formUiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(hostState = snackbarHostState)
-        },
-    ) { paddingValues ->
-        Box(modifier = modifier.padding(paddingValues = paddingValues)) {
-            Surface(
-                modifier = modifier.padding(all = 16.dp),
-                color = MaterialTheme.colorScheme.background
-            ) {
-                LoginScreenContent(
-                    uiState = formUiState,
-                    viewModel = loginViewModel,
-                    modifier = modifier,
-                    onClickRegisterAccount = onClickRegisterAccount,
-                    onClickRecoverPassword = onClickRecoverPassword
-                )
-            }
-
-            when(loginUiState){
-                is LoginUiState.Loading -> {
-                    ProgressHUD(
+    Box(modifier = modifier.fillMaxSize()) {
+        Image(
+            painter = painterResource(id = R.mipmap.launch_bkgd_foreground), // Replace with your image resource
+            contentDescription = null,
+            modifier = Modifier.matchParentSize(),
+            contentScale = ContentScale.Crop,
+            alpha = 0.25f
+        )
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(hostState = snackbarHostState)
+            },
+            containerColor = Color.Transparent // Makes Scaffold background transparent
+        ) { paddingValues ->
+            Box(modifier = modifier.padding(paddingValues = paddingValues)) {
+                Surface(
+                    modifier = modifier.padding(all = 16.dp),
+                    color = Color.Transparent, // Semi-transparent background
+                ) {
+                    LoginScreenContent(
+                        uiState = formUiState,
+                        viewModel = loginViewModel,
                         modifier = modifier,
-                        text = loginUiState.messageId
+                        onClickRegisterAccount = onClickRegisterAccount,
+                        onClickRecoverPassword = onClickRecoverPassword
                     )
                 }
-                is LoginUiState.Error -> {
-                    LaunchedEffect(Unit) {
-                        snackbarHostState.showSnackbar(
-                            message = loginUiState.message,
-                            duration = SnackbarDuration.Long
+
+                when (loginUiState) {
+                    is LoginUiState.Loading -> {
+                        ProgressHUD(
+                            modifier = modifier,
+                            text = loginUiState.messageId
                         )
                     }
+                    is LoginUiState.Error -> {
+                        LaunchedEffect(Unit) {
+                            snackbarHostState.showSnackbar(
+                                message = loginUiState.message,
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    }
+                    else -> {}
                 }
-                else -> {}
             }
         }
     }
@@ -122,7 +137,7 @@ fun LoginScreenContent(
     ) {
         Spacer(modifier = modifier.weight(1f))
         Image(
-            painter = painterResource(id = R.drawable.racesync_logo),
+            painter = painterResource(id = R.drawable.racesync_logo_splash),
             contentDescription = "RaceSync Logo"
         )
         Spacer(modifier = modifier.weight(1f))
@@ -162,6 +177,9 @@ fun LoginForm(
     onClickRegisterAccount: () -> Unit = {},
     onClickRecoverPassword: () -> Unit = {}
 ) {
+    val scope = rememberCoroutineScope()
+    val shakeState = ShakingState()
+
     Column(
         modifier = modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
@@ -215,16 +233,33 @@ fun LoginForm(
                 style = MaterialTheme.typography.titleSmall
             )
         }
-        OutlinedButton(
-            modifier = modifier
+        Button(
+            modifier = Modifier.shakable(shakeState)
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            onClick = onClickLogin,
-            enabled = isValidForm
+            onClick = {
+                scope.launch {
+                    if(isValidForm){
+                        onClickLogin()
+                    } else {
+                        shakeState.shake(
+                            animationDuration = 40
+                        )
+                    }
+                }
+            },
+            shape = RoundedCornerShape(7.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.White.copy(alpha = 0.7f),
+                contentColor = Color.Black,
+                disabledContainerColor = Color.White.copy(alpha = 0.7f),
+                disabledContentColor = Color.DarkGray
+            )
         ) {
             Text(
+                text = stringResource(R.string.login_btn_login),
                 style = MaterialTheme.typography.titleMedium,
-                text = stringResource(R.string.login_btn_login)
+                color = Color.Black
             )
         }
     }
@@ -234,7 +269,7 @@ fun LoginForm(
 @Composable
 fun Footer(modifier: Modifier = Modifier) {
     Surface(
-        color = MaterialTheme.colorScheme.surface
+        color = Color.Transparent
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
