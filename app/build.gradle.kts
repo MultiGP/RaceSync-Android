@@ -141,6 +141,7 @@ dependencies {
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging:24.1.1")
 
     //Maps
     implementation("com.google.maps.android:maps-compose:4.3.0")
