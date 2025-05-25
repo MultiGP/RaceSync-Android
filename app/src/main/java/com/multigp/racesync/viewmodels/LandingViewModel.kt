@@ -9,6 +9,8 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
@@ -78,10 +80,22 @@ class LandingViewModel @Inject constructor(
     val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
 
     init {
-        Log.d("TAG", "Hello World")
+        Log.d("viki", "Hello World")
         initializeUserProfile()
+        getNotificationToken()
     }
+    private fun getNotificationToken(){
+        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
+            if (!task.isSuccessful) {
+                Log.w("viki", "Fetching FCM registration token failed", task.exception)
+                return@OnCompleteListener
+            }
+            // Get new FCM registration token
+            val token = task.result
+            Log.d("viki", token)
 
+        })
+    }
     private fun initializeUserProfile(){
         viewModelScope.launch {
             try {
