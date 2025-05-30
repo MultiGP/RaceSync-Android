@@ -1,6 +1,8 @@
 package com.multigp.racesync.screens.landing
 
 import android.Manifest
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -24,18 +26,22 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.DistanceConfigurationSheet
 import com.multigp.racesync.composables.JoinRaceUI
 import com.multigp.racesync.composables.PermissionDeniedContent
+import com.multigp.racesync.composables.PermissionDialog
 import com.multigp.racesync.composables.PermissionsHandler
+import com.multigp.racesync.composables.RationaleDialog
 import com.multigp.racesync.composables.ResignRaceUI
 import com.multigp.racesync.composables.topbars.HomeScreenTopBar
 import com.multigp.racesync.domain.model.Aircraft
@@ -47,7 +53,7 @@ import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
 @OptIn(
-    ExperimentalPagerApi::class, ExperimentalPermissionsApi::class
+    ExperimentalPermissionsApi::class
 )
 @Composable
 fun HomeScreen(
@@ -269,6 +275,15 @@ fun HomeScreen(
                     Box(modifier = modifier)
                 }
             )
+        }
+    }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        val notificationPermissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+
+        if (!notificationPermissionState.status.isGranted) {
+            if (notificationPermissionState.status.shouldShowRationale) RationaleDialog()
+            else PermissionDialog { notificationPermissionState.launchPermissionRequest() }
         }
     }
 }
