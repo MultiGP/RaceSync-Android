@@ -1,11 +1,9 @@
 package com.multigp.racesync.data.api
 
 import com.multigp.racesync.domain.model.Aircraft
-import com.multigp.racesync.domain.model.AircraftResponse
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.Chapter
-import com.multigp.racesync.domain.model.Pilot
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
@@ -18,10 +16,11 @@ import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.requests.LogoutRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
+import com.multigp.racesync.domain.model.requests.UpdateFCMTokenRequest
 import com.multigp.racesync.domain.model.requests.SearchRequest
-import kotlinx.coroutines.flow.Flow
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.Header
 import retrofit2.http.POST
 import retrofit2.http.Query
 
@@ -35,6 +34,13 @@ interface RaceSyncApi {
     @POST("user/logout")
     suspend fun logout(
         @Body request: LogoutRequest
+    ): Response<BaseResponse<Any>>
+
+    @POST("user/setPushNotification")
+    suspend fun updateFCMToken(
+        @Header("apikey") apikey: String,
+        @Header("sessionid") sessionId: String,
+        @Body request: UpdateFCMTokenRequest
     ): Response<BaseResponse<Any>>
 
     @POST("chapter/list")

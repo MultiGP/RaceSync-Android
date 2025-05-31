@@ -82,20 +82,8 @@ class LandingViewModel @Inject constructor(
     init {
         Log.d("viki", "Hello World")
         initializeUserProfile()
-        getNotificationToken()
     }
-    private fun getNotificationToken(){
-        FirebaseMessaging.getInstance().token.addOnCompleteListener(OnCompleteListener { task ->
-            if (!task.isSuccessful) {
-                Log.w("viki", "Fetching FCM registration token failed", task.exception)
-                return@OnCompleteListener
-            }
-            // Get new FCM registration token
-            val token = task.result
-            Log.d("viki", token)
 
-        })
-    }
     private fun initializeUserProfile(){
         viewModelScope.launch {
             try {
@@ -106,6 +94,16 @@ class LandingViewModel @Inject constructor(
                     }
             }catch (exception: Exception){
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
+            }
+        }
+    }
+
+    fun updateFCMToken(fcmToken: String){
+        viewModelScope.launch {
+            try{
+                useCases.performLoginUseCase("create", fcmToken)
+                    .collect{}
+            }catch (_: Exception){
             }
         }
     }
