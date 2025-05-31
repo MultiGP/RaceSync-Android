@@ -20,11 +20,6 @@
     <string name="hud_logout_progress">Logging out, please wait…</string>
     <string name="landing_loading_chapters">Loading chapters, please wait...</string>
 
-    <string name="permissions_location_title">Location Services</string>
-    <string name="permissions_location_request">Kindly grant location access to access all app features.</string>
-    <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
-
-
     <string name="placeholder_title_no_races">No Races Found</string>
     <string name="placeholder_title_no_chapters">No Chapters Found</string>
     <string name="placeholder_message_no_races">You haven\'t joined any upcoming races yet.</string>
@@ -78,5 +73,11 @@
     <string name="notification_permission_title">Notification permission</string>
     <string name="notification_permission_description">Please grant notification permissions to receive upcoming races notifications.</string>
     <string name="notification_permission_settings">Notification permissions are required for this app. Please navigate to your device settings and enable notifications for RaceSync.</string>
+
+    <string name="request_location_permission">Request Location permission</string>
+    <string name="permissions_location_title">Location Permission</string>
+    <string name="permissions_location_request">Kindly grant location access to access all app features.</string>
+    <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
+
 
 </resources>

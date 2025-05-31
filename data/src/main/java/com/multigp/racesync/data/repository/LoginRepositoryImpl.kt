@@ -7,11 +7,12 @@ import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.BaseResponse2
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.model.requests.LogoutRequest
+import com.multigp.racesync.domain.model.requests.SaveFCMTokenData
+import com.multigp.racesync.domain.model.requests.UpdateFCMTokenRequest
 import com.multigp.racesync.domain.repositories.LoginRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 
@@ -55,6 +56,27 @@ class LoginRepositoryImpl(
             response.body()?.let { baseResponse ->
                 if (baseResponse.status) {
                     dataStore.clearSession()
+                    emit(true)
+                } else {
+                    throw Exception(baseResponse.errorMessage())
+                }
+            }
+        } else {
+            val errorResponse = BaseResponse.convertFromErrorResponse(response)
+            throw Exception(errorResponse.statusDescription)
+        }
+    }
+
+    override suspend fun updateFCMToken(action: String, fcmToken: String) = flow{
+        val sessionId = dataStore.getSessionId()
+        val request = UpdateFCMTokenRequest(data = SaveFCMTokenData(
+            action = action,
+            devicetoken = fcmToken
+        ))
+        val response = onboardingDataSource.updateFCMToken(apiKey, sessionId!!, request)
+        if (response.isSuccessful) {
+            response.body()?.let { baseResponse ->
+                if (baseResponse.status) {
                     emit(true)
                 } else {
                     throw Exception(baseResponse.errorMessage())

@@ -2,6 +2,7 @@ package com.multigp.racesync.screens.landing
 
 import android.Manifest
 import android.os.Build
+import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -33,6 +34,8 @@ import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.google.accompanist.permissions.rememberPermissionState
 import com.google.accompanist.permissions.shouldShowRationale
+import com.google.firebase.Firebase
+import com.google.firebase.messaging.messaging
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
@@ -51,6 +54,7 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 @OptIn(
     ExperimentalPermissionsApi::class
@@ -99,6 +103,22 @@ fun HomeScreen(
     )
 
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
+    val notificationPermissionState =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+        else null
+
+    val isNotificationPermissionGranted =
+        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
+                notificationPermissionState?.status?.isGranted == true
+
+    LaunchedEffect(key1 = isNotificationPermissionGranted) {
+        if (isNotificationPermissionGranted) {
+            val token = Firebase.messaging.token.await()
+            viewModel.updateFCMToken(token)
+        }
+    }
+
     Scaffold(
         topBar = {
             HomeScreenTopBar(
@@ -279,11 +299,11 @@ fun HomeScreen(
     }
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        val notificationPermissionState = rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
-
-        if (!notificationPermissionState.status.isGranted) {
-            if (notificationPermissionState.status.shouldShowRationale) RationaleDialog()
-            else PermissionDialog { notificationPermissionState.launchPermissionRequest() }
+        notificationPermissionState?.let { notifPermState ->
+            if (!notifPermState.status.isGranted) {
+                if (notifPermState.status.shouldShowRationale) RationaleDialog()
+                else PermissionDialog { notifPermState.launchPermissionRequest() }
+            }
         }
     }
 }
