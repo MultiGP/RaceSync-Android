@@ -23,13 +23,19 @@
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            android:label="@string/app_name"
             android:theme="@style/Theme.RaceSync"
-            android:launchMode="singleInstance">
+            android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:label="@string/race_notification">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data
+                    android:scheme="racesync"
+                    android:host="notification_race_details" />
             </intent-filter>
         </activity>
 

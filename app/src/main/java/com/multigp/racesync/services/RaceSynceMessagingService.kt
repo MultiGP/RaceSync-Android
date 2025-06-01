@@ -18,13 +18,16 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
     private val random = Random
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
         Log.d("FCM Token", "Notification Received")
-        remoteMessage.notification?.let { message ->
-            sendNotification(message)
+        val data = remoteMessage.data
+        if (data.isNotEmpty()) {
+            val title = data["title"] ?: "RaceSync"
+            val body = data["body"] ?: ""
+            val raceID = data["raceId"] ?: return
+            sendNotification(title, body, raceID)
         }
     }
 
-    private fun sendNotification(message: RemoteMessage.Notification) {
-        val raceID = "2057"
+    private fun sendNotification(title: String, body: String, raceID: String) {
         val deepLinkUri = "racesync://notification_race_details/$raceID".toUri()
         val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TOP
@@ -37,8 +40,8 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
         val channelId = this.getString(R.string.default_notification_channel_id)
 
         val notificationBuilder = NotificationCompat.Builder(this, channelId)
-            .setContentTitle(message.title)
-            .setContentText(message.body)
+            .setContentTitle(title)
+            .setContentText(body)
             .setSmallIcon(R.mipmap.ic_launcher)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
