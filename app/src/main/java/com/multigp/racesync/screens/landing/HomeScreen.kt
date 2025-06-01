@@ -115,6 +115,7 @@ fun HomeScreen(
     LaunchedEffect(key1 = isNotificationPermissionGranted) {
         if (isNotificationPermissionGranted) {
             val token = Firebase.messaging.token.await()
+            Log.d("FCM Token", token)
             viewModel.updateFCMToken(token)
         }
     }
