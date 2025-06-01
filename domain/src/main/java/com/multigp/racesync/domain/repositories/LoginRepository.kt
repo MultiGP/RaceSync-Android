@@ -14,4 +14,6 @@ interface LoginRepository {
     suspend fun updateFCMToken(action: String, fcmToken: String): Flow<Boolean>
 
     suspend fun clearSession()
+
+    suspend fun getNotificationPreference() : Flow<Boolean>
 }

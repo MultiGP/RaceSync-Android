@@ -77,6 +77,7 @@ class LoginRepositoryImpl(
         if (response.isSuccessful) {
             response.body()?.let { baseResponse ->
                 if (baseResponse.status) {
+                    dataStore.saveNotificationPreference(action == "create")
                     emit(true)
                 } else {
                     throw Exception(baseResponse.errorMessage())
@@ -90,5 +91,9 @@ class LoginRepositoryImpl(
 
     override suspend fun clearSession(){
         dataStore.clearSession()
+    }
+
+    override suspend fun getNotificationPreference() : Flow<Boolean>{
+        return dataStore.getNotificationPreference
     }
 }
