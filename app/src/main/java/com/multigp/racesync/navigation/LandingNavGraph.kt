@@ -7,6 +7,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
@@ -144,6 +145,23 @@ fun LandingNavGraph(
             navBackStackEntry.arguments?.getString(ChapterDetails.chapterIdArg)
                 ?.let { chapterId ->
                     ChapterDetailsScreen(chapterId)
+                }
+        }
+
+        composable(
+            route = NotificationRaceDetails.routeWithArgs,
+            arguments = NotificationRaceDetails.arguments,
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "racesync://notification_race_details/{raceId}"
+            })
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(NotificationRaceDetails.raceIdArg)
+                ?.let { raceId ->
+                    DesignGenericWebViewScreen(
+                        onMenuClicked = onMenuClicked,
+                        statWebUrl = "${NotificationRaceDetails.webUrl}$raceId",
+                        title = "Race Details"
+                    )
                 }
         }
 

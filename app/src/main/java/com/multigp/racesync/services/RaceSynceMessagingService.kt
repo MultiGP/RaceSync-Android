@@ -9,11 +9,10 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
 import android.os.Build
 import android.util.Log
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.core.app.NotificationCompat
+import androidx.core.net.toUri
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
-import com.multigp.racesync.OnboardingActivity
 import com.multigp.racesync.R
 import kotlin.random.Random
 
@@ -26,17 +25,16 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
         }
     }
 
-    @OptIn(ExperimentalMaterialApi::class)
     private fun sendNotification(message: RemoteMessage.Notification) {
-        // If you want the notifications to appear when your app is in foreground
-
-        val intent = Intent(this, OnboardingActivity::class.java).apply {
-            addFlags(FLAG_ACTIVITY_CLEAR_TOP)
+        val raceID = "2057"
+        val deepLinkUri = "racesync://notification_race_details/$raceID".toUri()
+        val intent = Intent(Intent.ACTION_VIEW, deepLinkUri).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or FLAG_ACTIVITY_CLEAR_TOP
         }
-
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, intent, FLAG_IMMUTABLE
-        )
+        val pendingIntent = androidx.core.app.TaskStackBuilder.create(this).run {
+            addNextIntentWithParentStack(intent)
+            getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or FLAG_IMMUTABLE)
+        }
 
         val channelId = this.getString(R.string.default_notification_channel_id)
 
