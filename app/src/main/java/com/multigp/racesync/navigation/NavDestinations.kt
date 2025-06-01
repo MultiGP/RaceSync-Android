@@ -84,6 +84,7 @@ object AircraftDetails : NavDestination {
 
 }
 
+
 object RaceDetails : NavDestination {
     override val icon = Icons.Default.Home
     override val title = "Race Details"
@@ -91,6 +92,18 @@ object RaceDetails : NavDestination {
     override val webUrl = null
     const val raceIdArg = "race"
     val routeWithArgs = "${route}/{${raceIdArg}}"
+    val arguments = listOf(
+        navArgument(raceIdArg) { type = NavType.StringType }
+    )
+}
+
+object NotificationRaceDetails : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "Race Details"
+    override val route = "notification_race_details"
+    override val webUrl = "https://www.multigp.com/MultiGP/views/zippyq.php?raceId="
+    const val raceIdArg = "raceId"
+    val routeWithArgs = "$route/{$raceIdArg}"
     val arguments = listOf(
         navArgument(raceIdArg) { type = NavType.StringType }
     )
