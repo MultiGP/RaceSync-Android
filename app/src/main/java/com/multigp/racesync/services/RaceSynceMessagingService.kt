@@ -17,6 +17,7 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
 
     private val random = Random
     override fun onMessageReceived(remoteMessage: RemoteMessage) {
+        Log.d("FCM Token", "Notification Received")
         remoteMessage.notification?.let { message ->
             sendNotification(message)
         }
@@ -50,10 +51,10 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
         // If you want to send messages to this application instance or
         // manage this apps subscriptions on the server side, send the
         // FCM registration token to your app server.
-        Log.d("FCM","New token: $token")
+        Log.d("FCM Token","New token: $token")
     }
 
     companion object {
-        const val CHANNEL_NAME = "RaceSync notification channel"
+        const val CHANNEL_NAME = "FCM notification channel"
     }
 }
