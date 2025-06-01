@@ -1,13 +1,10 @@
 package com.multigp.racesync.services
 
-import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.NotificationManager.IMPORTANCE_DEFAULT
 import android.app.PendingIntent
 import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP
-import android.os.Build
 import android.util.Log
 import androidx.core.app.NotificationCompat
 import androidx.core.net.toUri
@@ -46,12 +43,6 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
             .setContentIntent(pendingIntent)
 
         val manager = getSystemService(NOTIFICATION_SERVICE) as NotificationManager
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val channel = NotificationChannel(channelId, CHANNEL_NAME, IMPORTANCE_DEFAULT)
-            manager.createNotificationChannel(channel)
-        }
-
         manager.notify(random.nextInt(), notificationBuilder.build())
     }
 
@@ -63,6 +54,6 @@ class RaceSynceMessagingService : FirebaseMessagingService() {
     }
 
     companion object {
-        const val CHANNEL_NAME = "FCM notification channel"
+        const val CHANNEL_NAME = "RaceSync notification channel"
     }
 }
