@@ -15,5 +15,7 @@ class SaveFCMTokenData (
     @SerializedName("action")
     val action: String,
     @SerializedName("devicetoken")
-    val devicetoken: String
+    val devicetoken: String,
+    @SerializedName("platform")
+    val platform: String = "android"
 ): Parcelable
