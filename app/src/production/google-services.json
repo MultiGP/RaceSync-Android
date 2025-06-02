@@ -1,13 +1,13 @@
 {
   "project_info": {
-    "project_number": "659241406847",
-    "project_id": "racesync-multigp",
-    "storage_bucket": "racesync-multigp.firebasestorage.app"
+    "project_number": "299561565391",
+    "project_id": "multigp-racesync",
+    "storage_bucket": "multigp-racesync.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:659241406847:android:6c0aaaf555cfe931a38a4a",
+        "mobilesdk_app_id": "1:299561565391:android:c0b652d5524ce88d3c4bba",
         "android_client_info": {
           "package_name": "com.multigp.racesync"
         }
@@ -15,7 +15,7 @@
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAx0fQywKBKgFXqK_zl_74IidOFLdOBF6o"
+          "current_key": "AIzaSyB1YZ4sDeJJoq5-o3HbDSO2XEjx7pgpkHk"
         }
       ],
       "services": {
