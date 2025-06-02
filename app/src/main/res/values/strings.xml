@@ -79,7 +79,7 @@
     <string name="permissions_location_title">Location Permission</string>
     <string name="permissions_location_request">Kindly grant location access to access all app features.</string>
     <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
-    <string name="receive_notifications_from_zippyq">Receive notifications from ZippyQ</string>
+    <string name="receive_notifications_from_zippyq">Enable Notifications</string>
 
 
 </resources>

@@ -162,7 +162,7 @@ fun LandingNavGraph(
                     NotificationWebViewScreen(
                         onMenuClicked = onMenuClicked,
                         url = "${NotificationRaceDetails.webUrl}$raceId",
-                        title = "Race Details"
+                        title = "Race Schedule"
                     )
                 }
         }

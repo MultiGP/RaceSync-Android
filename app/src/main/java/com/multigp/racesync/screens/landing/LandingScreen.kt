@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
@@ -157,6 +158,12 @@ fun DrawerContent(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = modifier.padding(start = 8.dp, bottom = 16.dp, end = 8.dp)
             ) {
+                Icon(
+                    imageVector = Icons.Default.Notifications, // Notification bell
+                    contentDescription = "Notifications",
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 8.dp)
+                )
                 Text(
                     text = stringResource(R.string.receive_notifications_from_zippyq),
                     style = MaterialTheme.typography.bodyLarge,
@@ -185,7 +192,14 @@ fun DrawerContent(
             Spacer(modifier = modifier.height(16.dp))
 
             Text(
-                text = "Copyright @ 2015 - 2024 MultiGP, Inc.",
+                text = "Copyright @ 2015 - 2025 MultiGP, Inc.",
+                color = Color.Gray,
+                style = MaterialTheme.typography.titleSmall,
+                modifier = modifier.align(Alignment.Start),
+
+                )
+            Text(
+                text = "Developed by Viki 'Barracuda' Baarathi",
                 color = Color.Gray,
                 style = MaterialTheme.typography.titleSmall,
                 modifier = modifier.align(Alignment.Start),

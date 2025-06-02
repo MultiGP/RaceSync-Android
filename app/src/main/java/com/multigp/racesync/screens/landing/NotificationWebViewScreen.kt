@@ -46,7 +46,11 @@ fun NotificationWebViewScreen(
 
     Scaffold(
         topBar = {
-            CommonTopBar(title = title, onMenuClicked = onMenuClicked)
+            NotificationTopBar(
+                title = title,
+                urlToOpen = url,
+                onBackPressed = onMenuClicked
+            )
         }
     ) { padding ->
         Box(
