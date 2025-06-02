@@ -81,16 +81,16 @@ fun HomeScreenTopBar(
                 Row(
                     modifier = Modifier.align(Alignment.CenterEnd)
                 ) {
-                    AsyncImage(
-                        model = chapterImage,
-                        contentDescription = null,
-                        contentScale = ContentScale.Inside,
-                        modifier = Modifier
-                            .clickable { onChapterClicked() }
-                            .padding(10.dp)
-                            .size(25.dp)
-                            .clip(CircleShape)
-                    )
+//                    AsyncImage(
+//                        model = chapterImage,
+//                        contentDescription = null,
+//                        contentScale = ContentScale.Inside,
+//                        modifier = Modifier
+//                            .clickable { onChapterClicked() }
+//                            .padding(10.dp)
+//                            .size(25.dp)
+//                            .clip(CircleShape)
+//                    )
                     AsyncImage(
                         model = profileImage,
                         contentDescription = null,
