@@ -14,6 +14,7 @@ import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
+import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
 
@@ -157,9 +158,10 @@ fun LandingNavGraph(
         ) { navBackStackEntry ->
             navBackStackEntry.arguments?.getString(NotificationRaceDetails.raceIdArg)
                 ?.let { raceId ->
-                    DesignGenericWebViewScreen(
+
+                    NotificationWebViewScreen(
                         onMenuClicked = onMenuClicked,
-                        statWebUrl = "${NotificationRaceDetails.webUrl}$raceId",
+                        url = "${NotificationRaceDetails.webUrl}$raceId",
                         title = "Race Details"
                     )
                 }
