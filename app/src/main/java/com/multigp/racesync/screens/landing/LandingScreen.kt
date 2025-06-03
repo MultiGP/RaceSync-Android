@@ -149,7 +149,7 @@ fun DrawerContent(
                 .padding(top = 24.dp)
         ) {
             Text(
-                text = "Settings",
+                text = "MultiGP Essentials",
                 color = MaterialTheme.colorScheme.secondary,
                 style = MaterialTheme.typography.titleLarge,
                 modifier = modifier.align(Alignment.CenterHorizontally),

@@ -171,6 +171,13 @@ object IoSchedule : NavDestination {
     override val webUrl = "https://www.multigp.com/io25/schedule/"
 }
 
+object GqRanking : NavDestination {
+    override val iconPainterId = R.drawable.ic_tropy
+    override val title = "Standings"
+    override val route = "gqranking"
+    override val webUrl = "https://www.multigp.com/2025-global-qualifier-leaderboard/"
+}
+
 object VisitMultiGP : NavDestination {
     override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"
@@ -196,6 +203,7 @@ object SendFeedback : NavDestination {
 val drawerMenu = listOf(
     Landing,
     IoSchedule,
+    GqRanking,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,

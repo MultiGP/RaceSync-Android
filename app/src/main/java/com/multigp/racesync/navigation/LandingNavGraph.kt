@@ -97,6 +97,14 @@ fun LandingNavGraph(
             )
         }
 
+        composable(route = GqRanking.route) {
+            NotificationWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                url = GqRanking.webUrl,
+                title = GqRanking.title
+            )
+        }
+
         composable(
             route = AllAircraft.routeWithArgs,
             arguments = AllAircraft.arguments
