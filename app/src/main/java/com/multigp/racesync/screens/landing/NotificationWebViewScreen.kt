@@ -21,7 +21,8 @@ fun NotificationWebViewScreen(
     modifier: Modifier = Modifier,
     onMenuClicked: () -> Unit = {},
     url: String,
-    title: String
+    title: String,
+    showTitle: Boolean = false
 ) {
     var isLoading by remember { mutableStateOf(true) }
 
@@ -97,10 +98,13 @@ fun NotificationWebViewScreen(
                     .fillMaxSize()
                     .padding(padding)
             ) {
-                Text(text = "2025 MULTIGP GLOBAL QUALIFIER - SPONSORED BY FINZ",modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(16.dp)
-                )
+                if(showTitle){
+                    Text(text = "2025 MULTIGP GLOBAL QUALIFIER - SPONSORED BY FINZ",modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                    )
+                }
+
                 AndroidView(factory = { context ->
                     WebView(context).apply {
                         settings.javaScriptEnabled = true

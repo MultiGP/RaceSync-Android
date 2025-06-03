@@ -93,7 +93,8 @@ fun LandingNavGraph(
             NotificationWebViewScreen(
                 onMenuClicked = onMenuClicked,
                 url = IoSchedule.webUrl,
-                title = IoSchedule.title
+                title = IoSchedule.title,
+                showTitle = false
             )
         }
 
@@ -101,7 +102,8 @@ fun LandingNavGraph(
             NotificationWebViewScreen(
                 onMenuClicked = onMenuClicked,
                 url = GqRanking.webUrl,
-                title = GqRanking.title
+                title = GqRanking.title,
+                showTitle = true
             )
         }
 
