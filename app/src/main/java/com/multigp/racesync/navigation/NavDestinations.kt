@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BuildCircle
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EditRoad
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Flag
@@ -162,6 +163,13 @@ object VisitMultiGPShop : NavDestination {
     override val webUrl = "https://www.multigp.com/webstore/"
 }
 
+object IoSchedule : NavDestination {
+    override val icon = Icons.Outlined.CalendarMonth
+    override val title = "IO 2025 Schedule"
+    override val route = "ioschedule"
+    override val webUrl = "https://www.multigp.com/io25/schedule/"
+}
+
 object VisitMultiGP : NavDestination {
     override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"
@@ -186,6 +194,7 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
+    IoSchedule,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,

@@ -89,6 +89,14 @@ fun LandingNavGraph(
             )
         }
 
+        composable(route = IoSchedule.route) {
+            NotificationWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                url = IoSchedule.webUrl,
+                title = IoSchedule.title
+            )
+        }
+
         composable(
             route = AllAircraft.routeWithArgs,
             arguments = AllAircraft.arguments
