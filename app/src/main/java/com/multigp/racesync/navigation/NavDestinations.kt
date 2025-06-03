@@ -30,10 +30,11 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 
 interface NavDestination {
-    val icon: ImageVector
+    val icon: ImageVector? get() = null
     val title: String?
     val route: String
     val webUrl: String?
+    val iconPainterId: Int? get() = null
 
 }
 
@@ -164,7 +165,7 @@ object VisitMultiGPShop : NavDestination {
 }
 
 object IoSchedule : NavDestination {
-    override val icon = Icons.Outlined.CalendarMonth
+    override val iconPainterId = R.drawable.ic_international_open
     override val title = "IO 2025 Schedule"
     override val route = "ioschedule"
     override val webUrl = "https://www.multigp.com/io25/schedule/"
