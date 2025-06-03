@@ -63,7 +63,7 @@ class DataStoreManager(val context: Context) {
 
     val getNotificationPreference: Flow<Boolean> = context.dataStore.data
         .map { preferences ->
-            preferences[KEY_NOTIFICATION_PREFERENCE] ?: true
+            preferences[KEY_NOTIFICATION_PREFERENCE] ?: false
         }
 
     suspend fun clearSession(){

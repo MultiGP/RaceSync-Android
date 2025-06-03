@@ -1,9 +1,6 @@
 package com.multigp.racesync.screens.landing
 
 import android.Manifest
-import android.os.Build
-import android.util.Log
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -30,21 +27,14 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
-import com.google.accompanist.permissions.rememberPermissionState
-import com.google.accompanist.permissions.shouldShowRationale
-import com.google.firebase.Firebase
-import com.google.firebase.messaging.messaging
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.DistanceConfigurationSheet
 import com.multigp.racesync.composables.JoinRaceUI
 import com.multigp.racesync.composables.PermissionDeniedContent
-import com.multigp.racesync.composables.PermissionDialog
 import com.multigp.racesync.composables.PermissionsHandler
-import com.multigp.racesync.composables.RationaleDialog
 import com.multigp.racesync.composables.ResignRaceUI
 import com.multigp.racesync.composables.topbars.HomeScreenTopBar
 import com.multigp.racesync.domain.model.Aircraft
@@ -54,7 +44,6 @@ import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 
 @OptIn(
     ExperimentalPermissionsApi::class
@@ -103,22 +92,6 @@ fun HomeScreen(
     )
 
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
-    val notificationPermissionState =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-            rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
-        else null
-
-    val isNotificationPermissionGranted =
-        Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU ||
-                notificationPermissionState?.status?.isGranted == true
-
-    LaunchedEffect(key1 = isNotificationPermissionGranted) {
-        if (isNotificationPermissionGranted) {
-            val token = Firebase.messaging.token.await()
-            Log.d("FCM Token", token)
-            viewModel.updateFCMToken(token)
-        }
-    }
 
     Scaffold(
         topBar = {
@@ -296,15 +269,6 @@ fun HomeScreen(
                     Box(modifier = modifier)
                 }
             )
-        }
-    }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        notificationPermissionState?.let { notifPermState ->
-            if (!notifPermState.status.isGranted) {
-                if (notifPermState.status.shouldShowRationale) RationaleDialog()
-                else PermissionDialog { notifPermState.launchPermissionRequest() }
-            }
         }
     }
 }

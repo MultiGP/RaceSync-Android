@@ -17,52 +17,44 @@ import com.multigp.racesync.extensions.alertDialog
 import com.multigp.racesync.extensions.textButton
 
 @Composable
-fun PermissionDialog(onRequestPermission: () -> Unit) {
-    var showWarningDialog by remember { mutableStateOf(true) }
-
-    if (showWarningDialog) {
-        AlertDialog(
-            modifier = Modifier.alertDialog(),
-            title = { Text(stringResource(id = R.string.notification_permission_title)) },
-            text = { Text(stringResource(id = R.string.notification_permission_description)) },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onRequestPermission()
-                        showWarningDialog = false
-                    },
-                    modifier = Modifier.textButton(),
-                    colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) { Text(text = stringResource(R.string.request_notification_permission)) }
-            },
-            onDismissRequest = { }
-        )
-    }
+fun PermissionDialog(onRequestPermission: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        modifier = Modifier.alertDialog(),
+        title = { Text(stringResource(id = R.string.notification_permission_title)) },
+        text = { Text(stringResource(id = R.string.notification_permission_description)) },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onRequestPermission()
+                    onDismiss()
+                },
+                modifier = Modifier.textButton(),
+                colors = ButtonDefaults.textButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) { Text(text = stringResource(R.string.request_notification_permission)) }
+        },
+        onDismissRequest = onDismiss
+    )
 }
 
 @Composable
-fun RationaleDialog() {
-    var showWarningDialog by remember { mutableStateOf(true) }
-
-    if (showWarningDialog) {
-        AlertDialog(
-            modifier = Modifier.alertDialog(),
-            title = { Text(stringResource(id = R.string.notification_permission_title)) },
-            text = { Text(stringResource(id = R.string.notification_permission_settings)) },
-            confirmButton = {
-                TextButton(
-                    onClick = { showWarningDialog = false },
-                    modifier = Modifier.textButton(),
-                    colors = ButtonDefaults.textButtonColors(
-                        containerColor = MaterialTheme.colorScheme.primary,
-                        contentColor = MaterialTheme.colorScheme.onPrimary
-                    )
-                ) { Text(text = stringResource(R.string.ok)) }
-            },
-            onDismissRequest = { showWarningDialog = false }
-        )
-    }
+fun RationaleDialog(onDismiss: () -> Unit) {
+    AlertDialog(
+        modifier = Modifier.alertDialog(),
+        title = { Text(stringResource(id = R.string.notification_permission_title)) },
+        text = { Text(stringResource(id = R.string.notification_permission_settings)) },
+        confirmButton = {
+            TextButton(
+                onClick = onDismiss,
+                modifier = Modifier.textButton(),
+                colors = ButtonDefaults.textButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) { Text(text = stringResource(R.string.ok)) }
+        },
+        onDismissRequest = onDismiss
+    )
 }
