@@ -1,5 +1,8 @@
 package com.multigp.racesync.screens.landing
 
+import android.Manifest
+import android.os.Build
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -42,9 +45,15 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.isGranted
+import com.google.accompanist.permissions.rememberPermissionState
+import com.google.accompanist.permissions.shouldShowRationale
 import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import com.multigp.racesync.R
+import com.multigp.racesync.composables.PermissionDialog
+import com.multigp.racesync.composables.RationaleDialog
 import com.multigp.racesync.navigation.Landing
 import com.multigp.racesync.navigation.LandingNavGraph
 import com.multigp.racesync.navigation.Logout
@@ -82,9 +91,9 @@ fun LandingScreen(
                     scope.launch {
                         drawerState.close()
                     }
-                    if (route == Logout.route){
+                    if (route == Logout.route) {
                         onLogout()
-                    }else {
+                    } else {
                         selectedMenuItem = route
                         navController.navigate(route)
                     }
@@ -104,6 +113,7 @@ fun LandingScreen(
     }
 }
 
+@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 fun DrawerContent(
     menus: List<NavDestination>,
@@ -112,8 +122,25 @@ fun DrawerContent(
     viewModel: DrawerContentViewModel = hiltViewModel(),
     onMenuClick: (String) -> Unit
 ) {
+    var showRationaleDialog by remember { mutableStateOf(false) }
+    var showPermissionDialog by remember { mutableStateOf(false) }
+    var requestFCMTokenAfterPermission by remember { mutableStateOf(false) }
+
     val receiveNotifications by viewModel.notificationPreference.collectAsState()
     val scope = rememberCoroutineScope()
+
+    val notificationPermissionState =
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS)
+        else null
+
+    LaunchedEffect(notificationPermissionState?.status?.isGranted, requestFCMTokenAfterPermission) {
+        if (requestFCMTokenAfterPermission && notificationPermissionState?.status?.isGranted == true) {
+            requestFCMTokenAfterPermission = false
+            val token = Firebase.messaging.token.await()
+            viewModel.updateFCMToken(token)
+        }
+    }
 
     Surface(modifier = modifier.padding(all = 16.dp)) {
         Column(
@@ -148,7 +175,11 @@ fun DrawerContent(
                     selected = selectedMenuItem == it.route,
                     icon = {
                         it.iconPainterId?.let { resId ->
-                            Icon(painter = painterResource(resId), contentDescription = null, modifier = Modifier.size(24.dp))
+                            Icon(
+                                painter = painterResource(resId),
+                                contentDescription = null,
+                                modifier = Modifier.size(24.dp)
+                            )
                         } ?: run {
                             Icon(imageVector = it.icon!!, contentDescription = null)
                         }
@@ -181,8 +212,21 @@ fun DrawerContent(
                     checked = receiveNotifications,
                     onCheckedChange = {
                         scope.launch {
-                            val token = Firebase.messaging.token.await()
-                            viewModel.updateFCMToken(token)
+                            val shouldRequestPermission = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU &&
+                                notificationPermissionState?.status?.isGranted == false
+
+                            if (shouldRequestPermission) {
+                                notificationPermissionState?.let { notifPermState ->
+                                    if (notifPermState.status.shouldShowRationale) {
+                                        showRationaleDialog = true
+                                    } else {
+                                        showPermissionDialog = true
+                                    }
+                                }
+                            } else {
+                                val token = Firebase.messaging.token.await()
+                                viewModel.updateFCMToken(token)
+                            }
                         }
                     },
                     colors = androidx.compose.material3.SwitchDefaults.colors(
@@ -213,6 +257,20 @@ fun DrawerContent(
                 modifier = modifier.align(Alignment.Start),
 
                 )
+        }
+        if (showRationaleDialog) {
+            RationaleDialog(onDismiss = { showRationaleDialog = false })
+        }
+        if (showPermissionDialog) {
+            PermissionDialog(
+                onRequestPermission = {
+                    requestFCMTokenAfterPermission = true
+                    notificationPermissionState?.launchPermissionRequest()
+                },
+                onDismiss = {
+                    showPermissionDialog = false
+                }
+            )
         }
     }
 }

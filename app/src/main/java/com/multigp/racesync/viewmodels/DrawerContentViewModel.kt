@@ -15,7 +15,7 @@ class DrawerContentViewModel @Inject constructor (
     val useCases: RaceSyncUseCases,
 ): ViewModel() {
 
-    private val _notificationPreference = MutableStateFlow(true)
+    private val _notificationPreference = MutableStateFlow(false)
     val notificationPreference: StateFlow<Boolean> = _notificationPreference
 
     init {
