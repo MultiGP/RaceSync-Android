@@ -9,6 +9,8 @@ import androidx.paging.cachedIn
 import androidx.paging.filter
 import androidx.paging.map
 import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.tasks.OnCompleteListener
+import com.google.firebase.messaging.FirebaseMessaging
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
@@ -78,7 +80,7 @@ class LandingViewModel @Inject constructor(
     val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
 
     init {
-        Log.d("TAG", "Hello World")
+        Log.d("viki", "Hello World")
         initializeUserProfile()
     }
 
@@ -92,6 +94,16 @@ class LandingViewModel @Inject constructor(
                     }
             }catch (exception: Exception){
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
+            }
+        }
+    }
+
+    fun updateFCMToken(fcmToken: String){
+        viewModelScope.launch {
+            try{
+                useCases.performLoginUseCase("create", fcmToken)
+                    .collect{}
+            }catch (_: Exception){
             }
         }
     }

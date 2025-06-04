@@ -2,7 +2,7 @@
   "project_info": {
     "project_number": "299561565391",
     "project_id": "multigp-racesync",
-    "storage_bucket": "multigp-racesync.appspot.com"
+    "storage_bucket": "multigp-racesync.firebasestorage.app"
   },
   "client": [
     {

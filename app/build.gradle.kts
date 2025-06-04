@@ -68,16 +68,17 @@ android {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
-//    kotlinOptions {
-//        jvmTarget = "11"
-//    }
+
+    kotlinOptions {
+        jvmTarget = "17"
+    }
 
 
     buildFeatures {
         compose = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.5.7"
     }
     packaging {
         resources {
@@ -106,8 +107,8 @@ dependencies {
 
 
     implementation("io.coil-kt:coil-compose:2.5.0")
-    implementation("com.google.accompanist:accompanist-pager:0.25.0")
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.25.0")
+    implementation("com.google.accompanist:accompanist-pager:0.30.1")
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.30.1")
 
     //Permissions and Location
     implementation("com.google.accompanist:accompanist-permissions:0.25.0")
@@ -141,6 +142,7 @@ dependencies {
     //Firebase
     implementation(platform("com.google.firebase:firebase-bom:32.7.2"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-messaging:24.1.1")
 
     //Maps
     implementation("com.google.maps.android:maps-compose:4.3.0")

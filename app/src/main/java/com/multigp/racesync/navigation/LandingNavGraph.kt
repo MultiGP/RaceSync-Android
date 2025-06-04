@@ -7,12 +7,14 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import androidx.navigation.navDeepLink
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
+import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
 
@@ -87,6 +89,24 @@ fun LandingNavGraph(
             )
         }
 
+        composable(route = IoSchedule.route) {
+            NotificationWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                url = IoSchedule.webUrl,
+                title = IoSchedule.title,
+                showTitle = false
+            )
+        }
+
+        composable(route = GqRanking.route) {
+            NotificationWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                url = GqRanking.webUrl,
+                title = GqRanking.title,
+                showTitle = true
+            )
+        }
+
         composable(
             route = AllAircraft.routeWithArgs,
             arguments = AllAircraft.arguments
@@ -144,6 +164,24 @@ fun LandingNavGraph(
             navBackStackEntry.arguments?.getString(ChapterDetails.chapterIdArg)
                 ?.let { chapterId ->
                     ChapterDetailsScreen(chapterId)
+                }
+        }
+
+        composable(
+            route = NotificationRaceDetails.routeWithArgs,
+            arguments = NotificationRaceDetails.arguments,
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "racesync://notification_race_details/{raceId}"
+            })
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(NotificationRaceDetails.raceIdArg)
+                ?.let { raceId ->
+
+                    NotificationWebViewScreen(
+                        onMenuClicked = onMenuClicked,
+                        url = "${NotificationRaceDetails.webUrl}$raceId",
+                        title = "Race Schedule"
+                    )
                 }
         }
 

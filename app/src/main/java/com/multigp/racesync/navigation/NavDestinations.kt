@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Send
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.BuildCircle
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EditRoad
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Flag
@@ -29,10 +30,11 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Race
 
 interface NavDestination {
-    val icon: ImageVector
+    val icon: ImageVector? get() = null
     val title: String?
     val route: String
     val webUrl: String?
+    val iconPainterId: Int? get() = null
 
 }
 
@@ -84,6 +86,7 @@ object AircraftDetails : NavDestination {
 
 }
 
+
 object RaceDetails : NavDestination {
     override val icon = Icons.Default.Home
     override val title = "Race Details"
@@ -91,6 +94,18 @@ object RaceDetails : NavDestination {
     override val webUrl = null
     const val raceIdArg = "race"
     val routeWithArgs = "${route}/{${raceIdArg}}"
+    val arguments = listOf(
+        navArgument(raceIdArg) { type = NavType.StringType }
+    )
+}
+
+object NotificationRaceDetails : NavDestination {
+    override val icon = Icons.Default.Home
+    override val title = "Race Details"
+    override val route = "notification_race_details"
+    override val webUrl = "https://www.multigp.com/MultiGP/views/zippyq.php?raceId="
+    const val raceIdArg = "raceId"
+    val routeWithArgs = "$route/{$raceIdArg}"
     val arguments = listOf(
         navArgument(raceIdArg) { type = NavType.StringType }
     )
@@ -149,6 +164,20 @@ object VisitMultiGPShop : NavDestination {
     override val webUrl = "https://www.multigp.com/webstore/"
 }
 
+object IoSchedule : NavDestination {
+    override val iconPainterId = R.drawable.ic_international_open
+    override val title = "IO 2025 Schedule"
+    override val route = "ioschedule"
+    override val webUrl = "https://www.multigp.com/io25/schedule/"
+}
+
+object GqRanking : NavDestination {
+    override val iconPainterId = R.drawable.ic_tropy
+    override val title = "Standings"
+    override val route = "gqranking"
+    override val webUrl = "https://www.multigp.com/2025-global-qualifier-leaderboard/"
+}
+
 object VisitMultiGP : NavDestination {
     override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"
@@ -173,6 +202,8 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
+    IoSchedule,
+    GqRanking,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,
