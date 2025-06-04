@@ -113,7 +113,6 @@ class LoginViewModel @Inject constructor(
                 _loginUiState.value = LoginUiState.Loading(R.string.hud_logout_progress)
                 if (useCases.performLoginUseCase.getNotificationPreference().first()){
                     val token = Firebase.messaging.token.await()
-                    Log.d("FCM Token", "Token: $token")
                     useCases.performLoginUseCase("delete", token).first()
                 }
                 useCases.performLoginUseCase.logout().first()
