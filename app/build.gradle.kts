@@ -23,8 +23,8 @@ android {
         applicationId = "com.multigp.racesync"
         minSdk = 24
         targetSdk = 34
-        versionCode = 15
-        versionName = "0.1.6"
+        versionCode = 16
+        versionName = "1.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
