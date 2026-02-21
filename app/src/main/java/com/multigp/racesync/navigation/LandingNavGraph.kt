@@ -89,15 +89,6 @@ fun LandingNavGraph(
             )
         }
 
-        composable(route = IoSchedule.route) {
-            NotificationWebViewScreen(
-                onMenuClicked = onMenuClicked,
-                url = IoSchedule.webUrl,
-                title = IoSchedule.title,
-                showTitle = false
-            )
-        }
-
         composable(route = GqRanking.route) {
             NotificationWebViewScreen(
                 onMenuClicked = onMenuClicked,
