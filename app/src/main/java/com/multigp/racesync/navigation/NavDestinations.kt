@@ -154,7 +154,7 @@ object RulesRegulation : NavDestination {
     override val icon = Icons.Outlined.MenuBook
     override val title = "Season Rules & Regulations"
     override val route = "rules-regulation"
-    override val webUrl = "https://docs.google.com/document/d/1n1-TXigEqiD-yQ7-Vqb2lVP3wE4uIuuYnFGIam4vtsI/edit#heading=h.c7d32jvxr7wf"
+    override val webUrl = "https://docs.google.com/document/d/1U4aL9TgKGdlz1y04VMlKoSLFip_msUySuRq6ZnWwh7k/edit?usp=sharing"
 }
 
 object VisitMultiGPShop : NavDestination {
