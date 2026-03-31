@@ -23,11 +23,39 @@ class StandingsViewModel @Inject constructor(
     private val _searchQuery = MutableStateFlow("")
     val searchQuery: StateFlow<String> = _searchQuery.asStateFlow()
 
+    private val _myUserId = MutableStateFlow<String?>(null)
+    val myUserId: StateFlow<String?> = _myUserId.asStateFlow()
+
+    private val _myStanding = MutableStateFlow<Standing?>(null)
+    val myStanding: StateFlow<Standing?> = _myStanding.asStateFlow()
+
+    private val _myProfilePictureUrl = MutableStateFlow<String?>(null)
+    val myProfilePictureUrl: StateFlow<String?> = _myProfilePictureUrl.asStateFlow()
+
     private var allStandings: List<Standing> = emptyList()
     private var currentSeason: StandingSeason? = null
 
+    init {
+        fetchLoggedInUser()
+    }
+
+    private fun fetchLoggedInUser() {
+        viewModelScope.launch {
+            try {
+                useCases.getLoginInfoUseCase().collect { (_, userInfo) ->
+                    _myUserId.value = userInfo?.id
+                }
+            } catch (_: Exception) {}
+
+            try {
+                useCases.getProfileUseCase().collect { profile ->
+                    _myProfilePictureUrl.value = profile.profilePictureUrl
+                }
+            } catch (_: Exception) {}
+        }
+    }
+
     fun fetchStandings(season: StandingSeason) {
-        // Don't re-fetch if we already have this season loaded
         if (season == currentSeason && allStandings.isNotEmpty()) return
 
         currentSeason = season
@@ -36,6 +64,11 @@ class StandingsViewModel @Inject constructor(
             try {
                 useCases.getStandingsUseCase(season).collect { standings ->
                     allStandings = standings
+                    // Find logged-in user's standing
+                    val userId = _myUserId.value
+                    _myStanding.value = if (userId != null) {
+                        standings.find { it.userId == userId }
+                    } else null
                     _standingsUiState.value = UiState.Success(applyFilter(standings))
                 }
             } catch (exception: Exception) {
@@ -48,8 +81,7 @@ class StandingsViewModel @Inject constructor(
 
     fun onSearchQueryChanged(query: String) {
         _searchQuery.value = query
-        val currentState = _standingsUiState.value
-        if (currentState is UiState.Success || allStandings.isNotEmpty()) {
+        if (allStandings.isNotEmpty()) {
             _standingsUiState.value = UiState.Success(applyFilter(allStandings))
         }
     }

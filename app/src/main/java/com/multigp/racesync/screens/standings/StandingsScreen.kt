@@ -1,5 +1,17 @@
 package com.multigp.racesync.screens.standings
 
+import android.content.Context
+import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.Color as AndroidColor
+import android.graphics.LinearGradient
+import android.graphics.Paint
+import android.graphics.RectF
+import android.graphics.Shader
+import android.graphics.Typeface
+import android.net.Uri
+import android.util.TypedValue
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -24,6 +36,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -39,19 +52,25 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.domain.model.Standing
 import com.multigp.racesync.domain.model.StandingSeason
 import com.multigp.racesync.viewmodels.StandingsViewModel
 import com.multigp.racesync.viewmodels.UiState
+import java.io.File
+import java.io.FileOutputStream
 
 @Composable
 fun StandingsScreen(
@@ -62,10 +81,28 @@ fun StandingsScreen(
 ) {
     val standingsUiState by viewModel.standingsUiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
+    val myUserId by viewModel.myUserId.collectAsState()
+    val myStanding by viewModel.myStanding.collectAsState()
+    val myProfilePictureUrl by viewModel.myProfilePictureUrl.collectAsState()
     val listState = rememberLazyListState()
+    val context = LocalContext.current
+
+    var showBadgeDialog by remember { mutableStateOf(false) }
 
     LaunchedEffect(season) {
         viewModel.fetchStandings(season)
+    }
+
+    // Determine if user's row is visible in the list
+    val isMyRowVisible by remember {
+        derivedStateOf {
+            if (myStanding == null) return@derivedStateOf true
+            val standings = (standingsUiState as? UiState.Success)?.data ?: return@derivedStateOf true
+            val myIndex = standings.indexOfFirst { it.userId == myUserId }
+            if (myIndex < 0) return@derivedStateOf true
+            val visibleItems = listState.layoutInfo.visibleItemsInfo
+            visibleItems.any { it.index == myIndex }
+        }
     }
 
     Scaffold(
@@ -139,22 +176,51 @@ fun StandingsScreen(
                             )
                         }
                     } else {
-                        // Section header showing count
+                        // Section header
                         SectionHeader(
-                            season = season,
                             count = standings.size,
                             isFiltered = searchQuery.length >= 2
                         )
 
-                        StandingsList(
-                            standings = standings,
-                            listState = listState
-                        )
+                        // Main standings list
+                        Box(modifier = Modifier.weight(1f)) {
+                            StandingsList(
+                                standings = standings,
+                                listState = listState,
+                                myUserId = myUserId,
+                                onMyRowClicked = { showBadgeDialog = true }
+                            )
+
+                            // Pinned user row - shows when their row scrolls out of view
+                            val standing = myStanding
+                            if (standing != null && !isMyRowVisible && searchQuery.length < 2) {
+                                PinnedUserRow(
+                                    standing = standing,
+                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                    onClick = { showBadgeDialog = true }
+                                )
+                            }
+                        }
                     }
                 }
 
                 else -> {}
             }
+        }
+    }
+
+    // Badge share dialog
+    if (showBadgeDialog) {
+        myStanding?.let { standing ->
+            StandingBadgeDialog(
+                standing = standing,
+                season = season,
+                onDismiss = { showBadgeDialog = false },
+                onShare = {
+                    shareBadgeImage(context, standing, season)
+                    showBadgeDialog = false
+                }
+            )
         }
     }
 }
@@ -165,9 +231,7 @@ private fun StandingsTopBar(
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {}
 ) {
-    Surface(
-        color = MaterialTheme.colorScheme.surface
-    ) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
         Box(modifier = modifier.fillMaxWidth()) {
             Text(
                 text = title,
@@ -238,7 +302,6 @@ private fun SearchBar(
 
 @Composable
 private fun SectionHeader(
-    season: StandingSeason,
     count: Int,
     isFiltered: Boolean,
     modifier: Modifier = Modifier
@@ -261,7 +324,9 @@ private fun SectionHeader(
 private fun StandingsList(
     standings: List<Standing>,
     listState: LazyListState,
-    modifier: Modifier = Modifier
+    myUserId: String?,
+    modifier: Modifier = Modifier,
+    onMyRowClicked: () -> Unit = {}
 ) {
     LazyColumn(
         state = listState,
@@ -271,9 +336,12 @@ private fun StandingsList(
             items = standings,
             key = { _, standing -> "${standing.position}_${standing.userId}" }
         ) { index, standing ->
+            val isCurrentUser = myUserId != null && standing.userId == myUserId
             StandingRow(
                 standing = standing,
-                isAlternateRow = index % 2 == 1
+                isAlternateRow = index % 2 == 1,
+                isCurrentUser = isCurrentUser,
+                onClick = if (isCurrentUser) onMyRowClicked else null
             )
             HorizontalDivider(
                 thickness = 0.5.dp,
@@ -287,18 +355,33 @@ private fun StandingsList(
 private fun StandingRow(
     standing: Standing,
     isAlternateRow: Boolean = false,
-    modifier: Modifier = Modifier
+    isCurrentUser: Boolean = false,
+    modifier: Modifier = Modifier,
+    onClick: (() -> Unit)? = null
 ) {
-    val backgroundColor = if (isAlternateRow) {
-        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+    val backgroundColor = when {
+        isCurrentUser -> MaterialTheme.colorScheme.primaryContainer
+        isAlternateRow -> MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+        else -> MaterialTheme.colorScheme.surface
+    }
+
+    val textColor = if (isCurrentUser) {
+        MaterialTheme.colorScheme.onPrimaryContainer
     } else {
-        MaterialTheme.colorScheme.surface
+        MaterialTheme.colorScheme.onSurface
+    }
+
+    val subtitleColor = if (isCurrentUser) {
+        MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f)
+    } else {
+        MaterialTheme.colorScheme.onSurfaceVariant
     }
 
     Row(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -318,17 +401,83 @@ private fun StandingRow(
             Text(
                 text = standing.displayName,
                 style = MaterialTheme.typography.bodyLarge,
-                fontWeight = FontWeight.SemiBold,
+                fontWeight = if (isCurrentUser) FontWeight.Bold else FontWeight.SemiBold,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
-                color = MaterialTheme.colorScheme.onSurface
+                color = textColor
             )
             Text(
                 text = standing.subtitleLabel,
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                color = subtitleColor,
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        // Share icon for current user
+        if (isCurrentUser) {
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share standing",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier
+                    .size(20.dp)
+                    .clickable { onClick?.invoke() }
+            )
+        }
+    }
+}
+
+@Composable
+private fun PinnedUserRow(
+    standing: Standing,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shadowElevation = 8.dp,
+        tonalElevation = 2.dp
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primaryContainer)
+                .clickable { onClick() }
+                .padding(horizontal = 12.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            RankBadge(
+                rank = standing.position,
+                modifier = Modifier.width(48.dp)
+            )
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = standing.displayName,
+                    style = MaterialTheme.typography.bodyLarge,
+                    fontWeight = FontWeight.Bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Text(
+                    text = standing.subtitleLabel,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+            Icon(
+                imageVector = Icons.Default.Share,
+                contentDescription = "Share standing",
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.size(20.dp)
             )
         }
     }
@@ -344,9 +493,9 @@ private fun RankBadge(
         contentAlignment = Alignment.Center
     ) {
         when (rank) {
-            1 -> Text(text = "\uD83E\uDD47", fontSize = 24.sp) // 🥇
-            2 -> Text(text = "\uD83E\uDD48", fontSize = 24.sp) // 🥈
-            3 -> Text(text = "\uD83E\uDD49", fontSize = 24.sp) // 🥉
+            1 -> Text(text = "\uD83E\uDD47", fontSize = 24.sp) // gold
+            2 -> Text(text = "\uD83E\uDD48", fontSize = 24.sp) // silver
+            3 -> Text(text = "\uD83E\uDD49", fontSize = 24.sp) // bronze
             else -> Text(
                 text = rank.toString(),
                 style = MaterialTheme.typography.bodyLarge,
@@ -355,4 +504,249 @@ private fun RankBadge(
             )
         }
     }
+}
+
+// ============================================================
+// Standing Badge Dialog & Share
+// ============================================================
+
+@Composable
+private fun StandingBadgeDialog(
+    standing: Standing,
+    season: StandingSeason,
+    onDismiss: () -> Unit,
+    onShare: () -> Unit
+) {
+    androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
+        Surface(
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 6.dp
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                // Badge preview
+                StandingBadgePreview(standing = standing, season = season)
+
+                Spacer(modifier = Modifier.height(20.dp))
+
+                // Share button
+                androidx.compose.material3.Button(
+                    onClick = onShare,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Share My Standing")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                androidx.compose.material3.TextButton(onClick = onDismiss) {
+                    Text("Close")
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun StandingBadgePreview(
+    standing: Standing,
+    season: StandingSeason,
+    modifier: Modifier = Modifier
+) {
+    Surface(
+        modifier = modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.medium,
+        color = Color(0xFF1A1A2E)
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            // Rank
+            Text(
+                text = standing.positionWithSuffix,
+                fontSize = 48.sp,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Name with flag
+            Text(
+                text = standing.displayName,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                color = Color.White,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Subtitle
+            Text(
+                text = "Fastest 3 Consecutive Laps",
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.7f)
+            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Scores
+            if (standing.score1Label.isNotEmpty()) {
+                BadgeScoreRow(label = standing.score1Label)
+            }
+            if (standing.score2Label.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                BadgeScoreRow(label = standing.score2Label)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Season tag
+            Text(
+                text = season.title,
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.5f)
+            )
+        }
+    }
+}
+
+@Composable
+private fun BadgeScoreRow(label: String) {
+    Text(
+        text = label,
+        style = MaterialTheme.typography.bodyLarge,
+        fontWeight = FontWeight.SemiBold,
+        color = Color(0xFFFFD700) // Gold/yellow for scores
+    )
+}
+
+// ============================================================
+// Share Badge as Image
+// ============================================================
+
+private fun shareBadgeImage(context: Context, standing: Standing, season: StandingSeason) {
+    val bitmap = renderBadgeBitmap(context, standing, season)
+
+    // Save bitmap to cache directory
+    val cachePath = File(context.cacheDir, "images")
+    cachePath.mkdirs()
+    val file = File(cachePath, "standing_badge.png")
+    FileOutputStream(file).use { out ->
+        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+    }
+
+    val uri: Uri = FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        file
+    )
+
+    val shareIntent = Intent(Intent.ACTION_SEND).apply {
+        type = "image/png"
+        putExtra(Intent.EXTRA_STREAM, uri)
+        putExtra(Intent.EXTRA_TEXT, "${standing.displayName} - ${standing.positionWithSuffix} in ${season.title}")
+        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+    }
+
+    context.startActivity(Intent.createChooser(shareIntent, "Share Standing"))
+}
+
+private fun renderBadgeBitmap(context: Context, standing: Standing, season: StandingSeason): Bitmap {
+    val width = 540
+    val height = 400
+    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+
+    val density = context.resources.displayMetrics.density
+
+    // Background gradient
+    val bgPaint = Paint().apply {
+        shader = LinearGradient(
+            0f, 0f, 0f, height.toFloat(),
+            AndroidColor.parseColor("#1A1A2E"),
+            AndroidColor.parseColor("#16213E"),
+            Shader.TileMode.CLAMP
+        )
+    }
+    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+
+    // Rank text
+    val rankPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.WHITE
+        textSize = 72f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText(standing.positionWithSuffix, width / 2f, 90f, rankPaint)
+
+    // Checkered flag emoji + Name
+    val namePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.WHITE
+        textSize = 28f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText(standing.displayName, width / 2f, 135f, namePaint)
+
+    // Subtitle
+    val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.parseColor("#AAAAAA")
+        textSize = 20f
+        textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText("Fastest 3 Consecutive Laps", width / 2f, 170f, subtitlePaint)
+
+    // Divider line
+    val dividerPaint = Paint().apply {
+        color = AndroidColor.parseColor("#333355")
+        strokeWidth = 2f
+    }
+    canvas.drawLine(40f, 195f, width - 40f, 195f, dividerPaint)
+
+    // Score labels in yellow
+    val scorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.parseColor("#FFD700")
+        textSize = 26f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = Paint.Align.CENTER
+    }
+
+    if (standing.score1Label.isNotEmpty()) {
+        canvas.drawText(standing.score1Label, width / 2f, 240f, scorePaint)
+    }
+    if (standing.score2Label.isNotEmpty()) {
+        canvas.drawText(standing.score2Label, width / 2f, 280f, scorePaint)
+    }
+
+    // Season title at bottom
+    val seasonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.parseColor("#666688")
+        textSize = 18f
+        textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText(season.title, width / 2f, 340f, seasonPaint)
+
+    // MultiGP branding
+    val brandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.parseColor("#888888")
+        textSize = 14f
+        textAlign = Paint.Align.CENTER
+    }
+    canvas.drawText("MultiGP Global Qualifier", width / 2f, 375f, brandPaint)
+
+    return bitmap
 }

@@ -30,7 +30,32 @@ data class Standing(
             }
         }
 
+    val score1Label: String
+        get() {
+            return if (season1 == "2023") {
+                formatTime(season1Score)
+            } else {
+                "Spring: ${formatTime(season1Score)}"
+            }
+        }
+
+    val score2Label: String
+        get() {
+            return if (season1 == "2023") "" else "Summer: ${formatTime(season2Score)}"
+        }
+
+    val positionWithSuffix: String
+        get() = ordinalSuffix(position)
+
     companion object {
+        fun ordinalSuffix(n: Int): String {
+            val suffixes = arrayOf("th", "st", "nd", "rd")
+            val mod100 = n % 100
+            val suffix = if (mod100 in 11..13) "th"
+            else suffixes.getOrElse(n % 10) { "th" }
+            return "$n$suffix"
+        }
+
         fun formatTime(value: Double): String {
             if (value <= 0 || value > 180) return "N/A"
 
