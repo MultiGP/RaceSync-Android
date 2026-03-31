@@ -154,7 +154,7 @@ object RulesRegulation : NavDestination {
     override val icon = Icons.Outlined.MenuBook
     override val title = "Season Rules & Regulations"
     override val route = "rules-regulation"
-    override val webUrl = "https://docs.google.com/document/d/1n1-TXigEqiD-yQ7-Vqb2lVP3wE4uIuuYnFGIam4vtsI/edit#heading=h.c7d32jvxr7wf"
+    override val webUrl = "https://docs.google.com/document/d/1U4aL9TgKGdlz1y04VMlKoSLFip_msUySuRq6ZnWwh7k/edit?usp=sharing"
 }
 
 object VisitMultiGPShop : NavDestination {
@@ -162,13 +162,6 @@ object VisitMultiGPShop : NavDestination {
     override val title = "Visit the MultiGP Shop"
     override val route = "webstore"
     override val webUrl = "https://www.multigp.com/webstore/"
-}
-
-object IoSchedule : NavDestination {
-    override val iconPainterId = R.drawable.ic_international_open
-    override val title = "IO 2025 Schedule"
-    override val route = "ioschedule"
-    override val webUrl = "https://www.multigp.com/io25/schedule/"
 }
 
 object GqRanking : NavDestination {
@@ -202,7 +195,6 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
-    IoSchedule,
     GqRanking,
     ObstaclesBuildGuide,
     RulesRegulation,
