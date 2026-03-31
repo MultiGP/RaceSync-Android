@@ -17,13 +17,13 @@ android {
         }
     }
     namespace = "com.multigp.racesync"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.multigp.racesync"
         minSdk = 24
-        targetSdk = 34
-        versionCode = 17
+        targetSdk = 35
+        versionCode = 18
         versionName = "1.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
