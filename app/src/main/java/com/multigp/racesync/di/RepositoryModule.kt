@@ -8,11 +8,13 @@ import com.multigp.racesync.data.repository.ChaptersRepositoryImpl
 import com.multigp.racesync.data.repository.LoginRepositoryImpl
 import com.multigp.racesync.data.repository.ProfileRepositoryImpl
 import com.multigp.racesync.data.repository.RacesRepositoryImpl
+import com.multigp.racesync.data.repository.StandingsRepositoryImpl
 import com.multigp.racesync.data.repository.dataSource.OnboardingDataSource
 import com.multigp.racesync.domain.repositories.ChaptersRepository
 import com.multigp.racesync.domain.repositories.LoginRepository
 import com.multigp.racesync.domain.repositories.ProfileRepository
 import com.multigp.racesync.domain.repositories.RacesRepository
+import com.multigp.racesync.domain.repositories.StandingsRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -57,4 +59,7 @@ object RepositoryModule {
         apiKey: String,
     ): RacesRepository =
         RacesRepositoryImpl(raceSyncApi, raceSyncDB, locationClient, dataStore, apiKey)
+
+    @Provides
+    fun provideStandingsRepository(): StandingsRepository = StandingsRepositoryImpl()
 }

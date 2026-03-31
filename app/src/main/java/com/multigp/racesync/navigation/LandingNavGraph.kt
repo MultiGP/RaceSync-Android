@@ -8,6 +8,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.multigp.racesync.domain.model.StandingSeason
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
@@ -17,6 +18,8 @@ import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.standings.StandingsListScreen
+import com.multigp.racesync.screens.standings.StandingsScreen
 
 @Composable
 fun LandingNavGraph(
@@ -90,12 +93,27 @@ fun LandingNavGraph(
         }
 
         composable(route = GqRanking.route) {
-            NotificationWebViewScreen(
+            StandingsListScreen(
                 onMenuClicked = onMenuClicked,
-                url = GqRanking.webUrl,
-                title = GqRanking.title,
-                showTitle = true
+                onSeasonSelected = { season ->
+                    navController.navigate("${StandingsDetail.route}/${season.value}")
+                }
             )
+        }
+
+        composable(
+            route = StandingsDetail.routeWithArgs,
+            arguments = StandingsDetail.arguments
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(StandingsDetail.seasonArg)
+                ?.let { seasonValue ->
+                    val season = StandingSeason.values().find { it.value == seasonValue }
+                        ?: StandingSeason.Y2025
+                    StandingsScreen(
+                        season = season,
+                        onGoBack = { navController.popBackStack() }
+                    )
+                }
         }
 
         composable(
