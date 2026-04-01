@@ -43,6 +43,8 @@ import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -148,7 +150,9 @@ fun StandingsScreen(
             when (val state = standingsUiState) {
                 is UiState.Loading -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
                         CircularProgressIndicator(
@@ -159,7 +163,9 @@ fun StandingsScreen(
 
                 is UiState.Error -> {
                     Box(
-                        modifier = Modifier.fillMaxSize(),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
                         Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -181,7 +187,9 @@ fun StandingsScreen(
                     val standings = state.data
                     if (standings.isEmpty()) {
                         Box(
-                            modifier = Modifier.fillMaxSize(),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .weight(1f),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(
@@ -197,13 +205,14 @@ fun StandingsScreen(
                             isFiltered = searchQuery.length >= 2
                         )
 
-                        // Main standings list
+                        // Main standings list with pull-to-refresh
                         Box(modifier = Modifier.weight(1f)) {
                             StandingsList(
                                 standings = standings,
                                 listState = listState,
                                 myUserId = myUserId,
-                                onMyRowClicked = { showBadgeDialog = true }
+                                onMyRowClicked = { showBadgeDialog = true },
+                                onPullToRefresh = { viewModel.refresh() }
                             )
 
                             // Pinned user row - shows when their row scrolls out of view
@@ -342,11 +351,23 @@ private fun StandingsList(
     listState: LazyListState,
     myUserId: String?,
     modifier: Modifier = Modifier,
-    onMyRowClicked: () -> Unit = {}
+    onMyRowClicked: () -> Unit = {},
+    onPullToRefresh: () -> Unit = {}
 ) {
+    val canScrollUp by remember { derivedStateOf { listState.canScrollBackward } }
+
     LazyColumn(
         state = listState,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier
+            .fillMaxSize()
+            .pointerInput(Unit) {
+                detectVerticalDragGestures { _, dragAmount ->
+                    // If at the top of the list and dragging down
+                    if (!canScrollUp && dragAmount > 80f) {
+                        onPullToRefresh()
+                    }
+                }
+            }
     ) {
         itemsIndexed(
             items = standings,

@@ -6,4 +6,5 @@ import kotlinx.coroutines.flow.Flow
 
 interface StandingsRepository {
     suspend fun fetchStandings(season: StandingSeason): Flow<List<Standing>>
+    fun clearCache(season: StandingSeason)
 }

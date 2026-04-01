@@ -17,6 +17,10 @@ class StandingsRepositoryImpl : StandingsRepository {
 
     private val cache = mutableMapOf<StandingSeason, List<Standing>>()
 
+    override fun clearCache(season: StandingSeason) {
+        cache.remove(season)
+    }
+
     override suspend fun fetchStandings(season: StandingSeason): Flow<List<Standing>> = flow {
         // Return cached data if available
         cache[season]?.let {

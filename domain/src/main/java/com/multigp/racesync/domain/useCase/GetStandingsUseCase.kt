@@ -11,4 +11,8 @@ class GetStandingsUseCase(
     suspend operator fun invoke(season: StandingSeason): Flow<List<Standing>> {
         return standingsRepository.fetchStandings(season)
     }
+
+    fun clearCache(season: StandingSeason) {
+        standingsRepository.clearCache(season)
+    }
 }
