@@ -19,9 +19,13 @@ data class Standing(
             return "$flag $firstName '$userName' $lastName"
         }
 
+    /** True when this is a single-season entry (no season2 data) */
+    val isSingleSeason: Boolean
+        get() = season2.isBlank()
+
     val subtitleLabel: String
         get() {
-            return if (season1 == "2023") {
+            return if (isSingleSeason) {
                 formatTime(season1Score)
             } else {
                 val spring = "Spring: ${formatTime(season1Score)}"
@@ -32,7 +36,7 @@ data class Standing(
 
     val score1Label: String
         get() {
-            return if (season1 == "2023") {
+            return if (isSingleSeason) {
                 formatTime(season1Score)
             } else {
                 "Spring: ${formatTime(season1Score)}"
@@ -41,7 +45,7 @@ data class Standing(
 
     val score2Label: String
         get() {
-            return if (season1 == "2023") "" else "Summer: ${formatTime(season2Score)}"
+            return if (isSingleSeason) "" else "Summer: ${formatTime(season2Score)}"
         }
 
     val positionWithSuffix: String
@@ -78,11 +82,13 @@ data class Standing(
     }
 }
 
-enum class StandingSeason(val value: String) {
-    Y2025("2025"),
-    Y2024("2024"),
-    Y2023("2023");
+enum class StandingSeason(val value: String, val isDualSeason: Boolean) {
+    Y2026("2026", false),
+    Y2025("2025", true),
+    Y2024("2024", true),
+    Y2023("2023", false);
 
     val title: String get() = "$value MultiGP Global Qualifier"
     val shortTitle: String get() = "MultiGP GQ $value"
+    val isSingleSeason: Boolean get() = !isDualSeason
 }

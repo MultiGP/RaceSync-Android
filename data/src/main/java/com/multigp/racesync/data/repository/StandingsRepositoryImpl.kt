@@ -61,7 +61,7 @@ class StandingsRepositoryImpl : StandingsRepository {
     private fun buildStandingsUrl(season: StandingSeason): String {
         val baseUrl = "https://www.multigp.com/MultiGP/views/viewZipperSeasonResults.php"
 
-        return if (season != StandingSeason.Y2023) {
+        return if (season.isDualSeason) {
             "$baseUrl?season1=${season.value}Summer&season2=${season.value}Spring&exportcsv=true"
         } else {
             "$baseUrl?season1=${season.value}&exportcsv=true"
@@ -73,7 +73,7 @@ class StandingsRepositoryImpl : StandingsRepository {
             "position", "firstName", "userName", "lastName", "userId",
             "chapterName", "email", "country", "season1", "season1Score"
         )
-        if (season != StandingSeason.Y2023) {
+        if (season.isDualSeason) {
             headers.addAll(listOf("season2", "season2Score"))
         }
         return headers
@@ -125,20 +125,26 @@ class StandingsRepositoryImpl : StandingsRepository {
 
         val keys = lines.first().split(",").map { it.trim() }
 
-        Log.d("Standings", "CSV headers: $keys")
+        Log.d("Standings", "CSV headers (${keys.size}): $keys")
+        Log.d("Standings", "Total data lines: ${lines.size - 1}")
         if (lines.size > 1) {
-            Log.d("Standings", "First data line: ${lines[1]}")
+            val firstValues = lines[1].split(",")
+            Log.d("Standings", "First data line (${firstValues.size} cols): ${lines[1]}")
         }
 
         val standings = mutableListOf<Standing>()
 
         for (line in lines.drop(1)) {
             val values = line.split(",").map { it.trim() }
-            if (values.size != keys.size) {
+            if (values.size < keys.size) {
                 Log.d("Standings", "Skipping line (${values.size} values vs ${keys.size} keys): $line")
                 continue
             }
+            if (values.size > keys.size) {
+                Log.d("Standings", "Extra columns (${values.size} values vs ${keys.size} keys), using first ${keys.size}: $line")
+            }
 
+            // Zip only as many values as we have keys (ignore extra columns)
             val map = keys.zip(values).toMap()
 
             val standing = Standing(
@@ -151,8 +157,8 @@ class StandingsRepositoryImpl : StandingsRepository {
                 country = map["country"] ?: "",
                 season1 = map["season1"] ?: "",
                 season1Score = map["season1Score"]?.toDoubleOrNull() ?: 0.0,
-                season2 = if (season != StandingSeason.Y2023) (map["season2"] ?: "") else "",
-                season2Score = if (season != StandingSeason.Y2023) (map["season2Score"]?.toDoubleOrNull() ?: 0.0) else 0.0
+                season2 = if (season.isDualSeason) (map["season2"] ?: "") else "",
+                season2Score = if (season.isDualSeason) (map["season2Score"]?.toDoubleOrNull() ?: 0.0) else 0.0
             )
 
             if (standing.position > 0) {
