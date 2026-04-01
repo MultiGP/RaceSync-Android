@@ -61,6 +61,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -84,6 +85,7 @@ import com.multigp.racesync.domain.model.Standing
 import com.multigp.racesync.domain.model.StandingSeason
 import com.multigp.racesync.viewmodels.StandingsViewModel
 import com.multigp.racesync.viewmodels.UiState
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -103,6 +105,7 @@ fun StandingsScreen(
     val myProfilePictureUrl by viewModel.myProfilePictureUrl.collectAsState()
     val listState = rememberLazyListState()
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var showBadgeDialog by remember { mutableStateOf(false) }
 
@@ -211,7 +214,7 @@ fun StandingsScreen(
                                 standings = standings,
                                 listState = listState,
                                 myUserId = myUserId,
-                                onMyRowClicked = { showBadgeDialog = true },
+                                onShareClicked = { showBadgeDialog = true },
                                 onPullToRefresh = { viewModel.refresh() }
                             )
 
@@ -221,7 +224,16 @@ fun StandingsScreen(
                                 PinnedUserRow(
                                     standing = standing,
                                     modifier = Modifier.align(Alignment.BottomCenter),
-                                    onClick = { showBadgeDialog = true }
+                                    onTap = {
+                                        // Scroll to user's position in the list
+                                        val myIndex = standings.indexOfFirst { it.userId == myUserId }
+                                        if (myIndex >= 0) {
+                                            scope.launch {
+                                                listState.animateScrollToItem(myIndex)
+                                            }
+                                        }
+                                    },
+                                    onShare = { showBadgeDialog = true }
                                 )
                             }
                         }
@@ -351,7 +363,7 @@ private fun StandingsList(
     listState: LazyListState,
     myUserId: String?,
     modifier: Modifier = Modifier,
-    onMyRowClicked: () -> Unit = {},
+    onShareClicked: () -> Unit = {},
     onPullToRefresh: () -> Unit = {}
 ) {
     val canScrollUp by remember { derivedStateOf { listState.canScrollBackward } }
@@ -378,7 +390,7 @@ private fun StandingsList(
                 standing = standing,
                 isAlternateRow = index % 2 == 1,
                 isCurrentUser = isCurrentUser,
-                onClick = if (isCurrentUser) onMyRowClicked else null
+                onShareClicked = if (isCurrentUser) onShareClicked else null
             )
             HorizontalDivider(
                 thickness = 0.5.dp,
@@ -394,7 +406,7 @@ private fun StandingRow(
     isAlternateRow: Boolean = false,
     isCurrentUser: Boolean = false,
     modifier: Modifier = Modifier,
-    onClick: (() -> Unit)? = null
+    onShareClicked: (() -> Unit)? = null
 ) {
     val backgroundColor = when {
         isCurrentUser -> MaterialTheme.colorScheme.primaryContainer
@@ -418,7 +430,6 @@ private fun StandingRow(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
-            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -452,16 +463,19 @@ private fun StandingRow(
             )
         }
 
-        // Share icon for current user
-        if (isCurrentUser) {
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "Share standing",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier
-                    .size(20.dp)
-                    .clickable { onClick?.invoke() }
-            )
+        // Share icon for current user — only this triggers the badge
+        if (isCurrentUser && onShareClicked != null) {
+            IconButton(
+                onClick = onShareClicked,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share standing",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -470,7 +484,8 @@ private fun StandingRow(
 private fun PinnedUserRow(
     standing: Standing,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit = {}
+    onTap: () -> Unit = {},
+    onShare: () -> Unit = {}
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
@@ -481,7 +496,7 @@ private fun PinnedUserRow(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(MaterialTheme.colorScheme.primaryContainer)
-                .clickable { onClick() }
+                .clickable { onTap() }
                 .padding(horizontal = 12.dp, vertical = 10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -510,12 +525,17 @@ private fun PinnedUserRow(
                     overflow = TextOverflow.Ellipsis
                 )
             }
-            Icon(
-                imageVector = Icons.Default.Share,
-                contentDescription = "Share standing",
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                modifier = Modifier.size(20.dp)
-            )
+            IconButton(
+                onClick = onShare,
+                modifier = Modifier.size(36.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = "Share standing",
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
     }
 }
@@ -649,19 +669,33 @@ private fun StandingBadgePreview(
                         )
                 )
 
+                // MultiGP logo (top-left)
+                Image(
+                    painter = painterResource(id = R.drawable.icn_mgp_small_white),
+                    contentDescription = "MultiGP",
+                    modifier = Modifier
+                        .align(Alignment.TopStart)
+                        .padding(16.dp)
+                        .size(36.dp)
+                )
+
+                // Year (top-right)
+                Text(
+                    text = season.value,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(16.dp)
+                )
+
                 // Rank number overlay (bottom-left)
                 Column(
                     modifier = Modifier
                         .align(Alignment.BottomStart)
                         .padding(start = 20.dp, bottom = 16.dp)
                 ) {
-                    // MultiGP icon (replaces checkered flag)
-                    Image(
-                        painter = painterResource(id = R.drawable.icn_mgp_small_white),
-                        contentDescription = "MultiGP",
-                        modifier = Modifier.size(32.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
                     Text(
                         text = standing.positionWithSuffix,
                         fontSize = 64.sp,
@@ -867,13 +901,22 @@ private fun renderBadgeBitmap(
     }
     canvas.drawRect(0f, 0f, width.toFloat(), photoHeight.toFloat(), overlayPaint)
 
-    // MultiGP icon (replaces checkered flag)
+    // MultiGP icon (top-left)
     val mgpIcon = BitmapFactory.decodeResource(context.resources, R.drawable.icn_mgp_small_white)
     if (mgpIcon != null) {
-        val iconSize = 40
-        val iconDest = Rect(20, photoHeight - 145, 20 + iconSize, photoHeight - 145 + iconSize)
+        val iconSize = 50
+        val iconDest = Rect(20, 20, 20 + iconSize, 20 + iconSize)
         canvas.drawBitmap(mgpIcon, null, iconDest, null)
     }
+
+    // Year (top-right)
+    val yearPaintTop = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.WHITE
+        textSize = 26f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
+        textAlign = Paint.Align.RIGHT
+    }
+    canvas.drawText(season.value, width - 20f, 42f, yearPaintTop)
 
     // Rank number
     val rankPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
@@ -935,13 +978,13 @@ private fun renderBadgeBitmap(
         canvas.drawText(standing.score2Label, 20f, scoreY, scorePaint)
     }
 
-    // GQ MultiGP logo (bottom-right)
+    // GQ MultiGP logo (bottom-right of info panel)
     val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.standing_badge_logo)
     if (logoBitmap != null) {
         val logoH = 80
         val logoW = (logoBitmap.width.toFloat() / logoBitmap.height * logoH).toInt()
         val logoX = width - logoW - 20
-        val logoY = (infoTop + 65f).toInt()
+        val logoY = (infoTop + 50f).toInt()
         val logoDest = Rect(logoX, logoY, logoX + logoW, logoY + logoH)
         canvas.drawBitmap(logoBitmap, null, logoDest, null)
     }
