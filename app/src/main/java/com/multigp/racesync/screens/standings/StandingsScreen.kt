@@ -3,15 +3,16 @@ package com.multigp.racesync.screens.standings
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.Color as AndroidColor
 import android.graphics.LinearGradient
 import android.graphics.Paint
-import android.graphics.RectF
+import android.graphics.Rect
 import android.graphics.Shader
 import android.graphics.Typeface
 import android.net.Uri
-import android.util.TypedValue
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -22,6 +23,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,11 +34,14 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -57,7 +62,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
+import androidx.compose.foundation.Image
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -65,12 +75,17 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
+import com.multigp.racesync.R
 import com.multigp.racesync.domain.model.Standing
 import com.multigp.racesync.domain.model.StandingSeason
 import com.multigp.racesync.viewmodels.StandingsViewModel
 import com.multigp.racesync.viewmodels.UiState
 import java.io.File
 import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 @Composable
 fun StandingsScreen(
@@ -215,9 +230,10 @@ fun StandingsScreen(
             StandingBadgeDialog(
                 standing = standing,
                 season = season,
+                profilePictureUrl = myProfilePictureUrl,
                 onDismiss = { showBadgeDialog = false },
                 onShare = {
-                    shareBadgeImage(context, standing, season)
+                    shareBadgeImage(context, standing, season, myProfilePictureUrl)
                     showBadgeDialog = false
                 }
             )
@@ -507,49 +523,57 @@ private fun RankBadge(
 }
 
 // ============================================================
-// Standing Badge Dialog & Share
+// Standing Badge Dialog & Share (iOS-matching design)
 // ============================================================
+
+private val BadgeDarkBlue = Color(0xFF232B5B)
+private val BadgeYellow = Color(0xFFF9D749)
 
 @Composable
 private fun StandingBadgeDialog(
     standing: Standing,
     season: StandingSeason,
+    profilePictureUrl: String?,
     onDismiss: () -> Unit,
     onShare: () -> Unit
 ) {
     androidx.compose.ui.window.Dialog(onDismissRequest = onDismiss) {
-        Surface(
-            shape = MaterialTheme.shapes.large,
-            tonalElevation = 6.dp
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Column(
-                modifier = Modifier.padding(24.dp),
-                horizontalAlignment = Alignment.CenterHorizontally
+            // Badge card preview
+            StandingBadgePreview(
+                standing = standing,
+                season = season,
+                profilePictureUrl = profilePictureUrl
+            )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Share button (iOS style: white rounded button)
+            Button(
+                onClick = onShare,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(50.dp),
+                shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = Color.White,
+                    contentColor = Color.Black
+                )
             ) {
-                // Badge preview
-                StandingBadgePreview(standing = standing, season = season)
-
-                Spacer(modifier = Modifier.height(20.dp))
-
-                // Share button
-                androidx.compose.material3.Button(
-                    onClick = onShare,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Share,
-                        contentDescription = null,
-                        modifier = Modifier.size(18.dp)
-                    )
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Text("Share My Standing")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                androidx.compose.material3.TextButton(onClick = onDismiss) {
-                    Text("Close")
-                }
+                Icon(
+                    imageVector = Icons.Default.Share,
+                    contentDescription = null,
+                    modifier = Modifier.size(18.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = "Share to...",
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp
+                )
             }
         }
     }
@@ -559,194 +583,347 @@ private fun StandingBadgeDialog(
 private fun StandingBadgePreview(
     standing: Standing,
     season: StandingSeason,
+    profilePictureUrl: String?,
     modifier: Modifier = Modifier
 ) {
     Surface(
         modifier = modifier.fillMaxWidth(),
-        shape = MaterialTheme.shapes.medium,
-        color = Color(0xFF1A1A2E)
+        shape = RoundedCornerShape(12.dp),
+        color = BadgeDarkBlue
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // Rank
-            Text(
-                text = standing.positionWithSuffix,
-                fontSize = 48.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            )
+        Column(modifier = Modifier.fillMaxWidth()) {
+            // ---- Top section: Profile photo with gradient overlay ----
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1f) // Square photo area
+                    .clip(RoundedCornerShape(topStart = 12.dp, topEnd = 12.dp))
+            ) {
+                // Profile photo
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(profilePictureUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = "Profile photo",
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
 
-            Spacer(modifier = Modifier.height(8.dp))
+                // Gradient overlay (bottom to top, red-dark fading to transparent)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                colors = listOf(
+                                    Color.Transparent,
+                                    Color(0x33111133),
+                                    Color(0x99111133),
+                                    Color(0xCCCC0000)
+                                ),
+                                startY = 0f,
+                                endY = Float.POSITIVE_INFINITY
+                            )
+                        )
+                )
 
-            // Name with flag
-            Text(
-                text = standing.displayName,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = Color.White,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-
-            Spacer(modifier = Modifier.height(4.dp))
-
-            // Subtitle
-            Text(
-                text = "Fastest 3 Consecutive Laps",
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.7f)
-            )
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Scores
-            if (standing.score1Label.isNotEmpty()) {
-                BadgeScoreRow(label = standing.score1Label)
+                // Rank number overlay (bottom-left)
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.BottomStart)
+                        .padding(start = 20.dp, bottom = 16.dp)
+                ) {
+                    // MultiGP icon (replaces checkered flag)
+                    Image(
+                        painter = painterResource(id = R.drawable.icn_mgp_small_white),
+                        contentDescription = "MultiGP",
+                        modifier = Modifier.size(32.dp)
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = standing.positionWithSuffix,
+                        fontSize = 64.sp,
+                        fontWeight = FontWeight.Black,
+                        color = Color.White,
+                        lineHeight = 64.sp
+                    )
+                    Text(
+                        text = "Global Rank",
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium,
+                        color = Color.White.copy(alpha = 0.9f)
+                    )
+                }
             }
-            if (standing.score2Label.isNotEmpty()) {
+
+            // ---- Bottom section: Info panel (dark blue) ----
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BadgeDarkBlue)
+                    .padding(horizontal = 20.dp, vertical = 16.dp)
+            ) {
+                // Pilot name with flag
+                Text(
+                    text = standing.displayName,
+                    fontSize = 16.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
                 Spacer(modifier = Modifier.height(4.dp))
-                BadgeScoreRow(label = standing.score2Label)
+
+                // Subtitle
+                Text(
+                    text = "Fastest 3 Consecutive Laps",
+                    fontSize = 12.sp,
+                    color = Color(0xFF6D6D77)
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Scores row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column {
+                        if (standing.score1Label.isNotEmpty()) {
+                            Text(
+                                text = standing.score1Label,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = BadgeYellow
+                            )
+                        }
+                        if (standing.score2Label.isNotEmpty()) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = standing.score2Label,
+                                fontSize = 15.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = BadgeYellow
+                            )
+                        }
+                    }
+
+                    // GQ MultiGP logo (right side)
+                    Image(
+                        painter = painterResource(id = R.drawable.standing_badge_logo),
+                        contentDescription = "GQ MultiGP",
+                        modifier = Modifier
+                            .height(50.dp)
+                            .width(70.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                }
             }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            // Season tag
-            Text(
-                text = season.title,
-                style = MaterialTheme.typography.bodySmall,
-                color = Color.White.copy(alpha = 0.5f)
-            )
         }
     }
-}
-
-@Composable
-private fun BadgeScoreRow(label: String) {
-    Text(
-        text = label,
-        style = MaterialTheme.typography.bodyLarge,
-        fontWeight = FontWeight.SemiBold,
-        color = Color(0xFFFFD700) // Gold/yellow for scores
-    )
 }
 
 // ============================================================
 // Share Badge as Image
 // ============================================================
 
-private fun shareBadgeImage(context: Context, standing: Standing, season: StandingSeason) {
-    val bitmap = renderBadgeBitmap(context, standing, season)
+private fun shareBadgeImage(
+    context: Context,
+    standing: Standing,
+    season: StandingSeason,
+    profilePictureUrl: String?
+) {
+    // Launch on a background thread to download profile photo
+    Thread {
+        val profileBitmap = downloadProfileBitmap(profilePictureUrl)
+        val bitmap = renderBadgeBitmap(context, standing, season, profileBitmap)
 
-    // Save bitmap to cache directory
-    val cachePath = File(context.cacheDir, "images")
-    cachePath.mkdirs()
-    val file = File(cachePath, "standing_badge.png")
-    FileOutputStream(file).use { out ->
-        bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
-    }
+        // Save bitmap to cache directory
+        val cachePath = File(context.cacheDir, "images")
+        cachePath.mkdirs()
+        val file = File(cachePath, "standing_badge.png")
+        FileOutputStream(file).use { out ->
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, out)
+        }
 
-    val uri: Uri = FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        file
-    )
+        val uri: Uri = FileProvider.getUriForFile(
+            context,
+            "${context.packageName}.provider",
+            file
+        )
 
-    val shareIntent = Intent(Intent.ACTION_SEND).apply {
-        type = "image/png"
-        putExtra(Intent.EXTRA_STREAM, uri)
-        putExtra(Intent.EXTRA_TEXT, "${standing.displayName} - ${standing.positionWithSuffix} in ${season.title}")
-        addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-    }
+        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, uri)
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "${standing.displayName} - ${standing.positionWithSuffix} in ${season.title}"
+            )
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
 
-    context.startActivity(Intent.createChooser(shareIntent, "Share Standing"))
+        // Must start activity on main thread
+        android.os.Handler(android.os.Looper.getMainLooper()).post {
+            context.startActivity(Intent.createChooser(shareIntent, "Share Standing"))
+        }
+    }.start()
 }
 
-private fun renderBadgeBitmap(context: Context, standing: Standing, season: StandingSeason): Bitmap {
+private fun downloadProfileBitmap(url: String?): Bitmap? {
+    if (url.isNullOrBlank()) return null
+    return try {
+        val connection = URL(url).openConnection() as HttpURLConnection
+        connection.connectTimeout = 10000
+        connection.readTimeout = 10000
+        connection.doInput = true
+        connection.connect()
+        val inputStream = connection.inputStream
+        val bitmap = BitmapFactory.decodeStream(inputStream)
+        inputStream.close()
+        connection.disconnect()
+        bitmap
+    } catch (e: Exception) {
+        Log.e("StandingsBadge", "Failed to download profile photo", e)
+        null
+    }
+}
+
+private fun renderBadgeBitmap(
+    context: Context,
+    standing: Standing,
+    season: StandingSeason,
+    profileBitmap: Bitmap?
+): Bitmap {
     val width = 540
-    val height = 400
-    val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
+    val photoHeight = 540
+    val infoHeight = 180
+    val totalHeight = photoHeight + infoHeight
+    val bitmap = Bitmap.createBitmap(width, totalHeight, Bitmap.Config.ARGB_8888)
     val canvas = Canvas(bitmap)
 
-    val density = context.resources.displayMetrics.density
+    // ---- Top section: Profile photo ----
+    if (profileBitmap != null) {
+        // Scale and center-crop the profile image to fill 540x540
+        val srcW = profileBitmap.width
+        val srcH = profileBitmap.height
+        val scale = maxOf(width.toFloat() / srcW, photoHeight.toFloat() / srcH)
+        val scaledW = (srcW * scale).toInt()
+        val scaledH = (srcH * scale).toInt()
+        val offsetX = (width - scaledW) / 2
+        val offsetY = (photoHeight - scaledH) / 2
+        val destRect = Rect(offsetX, offsetY, offsetX + scaledW, offsetY + scaledH)
+        canvas.drawBitmap(profileBitmap, null, destRect, null)
+    } else {
+        // Fallback: dark gradient background if no photo
+        val fallbackPaint = Paint().apply {
+            shader = LinearGradient(
+                0f, 0f, 0f, photoHeight.toFloat(),
+                AndroidColor.parseColor("#333355"),
+                AndroidColor.parseColor("#1A1A2E"),
+                Shader.TileMode.CLAMP
+            )
+        }
+        canvas.drawRect(0f, 0f, width.toFloat(), photoHeight.toFloat(), fallbackPaint)
+    }
 
-    // Background gradient
-    val bgPaint = Paint().apply {
+    // Gradient overlay on the photo (bottom to top, red-dark fading to transparent)
+    val overlayPaint = Paint().apply {
         shader = LinearGradient(
-            0f, 0f, 0f, height.toFloat(),
-            AndroidColor.parseColor("#1A1A2E"),
-            AndroidColor.parseColor("#16213E"),
+            0f, 0f,
+            0f, photoHeight.toFloat(),
+            intArrayOf(
+                AndroidColor.parseColor("#00000000"),  // Transparent at top
+                AndroidColor.parseColor("#33111133"),
+                AndroidColor.parseColor("#99111133"),
+                AndroidColor.parseColor("#CCCC0000")   // Red at bottom
+            ),
+            floatArrayOf(0f, 0.4f, 0.7f, 1f),
             Shader.TileMode.CLAMP
         )
     }
-    canvas.drawRect(0f, 0f, width.toFloat(), height.toFloat(), bgPaint)
+    canvas.drawRect(0f, 0f, width.toFloat(), photoHeight.toFloat(), overlayPaint)
 
-    // Rank text
+    // MultiGP icon (replaces checkered flag)
+    val mgpIcon = BitmapFactory.decodeResource(context.resources, R.drawable.icn_mgp_small_white)
+    if (mgpIcon != null) {
+        val iconSize = 40
+        val iconDest = Rect(20, photoHeight - 145, 20 + iconSize, photoHeight - 145 + iconSize)
+        canvas.drawBitmap(mgpIcon, null, iconDest, null)
+    }
+
+    // Rank number
     val rankPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = AndroidColor.WHITE
-        textSize = 72f
+        textSize = 80f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.LEFT
     }
-    canvas.drawText(standing.positionWithSuffix, width / 2f, 90f, rankPaint)
+    canvas.drawText(standing.positionWithSuffix, 20f, photoHeight - 40f, rankPaint)
 
-    // Checkered flag emoji + Name
+    // "Global Rank" text
+    val globalRankPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
+        color = AndroidColor.parseColor("#E6FFFFFF")
+        textSize = 20f
+        typeface = Typeface.create(Typeface.DEFAULT, Typeface.NORMAL)
+        textAlign = Paint.Align.LEFT
+    }
+    canvas.drawText("Global Rank", 22f, photoHeight - 16f, globalRankPaint)
+
+    // ---- Bottom section: Dark blue info panel ----
+    val infoPaint = Paint().apply {
+        color = AndroidColor.parseColor("#232B5B")
+    }
+    canvas.drawRect(0f, photoHeight.toFloat(), width.toFloat(), totalHeight.toFloat(), infoPaint)
+
+    val infoTop = photoHeight.toFloat()
+
+    // Pilot name with flag
     val namePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
         color = AndroidColor.WHITE
-        textSize = 28f
+        textSize = 22f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.LEFT
     }
-    canvas.drawText(standing.displayName, width / 2f, 135f, namePaint)
+    canvas.drawText(standing.displayName, 20f, infoTop + 30f, namePaint)
 
     // Subtitle
     val subtitlePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = AndroidColor.parseColor("#AAAAAA")
-        textSize = 20f
-        textAlign = Paint.Align.CENTER
+        color = AndroidColor.parseColor("#6D6D77")
+        textSize = 16f
+        textAlign = Paint.Align.LEFT
     }
-    canvas.drawText("Fastest 3 Consecutive Laps", width / 2f, 170f, subtitlePaint)
-
-    // Divider line
-    val dividerPaint = Paint().apply {
-        color = AndroidColor.parseColor("#333355")
-        strokeWidth = 2f
-    }
-    canvas.drawLine(40f, 195f, width - 40f, 195f, dividerPaint)
+    canvas.drawText("Fastest 3 Consecutive Laps", 20f, infoTop + 52f, subtitlePaint)
 
     // Score labels in yellow
     val scorePaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = AndroidColor.parseColor("#FFD700")
-        textSize = 26f
+        color = AndroidColor.parseColor("#F9D749")
+        textSize = 20f
         typeface = Typeface.create(Typeface.DEFAULT, Typeface.BOLD)
-        textAlign = Paint.Align.CENTER
+        textAlign = Paint.Align.LEFT
     }
 
+    var scoreY = infoTop + 85f
     if (standing.score1Label.isNotEmpty()) {
-        canvas.drawText(standing.score1Label, width / 2f, 240f, scorePaint)
+        canvas.drawText(standing.score1Label, 20f, scoreY, scorePaint)
+        scoreY += 26f
     }
     if (standing.score2Label.isNotEmpty()) {
-        canvas.drawText(standing.score2Label, width / 2f, 280f, scorePaint)
+        canvas.drawText(standing.score2Label, 20f, scoreY, scorePaint)
     }
 
-    // Season title at bottom
-    val seasonPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = AndroidColor.parseColor("#666688")
-        textSize = 18f
-        textAlign = Paint.Align.CENTER
+    // GQ MultiGP logo (bottom-right)
+    val logoBitmap = BitmapFactory.decodeResource(context.resources, R.drawable.standing_badge_logo)
+    if (logoBitmap != null) {
+        val logoH = 80
+        val logoW = (logoBitmap.width.toFloat() / logoBitmap.height * logoH).toInt()
+        val logoX = width - logoW - 20
+        val logoY = (infoTop + 65f).toInt()
+        val logoDest = Rect(logoX, logoY, logoX + logoW, logoY + logoH)
+        canvas.drawBitmap(logoBitmap, null, logoDest, null)
     }
-    canvas.drawText(season.title, width / 2f, 340f, seasonPaint)
-
-    // MultiGP branding
-    val brandPaint = Paint(Paint.ANTI_ALIAS_FLAG).apply {
-        color = AndroidColor.parseColor("#888888")
-        textSize = 14f
-        textAlign = Paint.Align.CENTER
-    }
-    canvas.drawText("MultiGP Global Qualifier", width / 2f, 375f, brandPaint)
 
     return bitmap
 }
