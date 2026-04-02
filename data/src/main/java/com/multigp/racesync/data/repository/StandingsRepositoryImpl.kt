@@ -12,10 +12,11 @@ import java.io.BufferedReader
 import java.io.InputStreamReader
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 
 class StandingsRepositoryImpl : StandingsRepository {
 
-    private val cache = mutableMapOf<StandingSeason, List<Standing>>()
+    private val cache = ConcurrentHashMap<StandingSeason, List<Standing>>()
 
     override fun clearCache(season: StandingSeason) {
         cache.remove(season)

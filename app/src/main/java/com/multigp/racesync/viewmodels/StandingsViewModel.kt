@@ -32,9 +32,6 @@ class StandingsViewModel @Inject constructor(
     private val _myProfilePictureUrl = MutableStateFlow<String?>(null)
     val myProfilePictureUrl: StateFlow<String?> = _myProfilePictureUrl.asStateFlow()
 
-    private val _isRefreshing = MutableStateFlow(false)
-    val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
-
     private var allStandings: List<Standing> = emptyList()
     private var currentSeason: StandingSeason? = null
 
@@ -60,26 +57,8 @@ class StandingsViewModel @Inject constructor(
 
     fun fetchStandings(season: StandingSeason) {
         if (season == currentSeason && allStandings.isNotEmpty()) return
-
         currentSeason = season
-        viewModelScope.launch {
-            _standingsUiState.value = UiState.Loading
-            try {
-                useCases.getStandingsUseCase(season).collect { standings ->
-                    allStandings = standings
-                    // Find logged-in user's standing
-                    val userId = _myUserId.value
-                    _myStanding.value = if (userId != null) {
-                        standings.find { it.userId == userId }
-                    } else null
-                    _standingsUiState.value = UiState.Success(applyFilter(standings))
-                }
-            } catch (exception: Exception) {
-                _standingsUiState.value = UiState.Error(
-                    exception.localizedMessage ?: "Failed to load standings"
-                )
-            }
-        }
+        loadStandings(season)
     }
 
     fun onSearchQueryChanged(query: String) {
@@ -90,34 +69,33 @@ class StandingsViewModel @Inject constructor(
     }
 
     fun refresh() {
-        // Prevent multiple rapid refresh triggers
         if (_standingsUiState.value is UiState.Loading) return
 
         currentSeason?.let { season ->
-            _isRefreshing.value = true
             currentSeason = null
             allStandings = emptyList()
-            _standingsUiState.value = UiState.Loading
-            // Clear repository cache so we get fresh data from the network
             useCases.getStandingsUseCase.clearCache(season)
-            viewModelScope.launch {
-                try {
-                    useCases.getStandingsUseCase(season).collect { standings ->
-                        allStandings = standings
-                        currentSeason = season
-                        val userId = _myUserId.value
-                        _myStanding.value = if (userId != null) {
-                            standings.find { it.userId == userId }
-                        } else null
-                        _standingsUiState.value = UiState.Success(applyFilter(standings))
-                    }
-                } catch (exception: Exception) {
-                    _standingsUiState.value = UiState.Error(
-                        exception.localizedMessage ?: "Failed to load standings"
-                    )
-                } finally {
-                    _isRefreshing.value = false
+            loadStandings(season)
+        }
+    }
+
+    private fun loadStandings(season: StandingSeason) {
+        viewModelScope.launch {
+            _standingsUiState.value = UiState.Loading
+            try {
+                useCases.getStandingsUseCase(season).collect { standings ->
+                    allStandings = standings
+                    currentSeason = season
+                    val userId = _myUserId.value
+                    _myStanding.value = if (userId != null) {
+                        standings.find { it.userId == userId }
+                    } else null
+                    _standingsUiState.value = UiState.Success(applyFilter(standings))
                 }
+            } catch (exception: Exception) {
+                _standingsUiState.value = UiState.Error(
+                    exception.localizedMessage ?: "Failed to load standings"
+                )
             }
         }
     }

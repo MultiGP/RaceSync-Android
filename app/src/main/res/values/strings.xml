@@ -81,5 +81,21 @@
     <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
     <string name="receive_notifications_from_zippyq">Enable Notifications</string>
 
+    <!-- Standings -->
+    <string name="standings_back">Back</string>
+    <string name="standings_filter_pilots">Filter pilots</string>
+    <string name="standings_clear_search">Clear search</string>
+    <string name="standings_share">Share standing</string>
+    <string name="standings_share_to">Share to…</string>
+    <string name="standings_share_standing">Share Standing</string>
+    <string name="standings_global_rank">Global Rank</string>
+    <string name="standings_fastest_laps">Fastest 3 Consecutive Laps</string>
+    <string name="standings_profile_photo">Profile photo</string>
+    <string name="standings_no_results">No Results</string>
+    <string name="standings_no_standings">No standings available</string>
+    <string name="standings_error_title">Could not load the season standings.</string>
+    <string name="standings_error_retry">Please try again later.</string>
+    <string name="standings_results_count">%d results</string>
+    <string name="standings_section_header">Fastest 3 Consecutive Laps  •  %d pilots</string>
 
 </resources>

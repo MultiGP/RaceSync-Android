@@ -30,7 +30,7 @@ fun StandingsListScreen(
     onMenuClicked: () -> Unit = {},
     onSeasonSelected: (StandingSeason) -> Unit = {}
 ) {
-    val seasons = StandingSeason.values().toList()
+    val seasons = StandingSeason.entries
 
     Scaffold(
         topBar = {
