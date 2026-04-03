@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -14,30 +15,40 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.rememberNavController
 import com.multigp.racesync.navigation.OnboardingNavGraph
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LoginUiState
 import com.multigp.racesync.viewmodels.LoginViewModel
-import com.multigp.racesync.viewmodels.UiState
 import dagger.hilt.android.AndroidEntryPoint
+
+private val RaceSyncRed = Color(0xFF8D181B)
 
 @AndroidEntryPoint
 class OnboardingActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
+        val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            RaceSyncApp()
+            val viewModel: LoginViewModel = hiltViewModel()
+            val loginUiState by viewModel.loginUiState.collectAsState()
+
+            // Keep the system splash screen visible while initializing
+            splashScreen.setKeepOnScreenCondition {
+                loginUiState is LoginUiState.Initializing
+            }
+
+            RaceSyncApp(viewModel = viewModel)
         }
     }
 }
@@ -55,9 +66,11 @@ fun RaceSyncApp(
     RaceSyncTheme {
         when (loginUiState) {
             is LoginUiState.Initializing -> {
+                // Red background with white logo — matches the system splash screen
                 Box(
                     modifier
                         .fillMaxSize()
+                        .background(RaceSyncRed)
                         .padding(horizontal = 48.dp),
                     contentAlignment = Alignment.Center
                 ) {
