@@ -23,7 +23,7 @@
         <activity
             android:name=".OnboardingActivity"
             android:exported="true"
-            android:theme="@style/Theme.RaceSync"
+            android:theme="@style/Theme.RaceSync.Splash"
             android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
