@@ -1,6 +1,9 @@
 package com.multigp.racesync.composables.bottombars
 
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.BottomNavigation
@@ -30,7 +33,9 @@ fun RaceDetailsBottomBar(
     val scope = rememberCoroutineScope()
 
     BottomNavigation(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()),
         backgroundColor = MaterialTheme.colorScheme.background
     ) {
         tabs.forEachIndexed { index, tabItem ->
