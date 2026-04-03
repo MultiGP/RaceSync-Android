@@ -53,15 +53,20 @@ fun StandingsScreen(
         viewModel.fetchStandings(season)
     }
 
-    // Determine if user's row is visible in the list
-    val isMyRowVisible by remember {
+    // Track where the user's row is relative to the visible viewport
+    // VISIBLE = on screen, ABOVE = scrolled off the top, BELOW = below the viewport
+    val myRowPosition by remember {
         derivedStateOf {
-            if (myStanding == null) return@derivedStateOf true
-            val standings = (standingsUiState as? UiState.Success)?.data ?: return@derivedStateOf true
+            if (myStanding == null) return@derivedStateOf MyRowPosition.VISIBLE
+            val standings = (standingsUiState as? UiState.Success)?.data ?: return@derivedStateOf MyRowPosition.VISIBLE
             val myIndex = standings.indexOfFirst { it.userId == myUserId }
-            if (myIndex < 0) return@derivedStateOf true
+            if (myIndex < 0) return@derivedStateOf MyRowPosition.VISIBLE
+
             val visibleItems = listState.layoutInfo.visibleItemsInfo
-            visibleItems.any { it.index == myIndex }
+            if (visibleItems.any { it.index == myIndex }) return@derivedStateOf MyRowPosition.VISIBLE
+
+            val firstVisible = visibleItems.firstOrNull()?.index ?: return@derivedStateOf MyRowPosition.BELOW
+            if (myIndex < firstVisible) MyRowPosition.ABOVE else MyRowPosition.BELOW
         }
     }
 
@@ -158,10 +163,12 @@ fun StandingsScreen(
                             )
 
                             val standing = myStanding
-                            if (standing != null && !isMyRowVisible && searchQuery.length < 2) {
+                            if (standing != null && myRowPosition != MyRowPosition.VISIBLE && searchQuery.length < 2) {
+                                val pinAlignment = if (myRowPosition == MyRowPosition.ABOVE)
+                                    Alignment.TopCenter else Alignment.BottomCenter
                                 PinnedUserRow(
                                     standing = standing,
-                                    modifier = Modifier.align(Alignment.BottomCenter),
+                                    modifier = Modifier.align(pinAlignment),
                                     onTap = {
                                         val myIndex = standings.indexOfFirst { it.userId == myUserId }
                                         if (myIndex >= 0) {
@@ -199,4 +206,16 @@ fun StandingsScreen(
             )
         }
     }
+}
+
+/**
+ * Tracks where the signed-in user's row is relative to the visible list viewport.
+ */
+private enum class MyRowPosition {
+    /** Row is currently visible on screen */
+    VISIBLE,
+    /** Row has scrolled off the top of the viewport */
+    ABOVE,
+    /** Row is below the visible viewport */
+    BELOW
 }
