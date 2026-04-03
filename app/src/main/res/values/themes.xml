@@ -2,4 +2,11 @@
 <resources>
 
     <style name="Theme.RaceSync" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <style name="Theme.RaceSync.Splash" parent="Theme.SplashScreen">
+        <item name="windowSplashScreenBackground">@color/racesync_red</item>
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
+        <item name="postSplashScreenTheme">@style/Theme.RaceSync</item>
+    </style>
+
 </resources>
