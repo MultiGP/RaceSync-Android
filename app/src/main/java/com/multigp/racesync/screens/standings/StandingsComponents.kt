@@ -24,6 +24,8 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -32,6 +34,7 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -47,31 +50,34 @@ import androidx.compose.ui.unit.sp
 import com.multigp.racesync.R
 import com.multigp.racesync.domain.model.Standing
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StandingsTopBar(
     title: String,
     modifier: Modifier = Modifier,
     onGoBack: () -> Unit = {}
 ) {
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        Box(modifier = modifier.fillMaxWidth()) {
+    CenterAlignedTopAppBar(
+        modifier = modifier,
+        title = {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleLarge,
-                fontWeight = FontWeight.SemiBold,
-                modifier = modifier.align(Alignment.Center)
+                fontWeight = FontWeight.SemiBold
             )
-            IconButton(
-                modifier = modifier.align(Alignment.CenterStart),
-                onClick = onGoBack
-            ) {
+        },
+        navigationIcon = {
+            IconButton(onClick = onGoBack) {
                 Icon(
                     imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                     contentDescription = stringResource(R.string.standings_back)
                 )
             }
-        }
-    }
+        },
+        colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surface
+        )
+    )
 }
 
 @Composable
