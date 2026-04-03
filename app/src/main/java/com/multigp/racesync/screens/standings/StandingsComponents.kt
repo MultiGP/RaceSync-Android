@@ -23,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -155,6 +156,7 @@ internal fun StandingsList(
     myUserId: String?,
     modifier: Modifier = Modifier,
     onShareClicked: () -> Unit = {},
+    onPilotSelected: (String) -> Unit = {},
     onPullToRefresh: () -> Unit = {}
 ) {
     val canScrollUp by remember { derivedStateOf { listState.canScrollBackward } }
@@ -180,7 +182,8 @@ internal fun StandingsList(
                 standing = standing,
                 isAlternateRow = index % 2 == 1,
                 isCurrentUser = isCurrentUser,
-                onShareClicked = if (isCurrentUser) onShareClicked else null
+                onShareClicked = if (isCurrentUser) onShareClicked else null,
+                onTap = { onPilotSelected(standing.userName) }
             )
             HorizontalDivider(
                 thickness = 0.5.dp,
@@ -196,7 +199,8 @@ internal fun StandingRow(
     isAlternateRow: Boolean = false,
     isCurrentUser: Boolean = false,
     modifier: Modifier = Modifier,
-    onShareClicked: (() -> Unit)? = null
+    onShareClicked: (() -> Unit)? = null,
+    onTap: () -> Unit = {}
 ) {
     val backgroundColor = when {
         isCurrentUser -> MaterialTheme.colorScheme.primaryContainer
@@ -220,6 +224,7 @@ internal fun StandingRow(
         modifier = modifier
             .fillMaxWidth()
             .background(backgroundColor)
+            .clickable { onTap() }
             .padding(horizontal = 12.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -263,6 +268,13 @@ internal fun StandingRow(
                     modifier = Modifier.size(20.dp)
                 )
             }
+        } else {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(24.dp)
+            )
         }
     }
 }

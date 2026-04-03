@@ -36,7 +36,8 @@ fun StandingsScreen(
     season: StandingSeason,
     modifier: Modifier = Modifier,
     viewModel: StandingsViewModel = hiltViewModel(),
-    onGoBack: () -> Unit = {}
+    onGoBack: () -> Unit = {},
+    onPilotSelected: (String) -> Unit = {}
 ) {
     val standingsUiState by viewModel.standingsUiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
@@ -159,6 +160,7 @@ fun StandingsScreen(
                                 listState = listState,
                                 myUserId = myUserId,
                                 onShareClicked = { showBadgeDialog = true },
+                                onPilotSelected = onPilotSelected,
                                 onPullToRefresh = { viewModel.refresh() }
                             )
 

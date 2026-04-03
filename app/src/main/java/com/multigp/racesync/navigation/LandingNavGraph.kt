@@ -111,7 +111,10 @@ fun LandingNavGraph(
                         ?: StandingSeason.Y2025
                     StandingsScreen(
                         season = season,
-                        onGoBack = { navController.popBackStack() }
+                        onGoBack = { navController.popBackStack() },
+                        onPilotSelected = { pilotUserName ->
+                            navController.navigate(route = "pilot_info/${pilotUserName}")
+                        }
                     )
                 }
         }
