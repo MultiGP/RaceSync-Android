@@ -164,6 +164,13 @@ object VisitMultiGPShop : NavDestination {
     override val webUrl = "https://www.multigp.com/webstore/"
 }
 
+object Series : NavDestination {
+    override val icon = null
+    override val title = "Series"
+    override val route = "series"
+    override val webUrl = null
+}
+
 object GqRanking : NavDestination {
     override val iconPainterId = R.drawable.ic_tropy
     override val title = "Standings"
@@ -207,7 +214,6 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
-    GqRanking,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,

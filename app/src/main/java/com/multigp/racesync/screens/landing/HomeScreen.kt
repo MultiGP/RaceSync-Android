@@ -2,6 +2,7 @@ package com.multigp.racesync.screens.landing
 
 import android.Manifest
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,13 +37,12 @@ import com.multigp.racesync.composables.JoinRaceUI
 import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
 import com.multigp.racesync.composables.ResignRaceUI
-import com.multigp.racesync.composables.topbars.HomeScreenTopBar
+import com.multigp.racesync.composables.topbars.HomeScreenTabs
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 import com.multigp.racesync.viewmodels.LandingViewModel
-import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 
 @OptIn(
@@ -52,9 +52,6 @@ import kotlinx.coroutines.launch
 fun HomeScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
-    onMenuClicked: () -> Unit = {},
-    onChapterClicked: (String?) -> Unit = {},
-    onProfileClicked: (String) -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
@@ -68,8 +65,6 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
-    val profileUiState by viewModel.uiState.collectAsState()
-    val homeChapterImageUiState by viewModel.homeChapterImageUiState.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -94,33 +89,11 @@ fun HomeScreen(
     val permissionState = rememberMultiplePermissionsState(permissions = permissions)
 
     Scaffold(
+        contentWindowInsets = WindowInsets(0, 0, 0, 0),
         topBar = {
-            HomeScreenTopBar(
+            HomeScreenTabs(
                 tabs = landingTabs,
-                pagerState = pagerState,
-                onMenuClicked = onMenuClicked,
-                onChapterClicked = {
-                    (profileUiState as? UiState.Success)?.data?.let {
-                        onChapterClicked(it.homeChapterId)
-                    }
-                },
-                chapterImage = when (val homeChapterImage = homeChapterImageUiState) {
-                    is UiState.Success -> homeChapterImage.data
-                    else -> null
-                },
-                onProfileClicked = {
-                    (profileUiState as? UiState.Success)?.data?.let {
-                        onProfileClicked(it.userName)
-                    }
-                },
-                profileImage = when (profileUiState) {
-                    is UiState.Success -> {
-                        val profile = (profileUiState as UiState.Success).data
-                        profile.profilePictureUrl
-                    }
-
-                    else -> null
-                }
+                pagerState = pagerState
             )
         },
         floatingActionButton = {

@@ -81,6 +81,12 @@
     <string name="permissions_location_rationale">Kindly grant access to location services to find all the events happening around you.</string>
     <string name="receive_notifications_from_zippyq">Enable Notifications</string>
 
+    <!-- Bottom Tabs -->
+    <string name="tab_races">Races</string>
+    <string name="tab_series">Series</string>
+    <string name="tab_standings">Standings</string>
+    <string name="series_coming_soon">Series feature coming soon</string>
+
     <!-- Standings -->
     <string name="standings_back">Back</string>
     <string name="standings_filter_pilots">Filter pilots</string>

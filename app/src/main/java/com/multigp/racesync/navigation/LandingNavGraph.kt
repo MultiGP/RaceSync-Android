@@ -1,5 +1,7 @@
 package com.multigp.racesync.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -18,6 +20,7 @@ import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.series.SeriesPlaceholderScreen
 import com.multigp.racesync.screens.standings.StandingsListScreen
 import com.multigp.racesync.screens.standings.StandingsScreen
 
@@ -30,17 +33,12 @@ fun LandingNavGraph(
     NavHost(
         navController = navController,
         startDestination = Landing.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
     ) {
         composable(route = Landing.route) {
             HomeScreen(
-                onMenuClicked = onMenuClicked,
-                onChapterClicked = { chapterID ->
-                    navController.navigate(route = "chapter_details/${chapterID}")
-                },
-                onProfileClicked = { pilotUserName ->
-                    navController.navigate(route = "pilot_info/${pilotUserName}")
-                },
                 onRaceSelected = { race ->
                     navController.navigate("${RaceDetails.route}/${race.id}")
                 }
@@ -50,6 +48,10 @@ fun LandingNavGraph(
             DesignTrackScreen(
                 onMenuClicked = onMenuClicked
             )
+        }
+
+        composable(route = Series.route) {
+            SeriesPlaceholderScreen()
         }
 
         composable(route = ObstaclesBuildGuide.route) {
@@ -94,7 +96,6 @@ fun LandingNavGraph(
 
         composable(route = GqRanking.route) {
             StandingsListScreen(
-                onMenuClicked = onMenuClicked,
                 onSeasonSelected = { season ->
                     navController.navigate("${StandingsDetail.route}/${season.value}")
                 }

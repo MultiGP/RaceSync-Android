@@ -14,47 +14,33 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.multigp.racesync.composables.topbars.CommonTopBar
 import com.multigp.racesync.domain.model.StandingSeason
 
 @Composable
 fun StandingsListScreen(
     modifier: Modifier = Modifier,
-    onMenuClicked: () -> Unit = {},
     onSeasonSelected: (StandingSeason) -> Unit = {}
 ) {
     val seasons = StandingSeason.entries
 
-    Scaffold(
-        topBar = {
-            CommonTopBar(
-                title = "Standings",
-                onMenuClicked = onMenuClicked
+    LazyColumn(
+        modifier = modifier.fillMaxSize()
+    ) {
+        items(seasons) { season ->
+            SeasonRow(
+                season = season,
+                onClick = { onSeasonSelected(season) }
             )
-        }
-    ) { paddingValues ->
-        LazyColumn(
-            modifier = modifier
-                .fillMaxSize()
-                .padding(paddingValues)
-        ) {
-            items(seasons) { season ->
-                SeasonRow(
-                    season = season,
-                    onClick = { onSeasonSelected(season) }
-                )
-                HorizontalDivider(
-                    thickness = 1.dp,
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                )
-            }
+            HorizontalDivider(
+                thickness = 1.dp,
+                color = MaterialTheme.colorScheme.surfaceVariant
+            )
         }
     }
 }
