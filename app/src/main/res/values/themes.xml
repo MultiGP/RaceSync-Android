@@ -5,7 +5,7 @@
 
     <style name="Theme.RaceSync.Splash" parent="Theme.SplashScreen">
         <item name="windowSplashScreenBackground">@color/racesync_red</item>
-        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher_round</item>
+        <item name="windowSplashScreenAnimatedIcon">@android:color/transparent</item>
         <item name="postSplashScreenTheme">@style/Theme.RaceSync</item>
     </style>
 

@@ -2,22 +2,29 @@ package com.multigp.racesync.screens.landing
 
 import android.Manifest
 import android.os.Build
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.statusBars
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
-import androidx.compose.material3.Divider
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
@@ -37,14 +44,17 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import coil.compose.AsyncImage
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.isGranted
 import com.google.accompanist.permissions.rememberPermissionState
@@ -54,15 +64,23 @@ import com.google.firebase.messaging.messaging
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PermissionDialog
 import com.multigp.racesync.composables.RationaleDialog
+import com.multigp.racesync.composables.bottombars.HomeBottomBar
+import com.multigp.racesync.composables.bottombars.HomeTab
+import com.multigp.racesync.navigation.GqRanking
 import com.multigp.racesync.navigation.Landing
 import com.multigp.racesync.navigation.LandingNavGraph
 import com.multigp.racesync.navigation.Logout
 import com.multigp.racesync.navigation.NavDestination
+import com.multigp.racesync.navigation.Series
 import com.multigp.racesync.navigation.drawerMenu
 import com.multigp.racesync.viewmodels.DrawerContentViewModel
 import com.multigp.racesync.viewmodels.LandingViewModel
+import com.multigp.racesync.viewmodels.UiState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+
+/** Top-level routes where the bottom tab bar should be visible. */
+private val bottomBarRoutes = setOf(Landing.route, GqRanking.route, Series.route)
 
 @Composable
 fun LandingScreen(
@@ -72,8 +90,26 @@ fun LandingScreen(
     onLogout: () -> Unit = {},
 ) {
     val scope = rememberCoroutineScope()
+    val landingViewModel: LandingViewModel = hiltViewModel()
+    val profileUiState by landingViewModel.uiState.collectAsState()
+
     var selectedMenuItem by rememberSaveable {
         mutableStateOf(Landing.route)
+    }
+    var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Races) }
+
+    // Observe current route to control bottom bar visibility
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination?.route
+    val showBottomBar = currentRoute in bottomBarRoutes
+
+    // Sync selected tab when navigating via drawer or back stack
+    LaunchedEffect(currentRoute) {
+        when (currentRoute) {
+            Landing.route -> selectedTab = HomeTab.Races
+            Series.route -> selectedTab = HomeTab.Series
+            GqRanking.route -> selectedTab = HomeTab.Standings
+        }
     }
 
     BackHandler(onBack = {
@@ -95,21 +131,115 @@ fun LandingScreen(
                         onLogout()
                     } else {
                         selectedMenuItem = route
-                        navController.navigate(route)
+                        navController.navigate(route) {
+                            popUpTo(Landing.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
                     }
                 }
             }
         }
     ) {
-        LandingNavGraph(
-            navController = navController,
-            modifier = modifier,
-            onMenuClicked = {
-                scope.launch {
-                    drawerState.open()
-                }
+        Column(modifier = Modifier.fillMaxSize()) {
+            // Shared top bar — stays fixed across all tab routes, hidden on drill-down screens
+            if (showBottomBar) {
+                SharedHomeTopBar(
+                    onMenuClicked = {
+                        scope.launch { drawerState.open() }
+                    },
+                    profileImage = (profileUiState as? UiState.Success)?.data?.profilePictureUrl,
+                    onProfileClicked = {
+                        (profileUiState as? UiState.Success)?.data?.let {
+                            navController.navigate("pilot_info/${it.userName}")
+                        }
+                    }
+                )
             }
-        )
+
+            // Navigation content fills remaining vertical space
+            Box(modifier = Modifier.weight(1f)) {
+                LandingNavGraph(
+                    navController = navController,
+                    modifier = modifier,
+                    onMenuClicked = {
+                        scope.launch {
+                            drawerState.open()
+                        }
+                    }
+                )
+            }
+
+            // Bottom tabs — only on tab routes
+            if (showBottomBar) {
+                HomeBottomBar(
+                    selectedTab = selectedTab,
+                    onTabSelected = { tab ->
+                        selectedTab = tab
+                        val route = when (tab) {
+                            HomeTab.Races -> Landing.route
+                            HomeTab.Series -> Series.route
+                            HomeTab.Standings -> GqRanking.route
+                        }
+                        navController.navigate(route) {
+                            popUpTo(Landing.route) { saveState = true }
+                            launchSingleTop = true
+                            restoreState = true
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+/**
+ * Shared top bar shown on all bottom-tab screens.
+ * Displays the hamburger menu, centered RaceSync logo, and profile picture.
+ * Lives outside the NavHost so it never transitions.
+ */
+@Composable
+private fun SharedHomeTopBar(
+    onMenuClicked: () -> Unit,
+    profileImage: String?,
+    onProfileClicked: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(top = WindowInsets.statusBars.asPaddingValues().calculateTopPadding())
+        ) {
+            IconButton(
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = onMenuClicked
+            ) {
+                Image(
+                    imageVector = Icons.Default.Menu,
+                    contentDescription = "Menu"
+                )
+            }
+            Image(
+                modifier = Modifier
+                    .height(48.dp)
+                    .align(Alignment.Center),
+                painter = painterResource(id = R.drawable.racesync_logo),
+                contentScale = ContentScale.Inside,
+                contentDescription = null,
+            )
+            AsyncImage(
+                model = profileImage,
+                contentDescription = "Profile",
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .align(Alignment.CenterEnd)
+                    .clickable { onProfileClicked() }
+                    .padding(10.dp)
+                    .size(25.dp)
+                    .clip(CircleShape)
+            )
+        }
     }
 }
 

@@ -1,5 +1,7 @@
 package com.multigp.racesync.navigation
 
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
@@ -8,6 +10,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
+import com.multigp.racesync.domain.model.StandingSeason
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
@@ -17,6 +20,9 @@ import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.series.SeriesPlaceholderScreen
+import com.multigp.racesync.screens.standings.StandingsListScreen
+import com.multigp.racesync.screens.standings.StandingsScreen
 
 @Composable
 fun LandingNavGraph(
@@ -27,17 +33,12 @@ fun LandingNavGraph(
     NavHost(
         navController = navController,
         startDestination = Landing.route,
-        modifier = modifier
+        modifier = modifier,
+        enterTransition = { EnterTransition.None },
+        exitTransition = { ExitTransition.None }
     ) {
         composable(route = Landing.route) {
             HomeScreen(
-                onMenuClicked = onMenuClicked,
-                onChapterClicked = { chapterID ->
-                    navController.navigate(route = "chapter_details/${chapterID}")
-                },
-                onProfileClicked = { pilotUserName ->
-                    navController.navigate(route = "pilot_info/${pilotUserName}")
-                },
                 onRaceSelected = { race ->
                     navController.navigate("${RaceDetails.route}/${race.id}")
                 }
@@ -47,6 +48,10 @@ fun LandingNavGraph(
             DesignTrackScreen(
                 onMenuClicked = onMenuClicked
             )
+        }
+
+        composable(route = Series.route) {
+            SeriesPlaceholderScreen()
         }
 
         composable(route = ObstaclesBuildGuide.route) {
@@ -90,12 +95,29 @@ fun LandingNavGraph(
         }
 
         composable(route = GqRanking.route) {
-            NotificationWebViewScreen(
-                onMenuClicked = onMenuClicked,
-                url = GqRanking.webUrl,
-                title = GqRanking.title,
-                showTitle = true
+            StandingsListScreen(
+                onSeasonSelected = { season ->
+                    navController.navigate("${StandingsDetail.route}/${season.value}")
+                }
             )
+        }
+
+        composable(
+            route = StandingsDetail.routeWithArgs,
+            arguments = StandingsDetail.arguments
+        ) { navBackStackEntry ->
+            navBackStackEntry.arguments?.getString(StandingsDetail.seasonArg)
+                ?.let { seasonValue ->
+                    val season = StandingSeason.values().find { it.value == seasonValue }
+                        ?: StandingSeason.Y2025
+                    StandingsScreen(
+                        season = season,
+                        onGoBack = { navController.popBackStack() },
+                        onPilotSelected = { pilotUserName ->
+                            navController.navigate(route = "pilot_info/${pilotUserName}")
+                        }
+                    )
+                }
         }
 
         composable(
