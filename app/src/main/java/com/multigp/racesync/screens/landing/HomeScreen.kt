@@ -78,6 +78,7 @@ fun HomeScreen(
     // Re-fetch data when user swipes to a tab (matches iOS viewDidAppear refresh)
     LaunchedEffect(pagerState.currentPage) {
         when (pagerState.currentPage) {
+            0 -> viewModel.fetchJoinedRaces()
             1 -> viewModel.fetchNearbyRaces()
         }
     }

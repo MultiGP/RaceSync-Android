@@ -3,9 +3,6 @@ package com.multigp.racesync.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.filter
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
@@ -38,8 +35,8 @@ class LandingViewModel @Inject constructor(
     private val _nearbyRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
     val nearbyRacesUiState: StateFlow<UiState<List<Race>>> = _nearbyRacesUiState.asStateFlow()
 
-    private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
-    val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
+    private val _joinedRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val joinedRacesUiState: StateFlow<UiState<List<Race>>> = _joinedRacesUiState.asStateFlow()
 
     private val _raceDetailsUiState =
         MutableStateFlow<UiState<Triple<Profile, Race, RaceView>>>(UiState.Loading)
@@ -100,9 +97,15 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    // In-memory cache for nearby races — matches iOS's raceCollection dictionary.
+    // In-memory caches — matches iOS's raceCollection dictionary.
     // Shown instantly on tab switch while the API refreshes in the background.
+    private var joinedRacesCache: List<Race>? = null
     private var nearbyRacesCache: List<Race>? = null
+
+    // Tracks whether a pull-to-refresh is in flight so the UI can dismiss the spinner.
+    // Using a counter avoids StateFlow deduplication issues with identical UiState values.
+    private val _refreshComplete = MutableStateFlow(0)
+    val refreshComplete: StateFlow<Int> = _refreshComplete.asStateFlow()
 
     /**
      * Fetches nearby races using the iOS "cache-first + background refresh" pattern:
@@ -141,6 +144,8 @@ class LandingViewModel @Inject constructor(
                     _nearbyRacesUiState.value =
                         UiState.Error(e.localizedMessage ?: "Failed to load nearby races")
                 }
+            } finally {
+                _refreshComplete.value++
             }
         }
     }
@@ -150,15 +155,44 @@ class LandingViewModel @Inject constructor(
         nearbyRacesCache = null
     }
 
+    /**
+     * Fetches joined races using the iOS "cache-first + background refresh" pattern:
+     *
+     * 1. If cached data exists, emit it immediately (instant tab switch)
+     * 2. Fire the API call in the background
+     * 3. When fresh data arrives, update the UI silently
+     *
+     * Only shows a loading spinner if there's no cache (first load).
+     */
     fun fetchJoinedRaces() {
         viewModelScope.launch {
-            val racesPagingData = useCases.getRacesUseCase.fetchJoinedRaces()
-            racesPagingData
-                .cachedIn(viewModelScope)
-                .collect { pagingData ->
-                    _joinedRacesPagingData.value = pagingData.filter { it.isUpcoming }
+            // Step 1: Return cached data instantly (matches iOS completion(viewModels, true, nil))
+            joinedRacesCache?.let { cached ->
+                _joinedRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                // No cache — show loading spinner (only on first load)
+                _joinedRacesUiState.value = UiState.Loading
+            }
+
+            // Step 2: Fetch fresh data in background (matches iOS forceFetch:true)
+            try {
+                val races = useCases.getRacesUseCase.fetchJoinedRaces()
+                joinedRacesCache = races
+                _joinedRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (joinedRacesCache == null) {
+                    _joinedRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load joined races")
                 }
+            } finally {
+                _refreshComplete.value++
+            }
         }
+    }
+
+    /** Clears the joined cache. Called when join/resign changes the list. */
+    fun invalidateJoinedCache() {
+        joinedRacesCache = null
     }
 
     fun fetchJoinedChapterRaces() {
@@ -260,6 +294,8 @@ class LandingViewModel @Inject constructor(
             try {
                 useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
                     _joinRaceUiState.value = UiState.Success(it)
+                    invalidateJoinedCache()
+                    fetchJoinedRaces()
                 }
             } catch (exception: Exception) {
                 _joinRaceUiState.value =
@@ -274,6 +310,8 @@ class LandingViewModel @Inject constructor(
             try {
                 useCases.getRacesUseCase.resignFromRace(raceId).collect {
                     _resignRaceUiState.value = UiState.Success(it)
+                    invalidateJoinedCache()
+                    fetchJoinedRaces()
                 }
             } catch (exception: Exception) {
                 _resignRaceUiState.value =

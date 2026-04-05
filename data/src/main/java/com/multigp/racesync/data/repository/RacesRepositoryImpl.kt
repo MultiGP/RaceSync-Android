@@ -1,13 +1,8 @@
 package com.multigp.racesync.data.repository
 
 import android.location.Location
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
-import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.BaseResponse
@@ -37,6 +32,34 @@ class RacesRepositoryImpl(
     private val raceDao = raceSyncDB.raceDao()
     private val chapterDao = raceSyncDB.chapterDao()
     private val profileDao = raceSyncDB.profileDao()
+
+    /**
+     * Fetches joined races with a direct API call — no RemoteMediator.
+     * Matches iOS: joined + upcoming filters, pageSize = 100, in-memory result.
+     */
+    override suspend fun fetchJoinedRaces(pilotId: String): List<Race> {
+        val raceRequest = RaceRequest(
+            joined = JoinedRaces(pilotId = pilotId),
+            upComing = UpcomingRaces(limit = 100, orderByDistance = false)
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 100,
+            request = request
+        )
+
+        if (!response.status) return emptyList()
+
+        // No client-side isUpcoming filter — the server already handles it
+        // via the upComing parameter in the request (matches iOS behaviour).
+        return response.data ?: emptyList()
+    }
 
     /**
      * Fetches nearby races with a direct API call — no RemoteMediator.
@@ -72,26 +95,9 @@ class RacesRepositoryImpl(
 
         if (!response.status) return emptyList()
 
-        return response.data?.filter { it.isUpcoming } ?: emptyList()
-    }
-
-    @OptIn(ExperimentalPagingApi::class)
-    override suspend fun fetchRaces(pilotId: String): Flow<PagingData<Race>> {
-        val raceRequest = RaceRequest(
-            joined = JoinedRaces(pilotId = pilotId),
-            upComing = UpcomingRaces(orderByDistance = false)
-        )
-        val request = BaseRequest(
-            apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
-        )
-        val pagingSourceFactory = { raceDao.getJoinedRaces(true) }
-        return Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = RaceRemoteMediator(
-                raceSyncApi, raceSyncDB, request
-            ),
-            pagingSourceFactory = pagingSourceFactory,
-        ).flow
+        // No client-side isUpcoming filter — the server already handles it
+        // via the upComing parameter in the request (matches iOS behaviour).
+        return response.data ?: emptyList()
     }
 
     override suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {

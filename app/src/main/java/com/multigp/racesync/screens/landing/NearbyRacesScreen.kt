@@ -42,6 +42,7 @@ fun NearbyRacesScreen(
     val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
     var isLocationEnabled by remember { mutableStateOf(isLocationServiceEnabled(context, locationManager)) }
     val uiState by viewModel.nearbyRacesUiState.collectAsState()
+    val refreshComplete by viewModel.refreshComplete.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
     // Initial load
@@ -57,11 +58,9 @@ fun NearbyRacesScreen(
         }
     }
 
-    // Stop refresh spinner when data arrives
-    LaunchedEffect(uiState) {
-        if (uiState !is UiState.Loading) {
-            pullRefreshState.endRefresh()
-        }
+    // Stop refresh spinner when fetch completes (counter avoids StateFlow deduplication)
+    LaunchedEffect(refreshComplete) {
+        pullRefreshState.endRefresh()
     }
 
     if (!isLocationEnabled) {
