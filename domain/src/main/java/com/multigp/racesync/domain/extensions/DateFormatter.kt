@@ -12,13 +12,23 @@ fun Date.formatDate(format: String? = "EEE, MMM d @ h:mm a"): String? {
 }
 
 
-fun String.toDate(format: String? = "yyyy-MM-dd hh:mm a"): Date? {
-    val formatter = SimpleDateFormat("yyyy-MM-dd hh:mm a", Locale.getDefault())
-    return try {
-        formatter.parse(this)
-    } catch (e: ParseException) {
-        null
+fun String.toDate(format: String? = null): Date? {
+    // Primary: 24-hour with seconds (matches iOS DateUtil and most API responses)
+    // Fallback: 12-hour with AM/PM (matches iOS secondary format)
+    val formats = listOf(
+        "yyyy-MM-dd HH:mm:ss",
+        "yyyy-MM-dd h:mm a",
+        "yyyy-MM-dd hh:mm a"
+    )
+    val formatsToTry = if (format != null) listOf(format) + formats else formats
+    for (fmt in formatsToTry) {
+        try {
+            return SimpleDateFormat(fmt, Locale.getDefault()).parse(this)
+        } catch (_: ParseException) {
+            // Try next format
+        }
     }
+    return null
 }
 
 fun getDateAfterMidnight(): Date{

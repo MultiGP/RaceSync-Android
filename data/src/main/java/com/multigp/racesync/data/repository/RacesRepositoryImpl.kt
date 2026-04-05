@@ -1,15 +1,9 @@
 package com.multigp.racesync.data.repository
 
 import android.location.Location
-import androidx.paging.ExperimentalPagingApi
-import androidx.paging.Pager
-import androidx.paging.PagingConfig
-import androidx.paging.PagingData
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
-import com.multigp.racesync.data.paging.RaceRemoteMediator
 import com.multigp.racesync.data.prefs.DataStoreManager
-import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
@@ -35,8 +29,62 @@ class RacesRepositoryImpl(
     private val apiKey: String
 ) : RacesRepository {
     private val raceDao = raceSyncDB.raceDao()
-    private val chapterDao = raceSyncDB.chapterDao()
-    private val profileDao = raceSyncDB.profileDao()
+
+    /**
+     * Fetches chapter races with a single direct API call — no RemoteMediator.
+     * Matches iOS: upcoming + chapterId array filters, pageSize = 100, in-memory result.
+     */
+    override suspend fun fetchChapterRaces(chapterIds: List<String>): List<Race> {
+        if (chapterIds.isEmpty()) return emptyList()
+
+        val raceRequest = RaceRequest(
+            upComing = UpcomingRaces(limit = 100, orderByDistance = false),
+            chapterId = chapterIds
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 100,
+            request = request
+        )
+
+        if (!response.status) return emptyList()
+
+        return response.data ?: emptyList()
+    }
+
+    /**
+     * Fetches joined races with a direct API call — no RemoteMediator.
+     * Matches iOS: joined + upcoming filters, pageSize = 100, in-memory result.
+     */
+    override suspend fun fetchJoinedRaces(pilotId: String): List<Race> {
+        val raceRequest = RaceRequest(
+            joined = JoinedRaces(pilotId = pilotId),
+            upComing = UpcomingRaces(limit = 100, orderByDistance = false)
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 100,
+            request = request
+        )
+
+        if (!response.status) return emptyList()
+
+        // No client-side isUpcoming filter — the server already handles it
+        // via the upComing parameter in the request (matches iOS behaviour).
+        return response.data ?: emptyList()
+    }
 
     /**
      * Fetches nearby races with a direct API call — no RemoteMediator.
@@ -72,26 +120,9 @@ class RacesRepositoryImpl(
 
         if (!response.status) return emptyList()
 
-        return response.data?.filter { it.isUpcoming } ?: emptyList()
-    }
-
-    @OptIn(ExperimentalPagingApi::class)
-    override suspend fun fetchRaces(pilotId: String): Flow<PagingData<Race>> {
-        val raceRequest = RaceRequest(
-            joined = JoinedRaces(pilotId = pilotId),
-            upComing = UpcomingRaces(orderByDistance = false)
-        )
-        val request = BaseRequest(
-            apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
-        )
-        val pagingSourceFactory = { raceDao.getJoinedRaces(true) }
-        return Pager(
-            config = PagingConfig(pageSize = 20),
-            remoteMediator = RaceRemoteMediator(
-                raceSyncApi, raceSyncDB, request
-            ),
-            pagingSourceFactory = pagingSourceFactory,
-        ).flow
+        // No client-side isUpcoming filter — the server already handles it
+        // via the upComing parameter in the request (matches iOS behaviour).
+        return response.data ?: emptyList()
     }
 
     override suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {
@@ -119,51 +150,6 @@ class RacesRepositoryImpl(
             }
         }.flowOn(Dispatchers.IO)
     }
-
-    override suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>> {
-        /*
-            Three steps involved to fetch joined chapter races
-            1. Fetch joined chapters
-            2. Fetch list of races associated with chapter -> returns race name name and id only
-            3. Fetch each race using name as search string
-        */
-
-        return flow {
-            profileDao.getProfile(id = pilotId).firstOrNull()?.let { profile->
-                val raceRequest = BaseRequest(
-                    apiKey = apiKey,
-                    sessionId = dataStore.getSessionId()!!,
-                    data = RaceRequest(
-                        upComing = UpcomingRaces(orderByDistance = false),
-                        chapterId = profile.chapterIds
-                    )
-                )
-
-                //Fetch joined chapters
-                val chapterRaces = raceDao.getChapterRaces(true)
-                if (chapterRaces.isNotEmpty()) {
-                    chapterRaces.sortedBy { it.startDate!!.toDate() }
-                    emit(chapterRaces)
-                }
-
-                val races = profile.chapterIds.map { chapterId ->
-                    raceSyncApi.fetchRaces(page = 0, pageSize = 25, raceRequest)
-                }
-                    .filter { it.status && it.data != null }
-                    .flatMap { it.data!! }
-                    .filter { it.isTodayOrUpcoming }
-                    .sortedBy { it.startDate!!.toDate() }
-
-                val uniqueRaces = races.distinctBy { it.id }
-                uniqueRaces.forEach {
-                    it.isChapterRace = true
-                }
-                raceDao.addRaces(uniqueRaces)
-                emit(uniqueRaces)
-            } ?: kotlin.run { emit(emptyList<Race>()) }
-        }.flowOn(Dispatchers.IO)
-    }
-
 
     override suspend fun fetchRace(raceId: String): Flow<Race> {
         return flow {

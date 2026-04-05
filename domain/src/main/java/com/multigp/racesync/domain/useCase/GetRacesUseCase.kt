@@ -1,7 +1,6 @@
 package com.multigp.racesync.domain.useCase
 
 import android.location.Location
-import androidx.paging.PagingData
 import com.multigp.racesync.domain.extensions.calculateDistance
 import com.multigp.racesync.domain.location.LocationCoordinate
 import com.multigp.racesync.domain.location.LocationProvider
@@ -78,14 +77,23 @@ class GetRacesUseCase(
             race
         }
 
-        return NearbyRacesResult(racesWithDistance, coordinate)
+        // Sort by startDate ascending (soonest first) — matches iOS .descending sorting
+        val sorted = racesWithDistance.sortedBy { it.formattedStartDate }
+
+        return NearbyRacesResult(sorted, coordinate)
     }
 
     // ── Joined Races ────────────────────────────────────────────────
 
-    suspend fun fetchJoinedRaces(): Flow<PagingData<Race>> {
+    /**
+     * Fetches joined races for the authenticated user.
+     * Matches iOS: resolves pilotId, single API call with joined + upcoming filters,
+     * sorted by startDate ascending (soonest first) — iOS's .descending sorting.
+     */
+    suspend fun fetchJoinedRaces(): List<Race> {
         val loginInfo = loginInfoUserCase().first()
-        return racesRepository.fetchRaces(loginInfo.second!!.id)
+        val races = racesRepository.fetchJoinedRaces(loginInfo.second!!.id)
+        return races.sortedBy { it.formattedStartDate }
     }
 
     suspend fun fetchPilotRaces(pilotUserName: String): Flow<List<Race>> {
@@ -98,9 +106,15 @@ class GetRacesUseCase(
 
     // ── Chapter Races ───────────────────────────────────────────────
 
-    suspend fun fetchJoinedChapterRaces(): Flow<List<Race>> {
-        val loginInfo = loginInfoUserCase().first()
-        return racesRepository.fetchJoinedChapterRaces(loginInfo.second!!.id)
+    /**
+     * Fetches chapter races for the authenticated user.
+     * Matches iOS: resolves chapterIds from profile, single API call with
+     * upcoming + chapterId filters, sorted by startDate ascending (soonest first).
+     */
+    suspend fun fetchChapterRaces(): List<Race> {
+        val profile = profileUseCase().first()
+        val races = racesRepository.fetchChapterRaces(profile.chapterIds)
+        return races.sortedBy { it.formattedStartDate }
     }
 
     // ── Single Race ─────────────────────────────────────────────────

@@ -3,9 +3,6 @@ package com.multigp.racesync.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.paging.PagingData
-import androidx.paging.cachedIn
-import androidx.paging.filter
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
@@ -38,8 +35,8 @@ class LandingViewModel @Inject constructor(
     private val _nearbyRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
     val nearbyRacesUiState: StateFlow<UiState<List<Race>>> = _nearbyRacesUiState.asStateFlow()
 
-    private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
-    val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
+    private val _joinedRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val joinedRacesUiState: StateFlow<UiState<List<Race>>> = _joinedRacesUiState.asStateFlow()
 
     private val _raceDetailsUiState =
         MutableStateFlow<UiState<Triple<Profile, Race, RaceView>>>(UiState.Loading)
@@ -55,9 +52,9 @@ class LandingViewModel @Inject constructor(
     private val _homeChapterImageUiState = MutableStateFlow<UiState<String?>>(UiState.Loading)
     val homeChapterImageUiState: StateFlow<UiState<String?>> = _homeChapterImageUiState.asStateFlow()
 
-    private val _joineChapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
-    val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
-        _joineChapterRacesUiState.asStateFlow()
+    private val _chapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val chapterRacesUiState: StateFlow<UiState<List<Race>>> =
+        _chapterRacesUiState.asStateFlow()
 
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
@@ -70,6 +67,10 @@ class LandingViewModel @Inject constructor(
 
     private val _resignRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
+
+    // Tracks the race ID currently being joined/resigned — drives the button spinner.
+    private val _loadingRaceId = MutableStateFlow<String?>(null)
+    val loadingRaceId: StateFlow<String?> = _loadingRaceId.asStateFlow()
 
     init {
         Log.d("viki", "Hello World")
@@ -100,9 +101,16 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    // In-memory cache for nearby races — matches iOS's raceCollection dictionary.
+    // In-memory caches — matches iOS's raceCollection dictionary.
     // Shown instantly on tab switch while the API refreshes in the background.
+    private var joinedRacesCache: List<Race>? = null
     private var nearbyRacesCache: List<Race>? = null
+    private var chapterRacesCache: List<Race>? = null
+
+    // Tracks whether a pull-to-refresh is in flight so the UI can dismiss the spinner.
+    // Using a counter avoids StateFlow deduplication issues with identical UiState values.
+    private val _refreshComplete = MutableStateFlow(0)
+    val refreshComplete: StateFlow<Int> = _refreshComplete.asStateFlow()
 
     /**
      * Fetches nearby races using the iOS "cache-first + background refresh" pattern:
@@ -141,6 +149,8 @@ class LandingViewModel @Inject constructor(
                     _nearbyRacesUiState.value =
                         UiState.Error(e.localizedMessage ?: "Failed to load nearby races")
                 }
+            } finally {
+                _refreshComplete.value++
             }
         }
     }
@@ -150,28 +160,75 @@ class LandingViewModel @Inject constructor(
         nearbyRacesCache = null
     }
 
+    /**
+     * Fetches joined races using the iOS "cache-first + background refresh" pattern:
+     *
+     * 1. If cached data exists, emit it immediately (instant tab switch)
+     * 2. Fire the API call in the background
+     * 3. When fresh data arrives, update the UI silently
+     *
+     * Only shows a loading spinner if there's no cache (first load).
+     */
     fun fetchJoinedRaces() {
         viewModelScope.launch {
-            val racesPagingData = useCases.getRacesUseCase.fetchJoinedRaces()
-            racesPagingData
-                .cachedIn(viewModelScope)
-                .collect { pagingData ->
-                    _joinedRacesPagingData.value = pagingData.filter { it.isUpcoming }
+            // Step 1: Return cached data instantly (matches iOS completion(viewModels, true, nil))
+            joinedRacesCache?.let { cached ->
+                _joinedRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                // No cache — show loading spinner (only on first load)
+                _joinedRacesUiState.value = UiState.Loading
+            }
+
+            // Step 2: Fetch fresh data in background (matches iOS forceFetch:true)
+            try {
+                val races = useCases.getRacesUseCase.fetchJoinedRaces()
+                joinedRacesCache = races
+                _joinedRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (joinedRacesCache == null) {
+                    _joinedRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load joined races")
                 }
+            } finally {
+                _refreshComplete.value++
+            }
         }
     }
 
-    fun fetchJoinedChapterRaces() {
+    /** Clears the joined cache. Called when join/resign changes the list. */
+    fun invalidateJoinedCache() {
+        joinedRacesCache = null
+    }
+
+    /**
+     * Fetches chapter races using the iOS "cache-first + background refresh" pattern.
+     */
+    fun fetchChapterRaces() {
         viewModelScope.launch {
+            chapterRacesCache?.let { cached ->
+                _chapterRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                _chapterRacesUiState.value = UiState.Loading
+            }
+
             try {
-                _joineChapterRacesUiState.value = UiState.Loading
-                useCases.getRacesUseCase.fetchJoinedChapterRaces().collect {
-                    _joineChapterRacesUiState.value = UiState.Success(it)
+                val races = useCases.getRacesUseCase.fetchChapterRaces()
+                chapterRacesCache = races
+                _chapterRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (chapterRacesCache == null) {
+                    _chapterRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load chapter races")
                 }
-            } catch (exception: Exception) {
-                _joineChapterRacesUiState.value = UiState.Error(exception.localizedMessage ?: "")
+            } finally {
+                _refreshComplete.value++
             }
         }
+    }
+
+    /** Clears the chapter cache. */
+    fun invalidateChapterCache() {
+        chapterRacesCache = null
     }
 
     fun fetchRaceView(raceId: String) {
@@ -256,30 +313,60 @@ class LandingViewModel @Inject constructor(
 
     fun joinRace(raceId: String, aircraftId: String) {
         viewModelScope.launch {
-            _joinRaceUiState.value = UiState.Loading
+            _loadingRaceId.value = raceId
             try {
                 useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
+                    updateJoinStateInCaches(raceId, isJoined = true, participantDelta = 1)
                     _joinRaceUiState.value = UiState.Success(it)
                 }
             } catch (exception: Exception) {
                 _joinRaceUiState.value =
                     UiState.Error(exception.localizedMessage ?: "Failed to join the race")
+            } finally {
+                _loadingRaceId.value = null
             }
         }
     }
 
     fun resignFromRace(raceId: String) {
         viewModelScope.launch {
-            _resignRaceUiState.value = UiState.Loading
+            _loadingRaceId.value = raceId
             try {
                 useCases.getRacesUseCase.resignFromRace(raceId).collect {
+                    updateJoinStateInCaches(raceId, isJoined = false, participantDelta = -1)
                     _resignRaceUiState.value = UiState.Success(it)
                 }
             } catch (exception: Exception) {
                 _resignRaceUiState.value =
                     UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
+            } finally {
+                _loadingRaceId.value = null
             }
         }
+    }
+
+    /**
+     * Updates the isJoined flag on a race across all in-memory caches and re-emits
+     * the UI state so only the affected button recomposes — no full-page refresh.
+     * Matches iOS's local mutation of race.isJoined in handleStateChange().
+     */
+    private fun updateJoinStateInCaches(raceId: String, isJoined: Boolean, participantDelta: Int) {
+        fun List<Race>.updateRace(): List<Race> = map { race ->
+            if (race.id == raceId) {
+                race.isJoined = isJoined
+                race.participantCount += participantDelta
+            }
+            race
+        }
+
+        joinedRacesCache = joinedRacesCache?.updateRace()
+        nearbyRacesCache = nearbyRacesCache?.updateRace()
+        chapterRacesCache = chapterRacesCache?.updateRace()
+
+        // Re-emit current tab states so Compose picks up the mutation
+        joinedRacesCache?.let { _joinedRacesUiState.value = UiState.Success(it) }
+        nearbyRacesCache?.let { _nearbyRacesUiState.value = UiState.Success(it) }
+        chapterRacesCache?.let { _chapterRacesUiState.value = UiState.Success(it) }
     }
 
     fun updateJoinRaceUiState(isClosed: Boolean = true) {
