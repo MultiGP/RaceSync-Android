@@ -68,6 +68,10 @@ class LandingViewModel @Inject constructor(
     private val _resignRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val resignRaceUiState: StateFlow<UiState<Boolean>> = _resignRaceUiState.asStateFlow()
 
+    // Tracks the race ID currently being joined/resigned — drives the button spinner.
+    private val _loadingRaceId = MutableStateFlow<String?>(null)
+    val loadingRaceId: StateFlow<String?> = _loadingRaceId.asStateFlow()
+
     init {
         Log.d("viki", "Hello World")
         initializeUserProfile()
@@ -309,34 +313,60 @@ class LandingViewModel @Inject constructor(
 
     fun joinRace(raceId: String, aircraftId: String) {
         viewModelScope.launch {
-            _joinRaceUiState.value = UiState.Loading
+            _loadingRaceId.value = raceId
             try {
                 useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
+                    updateJoinStateInCaches(raceId, isJoined = true, participantDelta = 1)
                     _joinRaceUiState.value = UiState.Success(it)
-                    invalidateJoinedCache()
-                    fetchJoinedRaces()
                 }
             } catch (exception: Exception) {
                 _joinRaceUiState.value =
                     UiState.Error(exception.localizedMessage ?: "Failed to join the race")
+            } finally {
+                _loadingRaceId.value = null
             }
         }
     }
 
     fun resignFromRace(raceId: String) {
         viewModelScope.launch {
-            _resignRaceUiState.value = UiState.Loading
+            _loadingRaceId.value = raceId
             try {
                 useCases.getRacesUseCase.resignFromRace(raceId).collect {
+                    updateJoinStateInCaches(raceId, isJoined = false, participantDelta = -1)
                     _resignRaceUiState.value = UiState.Success(it)
-                    invalidateJoinedCache()
-                    fetchJoinedRaces()
                 }
             } catch (exception: Exception) {
                 _resignRaceUiState.value =
                     UiState.Error(exception.localizedMessage ?: "Failed to resign from the race")
+            } finally {
+                _loadingRaceId.value = null
             }
         }
+    }
+
+    /**
+     * Updates the isJoined flag on a race across all in-memory caches and re-emits
+     * the UI state so only the affected button recomposes — no full-page refresh.
+     * Matches iOS's local mutation of race.isJoined in handleStateChange().
+     */
+    private fun updateJoinStateInCaches(raceId: String, isJoined: Boolean, participantDelta: Int) {
+        fun List<Race>.updateRace(): List<Race> = map { race ->
+            if (race.id == raceId) {
+                race.isJoined = isJoined
+                race.participantCount += participantDelta
+            }
+            race
+        }
+
+        joinedRacesCache = joinedRacesCache?.updateRace()
+        nearbyRacesCache = nearbyRacesCache?.updateRace()
+        chapterRacesCache = chapterRacesCache?.updateRace()
+
+        // Re-emit current tab states so Compose picks up the mutation
+        joinedRacesCache?.let { _joinedRacesUiState.value = UiState.Success(it) }
+        nearbyRacesCache?.let { _nearbyRacesUiState.value = UiState.Success(it) }
+        chapterRacesCache?.let { _chapterRacesUiState.value = UiState.Success(it) }
     }
 
     fun updateJoinRaceUiState(isClosed: Boolean = true) {

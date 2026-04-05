@@ -34,7 +34,8 @@ import com.multigp.racesync.domain.model.Race
 fun RaceCell(
     race: Race,
     modifier: Modifier = Modifier,
-    showDistance:Boolean = false,
+    showDistance: Boolean = false,
+    isLoading: Boolean = false,
     onClick: (Race) -> Unit = {},
     onRaceAction: (Race) -> Unit = {}
 ) {
@@ -82,7 +83,7 @@ fun RaceCell(
                 )
             }
             Column {
-                JoinButton(race.isJoined, race.status, onClick = {onRaceAction(race)})
+                JoinButton(race.isJoined, race.status, isLoading = isLoading, onClick = {onRaceAction(race)})
                 ParticipantsButton(text = "" + race.participantCount, onClick = {})
             }
         }

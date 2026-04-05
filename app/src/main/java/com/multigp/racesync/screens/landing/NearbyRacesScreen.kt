@@ -43,6 +43,7 @@ fun NearbyRacesScreen(
     var isLocationEnabled by remember { mutableStateOf(isLocationServiceEnabled(context, locationManager)) }
     val uiState by viewModel.nearbyRacesUiState.collectAsState()
     val refreshComplete by viewModel.refreshComplete.collectAsState()
+    val loadingRaceId by viewModel.loadingRaceId.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
     // Initial load
@@ -90,11 +91,15 @@ fun NearbyRacesScreen(
             is UiState.Success -> {
                 val races = (uiState as UiState.Success<List<Race>>).data
                 if (races.isEmpty()) {
-                    PlaceholderScreen(
-                        title = stringResource(R.string.placeholder_title_no_races),
-                        message = stringResource(R.string.placeholder_message_no_nearby_races),
-                        canRetry = false
-                    )
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        item {
+                            PlaceholderScreen(
+                                title = stringResource(R.string.placeholder_title_no_races),
+                                message = stringResource(R.string.placeholder_message_no_nearby_races),
+                                canRetry = false
+                            )
+                        }
+                    }
                 } else {
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         items(items = races, key = { it.id }) { race ->
@@ -102,6 +107,7 @@ fun NearbyRacesScreen(
                                 race,
                                 modifier = Modifier,
                                 showDistance = true,
+                                isLoading = loadingRaceId == race.id,
                                 onClick = onRaceSelected,
                                 onRaceAction = onJoinRace
                             )
@@ -112,14 +118,18 @@ fun NearbyRacesScreen(
 
             is UiState.Error -> {
                 val errorMessage = (uiState as UiState.Error).message
-                PlaceholderScreen(
-                    title = stringResource(R.string.error_title_loading_races),
-                    message = errorMessage,
-                    buttonTitle = stringResource(R.string.error_btn_title_retry),
-                    isError = true,
-                    canRetry = true,
-                    onButtonClick = { viewModel.fetchNearbyRaces() }
-                )
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item {
+                        PlaceholderScreen(
+                            title = stringResource(R.string.error_title_loading_races),
+                            message = errorMessage,
+                            buttonTitle = stringResource(R.string.error_btn_title_retry),
+                            isError = true,
+                            canRetry = true,
+                            onButtonClick = { viewModel.fetchNearbyRaces() }
+                        )
+                    }
+                }
             }
 
             is UiState.None -> { /* Initial state — nothing to show yet */ }
