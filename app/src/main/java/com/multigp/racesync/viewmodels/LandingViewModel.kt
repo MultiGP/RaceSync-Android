@@ -3,7 +3,6 @@ package com.multigp.racesync.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
@@ -58,9 +57,6 @@ class LandingViewModel @Inject constructor(
 
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
-
-    private val _aircraftsUiState = MutableStateFlow<UiState<List<Aircraft>>>(UiState.Loading)
-    val aircraftsUiState: StateFlow<UiState<List<Aircraft>>> = _aircraftsUiState.asStateFlow()
 
     private val _joinRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val joinRaceUiState: StateFlow<UiState<Boolean>> = _joinRaceUiState.asStateFlow()
@@ -292,21 +288,6 @@ class LandingViewModel @Inject constructor(
         viewModelScope.launch {
             useCases.getRacesUseCase.fetchRaceFeedOptions().collect {
                 _raceFeedOoption.value = it
-            }
-        }
-    }
-
-    fun fetchAircrafts() {
-        viewModelScope.launch {
-            _aircraftsUiState.value = UiState.Loading
-            try {
-                useCases.getAllAircraftUseCase()
-                    .collect { aircrafts ->
-                        _aircraftsUiState.value = UiState.Success(aircrafts)
-                    }
-            } catch (exception: Exception) {
-                _aircraftsUiState.value =
-                    UiState.Error(exception.localizedMessage ?: "Failed to load aircrafts")
             }
         }
     }
