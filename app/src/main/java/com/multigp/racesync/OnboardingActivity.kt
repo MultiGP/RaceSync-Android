@@ -43,10 +43,8 @@ class OnboardingActivity : ComponentActivity() {
             val viewModel: LoginViewModel = hiltViewModel()
             val loginUiState by viewModel.loginUiState.collectAsState()
 
-            // Keep the system splash screen visible while initializing
-            splashScreen.setKeepOnScreenCondition {
-                loginUiState is LoginUiState.Initializing
-            }
+            // Let the system splash dismiss quickly so the Compose
+            // initializing screen (with the crisp vector logo) takes over
 
             RaceSyncApp(viewModel = viewModel)
         }
@@ -75,9 +73,9 @@ fun RaceSyncApp(
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
-                        painter = painterResource(id = R.drawable.racesync_logo),
+                        painter = painterResource(id = R.drawable.racesync_logo_splash_white),
                         contentDescription = null,
-                        contentScale = ContentScale.Inside
+                        contentScale = ContentScale.FillWidth
                     )
                 }
             }
