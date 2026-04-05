@@ -4,5 +4,5 @@ import com.google.gson.annotations.SerializedName
 
 data class JoinRaceRequest(
     @SerializedName("aircraftId")
-    val aircraftId: String
+    val aircraftId: String? = null
 )

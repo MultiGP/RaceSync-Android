@@ -311,11 +311,11 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun joinRace(raceId: String, aircraftId: String) {
+    fun joinRace(raceId: String) {
         viewModelScope.launch {
             _loadingRaceId.value = raceId
             try {
-                useCases.getRacesUseCase.joinRace(raceId, aircraftId).collect {
+                useCases.getRacesUseCase.joinRace(raceId).collect {
                     updateJoinStateInCaches(raceId, isJoined = true, participantDelta = 1)
                     _joinRaceUiState.value = UiState.Success(it)
                 }

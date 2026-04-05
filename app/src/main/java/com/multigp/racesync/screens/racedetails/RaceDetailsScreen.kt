@@ -14,8 +14,6 @@ import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -29,7 +27,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.CustomMap
 import com.multigp.racesync.composables.JoinRaceUI
@@ -41,7 +38,6 @@ import com.multigp.racesync.composables.text.HtmlText
 import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
-import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
@@ -57,20 +53,17 @@ fun RaceDetailsScreen(
     resignRaceUiState: UiState<Boolean>,
     viewModel: LandingViewModel = hiltViewModel()
 ) {
-    var showAircraftSheet by remember { mutableStateOf(false) }
-    var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
     var showResignRaceDialog by remember { mutableStateOf(false) }
     var showRaceMap by remember { mutableStateOf(false) }
     var showMapOptionsSheet by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
-    var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
 
     val (profile, race, raceView) = data
 
     val onJoinRace: (Race) -> Unit = { raceToJoin ->
         selectedRace = raceToJoin
         if (!race.isJoined) {
-            showAircraftSheet = true
+            viewModel.joinRace(raceToJoin.id)
         } else {
             showResignRaceDialog = true
         }
@@ -82,22 +75,6 @@ fun RaceDetailsScreen(
         onJoinRace = onJoinRace,
         onShowMap = { showRaceMap = true }
     )
-
-    if (showAircraftSheet) {
-        val aircraftUiState by viewModel.aircraftsUiState.collectAsState()
-        LaunchedEffect(Unit) {
-            viewModel.fetchAircrafts()
-        }
-        AircraftsSheet(
-            uiState = aircraftUiState,
-            modifier = modifier,
-            onAircraftClick = { aircraft ->
-                selectedAircraft = aircraft
-                showJoinRaceConfirmationDialog = true
-            },
-            onSheetDissmissed = { showAircraftSheet = false }
-        )
-    }
 
     if (showRaceMap) {
         MapsBottomSheet(
@@ -117,31 +94,6 @@ fun RaceDetailsScreen(
             onSheetDissmissed = {
                 showMapOptionsSheet = false
             },
-        )
-    }
-
-    if (showJoinRaceConfirmationDialog) {
-        CustomAlertDialog(
-            title = stringResource(R.string.alert_join_race_title),
-            body = stringResource(
-                R.string.alert_join_race_message,
-                selectedAircraft?.name ?: ""
-            ),
-            confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
-            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-            onConfirm = {
-                viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            },
-            onDismiss = {
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            },
-            onDismissRequest = {
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            }
         )
     }
 
