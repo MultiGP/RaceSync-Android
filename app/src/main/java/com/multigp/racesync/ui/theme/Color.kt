@@ -66,3 +66,18 @@ val md_theme_dark_scrim = Color(0xFF000000)
 
 
 val seed = Color(0xFF8D181C)
+
+// ── Race Cell Colors (matches iOS color palette) ──
+val RaceCellDateColor = Color(0xFF8E8E98)       // iOS gray200 — date labels
+val RaceCellTitleColor = Color(0xFF0B0B0B)       // iOS black — primary text
+val RaceCellSubtitleColor = Color(0xFF6D6D77)    // iOS gray300 — subtitle text
+val RaceCellDividerColor = Color(0xFFE5E5EA)     // iOS system separator
+val RaceCellBackground = Color.White
+
+// ── Join Button Colors (matches iOS JoinButton states) ──
+val JoinButtonGreen = Color(0xFF387E29)          // iOS Color.green — join actions
+val JoinButtonClosedGray = Color(0xFFCACACF)     // iOS gray100 — closed/disabled state
+
+// ── Participant Badge Colors ──
+val ParticipantBadgeBackground = Color(0xFFEDECF3)  // iOS gray50 — badge background
+val ParticipantBadgeContent = Color(0xFF0B0B0B)      // iOS black — badge text/icon

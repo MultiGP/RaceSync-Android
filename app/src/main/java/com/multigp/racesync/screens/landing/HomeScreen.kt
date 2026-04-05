@@ -30,7 +30,6 @@ import com.google.accompanist.pager.rememberPagerState
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.rememberMultiplePermissionsState
 import com.multigp.racesync.R
-import com.multigp.racesync.composables.AircraftsSheet
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.DistanceConfigurationSheet
 import com.multigp.racesync.composables.JoinRaceUI
@@ -38,7 +37,6 @@ import com.multigp.racesync.composables.PermissionDeniedContent
 import com.multigp.racesync.composables.PermissionsHandler
 import com.multigp.racesync.composables.ResignRaceUI
 import com.multigp.racesync.composables.topbars.HomeScreenTabs
-import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.navigation.landingTabs
 import com.multigp.racesync.ui.theme.RaceSyncTheme
@@ -57,11 +55,8 @@ fun HomeScreen(
     val pagerState = rememberPagerState()
     val coroutineScope = rememberCoroutineScope()
     var showBottomSheet by remember { mutableStateOf(false) }
-    var showAircraftSheet by remember { mutableStateOf(false) }
-    var showJoinRaceConfirmationDialog by remember { mutableStateOf(false) }
     var showResignRaceDialog by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
-    var selectedAircraft by remember { mutableStateOf<Aircraft?>(null) }
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
@@ -69,7 +64,7 @@ fun HomeScreen(
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
         if (!race.isJoined) {
-            showAircraftSheet = true
+            viewModel.joinRace(race.id)
         } else {
             showResignRaceDialog = true
         }
@@ -162,46 +157,6 @@ fun HomeScreen(
             )
         }
 
-        if (showAircraftSheet) {
-            val aircraftUiState by viewModel.aircraftsUiState.collectAsState()
-            LaunchedEffect(Unit) {
-                viewModel.fetchAircrafts()
-            }
-            AircraftsSheet(
-                uiState = aircraftUiState,
-                modifier = modifier,
-                onAircraftClick = { aircraft ->
-                    selectedAircraft = aircraft
-                    showJoinRaceConfirmationDialog = true
-                },
-                onSheetDissmissed = { showAircraftSheet = false }
-            )
-        }
-    }
-
-    if (showJoinRaceConfirmationDialog) {
-        CustomAlertDialog(
-            title = stringResource(R.string.alert_join_race_title),
-            body = stringResource(
-                R.string.alert_join_race_message,
-                selectedAircraft?.name ?: ""
-            ),
-            confirmButtonTitle = stringResource(R.string.alert_join_race_lbl_btn_confirm),
-            dismissButtonTitle = stringResource(R.string.lbl_btn_cancel),
-            onConfirm = {
-                viewModel.joinRace((selectedRace?.id)!!, (selectedAircraft?.id)!!)
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            },
-            onDismiss = {
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            },
-            onDismissRequest = {
-                showJoinRaceConfirmationDialog = false
-                showAircraftSheet = false
-            }
-        )
     }
 
     JoinRaceUI(

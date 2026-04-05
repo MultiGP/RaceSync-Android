@@ -138,9 +138,9 @@ class GetRacesUseCase(
 
     // ── Join / Resign ───────────────────────────────────────────────
 
-    suspend fun joinRace(raceId: String, aircraftId: String): Flow<Boolean> {
+    suspend fun joinRace(raceId: String): Flow<Boolean> {
         val pilotId = loginInfoUserCase().first().second!!.id
-        return racesRepository.joinRace(pilotId, raceId, aircraftId)
+        return racesRepository.joinRace(pilotId, raceId)
     }
 
     suspend fun resignFromRace(raceId: String): Flow<Boolean> {

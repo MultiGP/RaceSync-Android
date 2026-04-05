@@ -184,11 +184,10 @@ class RacesRepositoryImpl(
 
     override suspend fun joinRace(
         pilotId: String,
-        raceId: String,
-        aircraftId: String
+        raceId: String
     ): Flow<Boolean> {
         val request = BaseRequest(
-            data = JoinRaceRequest(aircraftId = aircraftId),
+            data = JoinRaceRequest(),
             sessionId = dataStore.getSessionId()!!,
             apiKey = apiKey
         )

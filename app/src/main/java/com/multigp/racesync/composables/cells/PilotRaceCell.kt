@@ -83,7 +83,6 @@ fun PilotRaceCell(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ParticipantsButton(
-                        paddingValues = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                         text = "" + race.participantCount,
                         onClick = {}
                     )
