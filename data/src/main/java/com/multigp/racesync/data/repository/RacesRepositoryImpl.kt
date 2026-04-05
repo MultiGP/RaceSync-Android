@@ -1,12 +1,10 @@
 package com.multigp.racesync.data.repository
 
-import android.annotation.SuppressLint
 import android.location.Location
 import androidx.paging.ExperimentalPagingApi
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
 import androidx.paging.PagingData
-import com.google.android.gms.location.FusedLocationProviderClient
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.db.RaceSyncDB
 import com.multigp.racesync.data.paging.RaceRemoteMediator
@@ -16,28 +14,23 @@ import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
 import com.multigp.racesync.domain.model.requests.BaseRequest
-import com.multigp.racesync.domain.model.requests.ChaptersRequest
 import com.multigp.racesync.domain.model.requests.JoinRaceRequest
-import com.multigp.racesync.domain.model.requests.JoinedChapters
 import com.multigp.racesync.domain.model.requests.JoinedRaces
 import com.multigp.racesync.domain.model.requests.NearbyRaces
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpcomingRaces
+import com.multigp.racesync.domain.location.LocationCoordinate
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.tasks.await
 
-@SuppressLint("MissingPermission")
 class RacesRepositoryImpl(
     private val raceSyncApi: RaceSyncApi,
     private val raceSyncDB: RaceSyncDB,
-    private val locationClient: FusedLocationProviderClient,
     private val dataStore: DataStoreManager,
     private val apiKey: String
 ) : RacesRepository {
@@ -45,33 +38,41 @@ class RacesRepositoryImpl(
     private val chapterDao = raceSyncDB.chapterDao()
     private val profileDao = raceSyncDB.profileDao()
 
-    @OptIn(ExperimentalPagingApi::class)
-    override suspend fun fetchRaces(radius: Double): Flow<PagingData<Race>> {
-        return locationClient.lastLocation.await()?.let { location ->
-            val raceRequest = RaceRequest(
-                joined = null,
-                nearBy = NearbyRaces(location.latitude, location.longitude, radius),
-                upComing = UpcomingRaces(orderByDistance = true)
-            )
-            val request = BaseRequest(
-                apiKey = apiKey, data = raceRequest, sessionId = dataStore.getSessionId()!!
-            )
-            val pagingSourceFactory = {
-                raceDao.getAllRaces()
-            }
-            Pager(
-                //API doesn't support paging. Therefore fetching maximum races
-                config = PagingConfig(pageSize = 1000),
-                remoteMediator = RaceRemoteMediator(
-                    raceSyncApi, raceSyncDB, request
-                ),
-                pagingSourceFactory = pagingSourceFactory,
-            ).flow
-        } ?: kotlin.run {
-            flow {
-                emit(PagingData.empty())
-            }
-        }
+    /**
+     * Fetches nearby races with a direct API call — no RemoteMediator.
+     * Matches iOS: single request, pageSize = 100, in-memory result.
+     *
+     * The API handles distance filtering server-side via the radius param.
+     * We always send the radius in miles (converting from km if needed,
+     * which the UseCase layer handles before calling this).
+     */
+    override suspend fun fetchNearbyRaces(
+        coordinate: LocationCoordinate,
+        radiusMiles: Double
+    ): List<Race> {
+        val raceRequest = RaceRequest(
+            nearBy = NearbyRaces(
+                latitude = coordinate.latitude,
+                longitude = coordinate.longitude,
+                radius = radiusMiles
+            ),
+            upComing = UpcomingRaces(limit = 100, orderByDistance = true)
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 100,
+            request = request
+        )
+
+        if (!response.status) return emptyList()
+
+        return response.data?.filter { it.isUpcoming } ?: emptyList()
     }
 
     @OptIn(ExperimentalPagingApi::class)

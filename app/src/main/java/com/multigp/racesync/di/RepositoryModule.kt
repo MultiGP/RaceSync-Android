@@ -55,10 +55,9 @@ object RepositoryModule {
         raceSyncApi: RaceSyncApi,
         raceSyncDB: RaceSyncDB,
         dataStore: DataStoreManager,
-        locationClient: FusedLocationProviderClient,
         apiKey: String,
     ): RacesRepository =
-        RacesRepositoryImpl(raceSyncApi, raceSyncDB, locationClient, dataStore, apiKey)
+        RacesRepositoryImpl(raceSyncApi, raceSyncDB, dataStore, apiKey)
 
     @Provides
     fun provideStandingsRepository(): StandingsRepository = StandingsRepositoryImpl()

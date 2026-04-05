@@ -1,16 +1,11 @@
 package com.multigp.racesync.viewmodels
 
-import android.annotation.SuppressLint
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import androidx.paging.PagingData
 import androidx.paging.cachedIn
 import androidx.paging.filter
-import androidx.paging.map
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.tasks.OnCompleteListener
-import com.google.firebase.messaging.FirebaseMessaging
 import com.multigp.racesync.domain.model.Aircraft
 import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
@@ -23,7 +18,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
 sealed class UiState<out T> {
@@ -33,18 +27,16 @@ sealed class UiState<out T> {
     data class Error(val message: String) : UiState<Nothing>()
 }
 
-@SuppressLint("MissingPermission")
 @HiltViewModel
 class LandingViewModel @Inject constructor(
     val useCases: RaceSyncUseCases,
-    private val locationClient: FusedLocationProviderClient,
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow<UiState<Profile>>(UiState.None)
     val uiState: StateFlow<UiState<Profile>> = _uiState.asStateFlow()
 
-    private val _nearbyRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
-    val nearbyRacesPagingData: StateFlow<PagingData<Race>> = _nearbyRacesPagingData
+    private val _nearbyRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val nearbyRacesUiState: StateFlow<UiState<List<Race>>> = _nearbyRacesUiState.asStateFlow()
 
     private val _joinedRacesPagingData = MutableStateFlow<PagingData<Race>>(PagingData.empty())
     val joinedRacesPagingData: StateFlow<PagingData<Race>> = _joinedRacesPagingData
@@ -108,28 +100,54 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    @SuppressLint("MissingPermission")
+    // In-memory cache for nearby races — matches iOS's raceCollection dictionary.
+    // Shown instantly on tab switch while the API refreshes in the background.
+    private var nearbyRacesCache: List<Race>? = null
+
+    /**
+     * Fetches nearby races using the iOS "cache-first + background refresh" pattern:
+     *
+     * 1. If cached data exists, emit it immediately (instant tab switch)
+     * 2. Fire the API call in the background
+     * 3. When fresh data arrives, update the UI silently
+     *
+     * Only shows a loading spinner if there's no cache (first load).
+     */
     fun fetchNearbyRaces() {
         viewModelScope.launch {
-            locationClient.lastLocation.await()?.let { curLocation ->
-                val searchRadius = useCases.getRacesUseCase.fetchSearchRadius()
-                val racesPagingData = useCases.getRacesUseCase.fetchNearbyRaces(searchRadius)
-                val (radius, unit) = useCases.getRacesUseCase.fetchRaceFeedOptions().first()
-                racesPagingData
-                    .cachedIn(viewModelScope)
-                    .collect { pagingData ->
-                        _nearbyRacesPagingData.value = pagingData
-                            .filter { it.isUpcoming }
-                            .filter { race ->
-                                race.isWithInSearchRadius(curLocation, searchRadius)
-                            }
-                            .map {race ->
-                                useCases.getRacesUseCase.calculateRaceDistace(race, curLocation)
-                                race
-                            }
+            // Step 1: Return cached data instantly (matches iOS completion(viewModels, true, nil))
+            nearbyRacesCache?.let { cached ->
+                _nearbyRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                // No cache — show loading spinner (only on first load)
+                _nearbyRacesUiState.value = UiState.Loading
+            }
+
+            // Step 2: Fetch fresh data in background (matches iOS forceFetch:true)
+            try {
+                val result = useCases.getRacesUseCase.fetchNearbyRaces()
+                if (result.coordinate == null) {
+                    // Only show error if we have no cache to fall back on
+                    if (nearbyRacesCache == null) {
+                        _nearbyRacesUiState.value =
+                            UiState.Error("Unable to determine your location")
                     }
+                } else {
+                    nearbyRacesCache = result.races
+                    _nearbyRacesUiState.value = UiState.Success(result.races)
+                }
+            } catch (e: Exception) {
+                if (nearbyRacesCache == null) {
+                    _nearbyRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load nearby races")
+                }
             }
         }
+    }
+
+    /** Clears the nearby cache. Called when search radius changes. */
+    fun invalidateNearbyCache() {
+        nearbyRacesCache = null
     }
 
     fun fetchJoinedRaces() {
@@ -208,6 +226,7 @@ class LandingViewModel @Inject constructor(
     fun saveSearchRadius(radius: Double, unit: String) {
         viewModelScope.launch {
             useCases.getRacesUseCase.saveSearchRadius(radius, unit)
+            invalidateNearbyCache()
             fetchNearbyRaces()
         }
     }

@@ -13,6 +13,7 @@ import com.multigp.racesync.domain.useCase.GetRacesUseCase
 import com.multigp.racesync.domain.useCase.GetStandingsUseCase
 import com.multigp.racesync.domain.useCase.LoginUseCase
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
+import com.multigp.racesync.domain.location.LocationProvider
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -27,12 +28,13 @@ object UseCaseModule {
         chaptersRepository: ChaptersRepository,
         racesRepository: RacesRepository,
         profileRepository: ProfileRepository,
-        standingsRepository: StandingsRepository
+        standingsRepository: StandingsRepository,
+        locationProvider: LocationProvider
     ) = RaceSyncUseCases(
         performLoginUseCase = LoginUseCase(loginRepository),
         getLoginInfoUseCase = GetLoginInfoUseCase(loginRepository),
         getChaptersUseCase = GetChaptersUseCase(chaptersRepository, GetLoginInfoUseCase(loginRepository), GetProfileUseCase(profileRepository)),
-        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUseCase(loginRepository), GetProfileUseCase(profileRepository)),
+        getRacesUseCase = GetRacesUseCase(racesRepository, GetLoginInfoUseCase(loginRepository), GetProfileUseCase(profileRepository), locationProvider),
         getProfileUseCase = GetProfileUseCase(profileRepository),
         getAllAircraftUseCase = GetAllAircraftUseCase((profileRepository)),
         getStandingsUseCase = GetStandingsUseCase(standingsRepository)
