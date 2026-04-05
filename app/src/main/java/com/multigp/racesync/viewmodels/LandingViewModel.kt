@@ -52,9 +52,9 @@ class LandingViewModel @Inject constructor(
     private val _homeChapterImageUiState = MutableStateFlow<UiState<String?>>(UiState.Loading)
     val homeChapterImageUiState: StateFlow<UiState<String?>> = _homeChapterImageUiState.asStateFlow()
 
-    private val _joineChapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.Loading)
-    val joineChapterRacesUiState: StateFlow<UiState<List<Race>>> =
-        _joineChapterRacesUiState.asStateFlow()
+    private val _chapterRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val chapterRacesUiState: StateFlow<UiState<List<Race>>> =
+        _chapterRacesUiState.asStateFlow()
 
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
@@ -101,6 +101,7 @@ class LandingViewModel @Inject constructor(
     // Shown instantly on tab switch while the API refreshes in the background.
     private var joinedRacesCache: List<Race>? = null
     private var nearbyRacesCache: List<Race>? = null
+    private var chapterRacesCache: List<Race>? = null
 
     // Tracks whether a pull-to-refresh is in flight so the UI can dismiss the spinner.
     // Using a counter avoids StateFlow deduplication issues with identical UiState values.
@@ -195,17 +196,35 @@ class LandingViewModel @Inject constructor(
         joinedRacesCache = null
     }
 
-    fun fetchJoinedChapterRaces() {
+    /**
+     * Fetches chapter races using the iOS "cache-first + background refresh" pattern.
+     */
+    fun fetchChapterRaces() {
         viewModelScope.launch {
+            chapterRacesCache?.let { cached ->
+                _chapterRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                _chapterRacesUiState.value = UiState.Loading
+            }
+
             try {
-                _joineChapterRacesUiState.value = UiState.Loading
-                useCases.getRacesUseCase.fetchJoinedChapterRaces().collect {
-                    _joineChapterRacesUiState.value = UiState.Success(it)
+                val races = useCases.getRacesUseCase.fetchChapterRaces()
+                chapterRacesCache = races
+                _chapterRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (chapterRacesCache == null) {
+                    _chapterRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load chapter races")
                 }
-            } catch (exception: Exception) {
-                _joineChapterRacesUiState.value = UiState.Error(exception.localizedMessage ?: "")
+            } finally {
+                _refreshComplete.value++
             }
         }
+    }
+
+    /** Clears the chapter cache. */
+    fun invalidateChapterCache() {
+        chapterRacesCache = null
     }
 
     fun fetchRaceView(raceId: String) {

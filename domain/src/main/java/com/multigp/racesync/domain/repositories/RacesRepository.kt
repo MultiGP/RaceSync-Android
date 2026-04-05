@@ -9,8 +9,6 @@ import kotlinx.coroutines.flow.Flow
 interface RacesRepository {
     suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>>
 
-    suspend fun fetchJoinedChapterRaces(pilotId: String): Flow<List<Race>>
-
     suspend fun fetchRace(raceId: String): Flow<Race>
 
     suspend fun saveSearchRadius(radius: Double, unit: String)
@@ -24,6 +22,13 @@ interface RacesRepository {
     suspend fun calculateRaceDistance(race: Race, currentLocation: Location)
 
     suspend fun fetchRaceView(raceId: String): Flow<RaceView>
+
+    /**
+     * Fetches chapter races for the given chapter IDs from the API.
+     * Matches iOS behaviour: single API call with upcoming + chapterId filters,
+     * pageSize = 100, returns an in-memory list.
+     */
+    suspend fun fetchChapterRaces(chapterIds: List<String>): List<Race>
 
     /**
      * Fetches joined races for the given pilot from the API.

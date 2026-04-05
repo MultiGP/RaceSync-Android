@@ -80,6 +80,7 @@ fun HomeScreen(
         when (pagerState.currentPage) {
             0 -> viewModel.fetchJoinedRaces()
             1 -> viewModel.fetchNearbyRaces()
+            2 -> viewModel.fetchChapterRaces()
         }
     }
 

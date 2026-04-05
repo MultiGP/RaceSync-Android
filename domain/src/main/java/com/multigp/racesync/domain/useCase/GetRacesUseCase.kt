@@ -106,9 +106,15 @@ class GetRacesUseCase(
 
     // ── Chapter Races ───────────────────────────────────────────────
 
-    suspend fun fetchJoinedChapterRaces(): Flow<List<Race>> {
-        val loginInfo = loginInfoUserCase().first()
-        return racesRepository.fetchJoinedChapterRaces(loginInfo.second!!.id)
+    /**
+     * Fetches chapter races for the authenticated user.
+     * Matches iOS: resolves chapterIds from profile, single API call with
+     * upcoming + chapterId filters, sorted by startDate ascending (soonest first).
+     */
+    suspend fun fetchChapterRaces(): List<Race> {
+        val profile = profileUseCase().first()
+        val races = racesRepository.fetchChapterRaces(profile.chapterIds)
+        return races.sortedBy { it.formattedStartDate }
     }
 
     // ── Single Race ─────────────────────────────────────────────────
