@@ -75,6 +75,13 @@ fun HomeScreen(
         }
     }
 
+    // Re-fetch data when user swipes to a tab (matches iOS viewDidAppear refresh)
+    LaunchedEffect(pagerState.currentPage) {
+        when (pagerState.currentPage) {
+            1 -> viewModel.fetchNearbyRaces()
+        }
+    }
+
     val gotoNearbyRaces: () -> Unit = {
         coroutineScope.launch {
             pagerState.scrollToPage(1)
