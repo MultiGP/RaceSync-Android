@@ -43,13 +43,15 @@ fun PilotInformationView(
     onClickAircrafts: (String) -> Unit = {},
 ) {
     Column {
-        // ── Background + Avatar (iOS: 170pt avatar, 16:9 background) ──
+        // ── Background + Avatar ──
+        // iOS banner: 1100×360 crop (~3:1 ratio), avatar 170pt with 85% overlap
+        // Android: 3:1 ratio gives ~131dp on typical phone, avatar 100dp
         Box(
             modifier = modifier.fillMaxWidth(),
             contentAlignment = Alignment.BottomCenter
         ) {
             Image(
-                modifier = modifier.aspectRatio(1.7778f),
+                modifier = modifier.aspectRatio(3f),
                 painter = rememberAsyncImagePainter(
                     model = profile.profileBackgroundUrl,
                     placeholder = painterResource(id = R.drawable.pilot_profile_placeholder),
@@ -59,10 +61,9 @@ fun PilotInformationView(
                 contentDescription = "Pilot profile background"
             )
             AsyncCircularImage(
-                modifier = modifier
-                    .size(120.dp)
-                    .offset(y = 30.dp),
-                url = profile.profilePictureUrl
+                modifier = modifier.offset(y = 16.dp),
+                url = profile.profilePictureUrl,
+                size = 100.dp
             )
         }
 
