@@ -80,7 +80,6 @@ fun PilotChapterCell(
                 )
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     ParticipantsButton(
-                        paddingValues = PaddingValues(horizontal = 6.dp, vertical = 2.dp),
                         text = "" + chapter.memberCount,
                         onClick = {}
                     )

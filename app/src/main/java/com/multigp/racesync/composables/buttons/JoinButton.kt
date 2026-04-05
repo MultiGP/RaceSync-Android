@@ -2,10 +2,11 @@ package com.multigp.racesync.composables.buttons
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -14,6 +15,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import com.multigp.racesync.ui.theme.JoinButtonClosedGray
+import com.multigp.racesync.ui.theme.JoinButtonGreen
+import com.multigp.racesync.ui.theme.RaceCellTitleColor
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
 @Composable
@@ -31,79 +36,68 @@ fun JoinButton(
             }
         },
         enabled = status != "Closed" && !isLoading,
-        shape = MaterialTheme.shapes.small,
-        contentPadding = PaddingValues(start = 12.dp, end = 12.dp),
+        modifier = modifier.defaultMinSize(minWidth = 76.dp, minHeight = 32.dp),
+        shape = RoundedCornerShape(6.dp),
+        contentPadding = PaddingValues(horizontal = 8.dp, vertical = 5.dp),
         colors = ButtonDefaults.buttonColors(
-            containerColor = getContainerColor(status = status!!, isJoined = isJoined),
-            contentColor = getContentColor(status = status, isJoined = isJoined),
+            containerColor = resolveContainerColor(status = status ?: "Open", isJoined = isJoined),
+            contentColor = resolveContentColor(status = status ?: "Open", isJoined = isJoined),
             disabledContainerColor = if (isLoading) {
-                getContainerColor(status = status, isJoined = isJoined)
+                resolveContainerColor(status = status ?: "Open", isJoined = isJoined)
             } else {
-                Color.LightGray
+                JoinButtonClosedGray
             },
             disabledContentColor = if (isLoading) {
-                getContentColor(status = status, isJoined = isJoined)
+                resolveContentColor(status = status ?: "Open", isJoined = isJoined)
             } else {
-                Color.DarkGray
+                RaceCellTitleColor
             }
         ),
-        border = BorderStroke(1.dp, color = getBorderColor(status = status, isJoined = isJoined))
+        border = BorderStroke(1.dp, color = resolveBorderColor(status = status ?: "Open", isJoined = isJoined))
     ) {
         if (isLoading) {
             CircularProgressIndicator(
-                modifier = Modifier.size(16.dp),
+                modifier = Modifier.size(14.dp),
                 strokeWidth = 2.dp,
-                color = getContentColor(status = status, isJoined = isJoined)
+                color = resolveContentColor(status = status ?: "Open", isJoined = isJoined)
             )
         } else {
             Text(
-                text = getText(status = status, isJoined = isJoined),
-                style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Bold
+                text = resolveText(status = status ?: "Open", isJoined = isJoined),
+                fontSize = 14.sp,
+                fontWeight = if (isJoined) FontWeight.Normal else FontWeight.Bold
             )
         }
     }
 }
 
-@Composable
-fun getContainerColor(status: String, isJoined: Boolean): Color {
-    return if (status == "Closed") {
-        Color.LightGray
-    } else if (isJoined) {
-        MaterialTheme.colorScheme.tertiary
-    } else {
-        MaterialTheme.colorScheme.surface
+// ── Private helper functions for JoinButton state resolution ──
+
+private fun resolveContainerColor(status: String, isJoined: Boolean): Color {
+    return when {
+        status == "Closed" -> JoinButtonClosedGray
+        isJoined -> JoinButtonGreen
+        else -> Color.White
     }
 }
 
-@Composable
-fun getContentColor(status: String, isJoined: Boolean): Color {
-    return if (status == "Closed") {
-        Color.DarkGray
-    } else if (isJoined) {
-        MaterialTheme.colorScheme.surface
-    } else {
-        MaterialTheme.colorScheme.tertiary
+private fun resolveContentColor(status: String, isJoined: Boolean): Color {
+    return when {
+        status == "Closed" -> RaceCellTitleColor
+        isJoined -> Color.White
+        else -> JoinButtonGreen
     }
 }
 
-@Composable
-fun getBorderColor(status: String, isJoined: Boolean): Color {
-    return if (status == "Closed") {
-        Color.LightGray
-    } else {
-        MaterialTheme.colorScheme.tertiary
-    }
+private fun resolveBorderColor(status: String, isJoined: Boolean): Color {
+    return if (status == "Closed") JoinButtonClosedGray else JoinButtonGreen
 }
 
-@Composable
-fun getText(status: String, isJoined: Boolean): String {
-    return if (status == "Closed") {
-        status
-    } else if (isJoined) {
-        "Joined"
-    } else {
-        "Join"
+private fun resolveText(status: String, isJoined: Boolean): String {
+    return when {
+        status == "Closed" -> status
+        isJoined -> "Joined"
+        else -> "Join"
     }
 }
 
