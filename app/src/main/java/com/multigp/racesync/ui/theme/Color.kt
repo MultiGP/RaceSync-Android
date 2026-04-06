@@ -81,3 +81,5 @@ val JoinButtonClosedGray = Color(0xFFCACACF)     // iOS gray100 — closed/disab
 // ── Participant Badge Colors ──
 val ParticipantBadgeBackground = Color(0xFFEDECF3)  // iOS gray50 — badge background
 val ParticipantBadgeContent = Color(0xFF0B0B0B)      // iOS black — badge text/icon
+
+val PilotAircraftsButton = Color(0xFF000080)         // Navy — Aircrafts button
