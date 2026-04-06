@@ -30,9 +30,13 @@ import com.multigp.racesync.composables.text.IconText
 fun DistanceConfigurationSheet(
     initialRadius: Double = 100.0,
     initialUnit: String = "mi",
+    initialGqYear: String = "2026",
+    initialRaceClass: String = "Whoop",
     modifier: Modifier = Modifier,
     onBottomSheetDismiss: () -> Unit = {},
-    onRadiusSelection: (radius: Double, unit: String) -> Unit
+    onRadiusSelection: (radius: Double, unit: String) -> Unit,
+    onGqYearSelected: (String) -> Unit = {},
+    onRaceClassSelected: (String) -> Unit = {}
 ) {
     val sheetState = rememberModalBottomSheetState()
     val metricRadii = linkedMapOf(
@@ -59,6 +63,11 @@ fun DistanceConfigurationSheet(
 
     var selectedRadiusIndex by remember { mutableStateOf(radiusIndex) }
     var selectedMetricsIndex by remember { mutableStateOf(measurementSystemIndex) }
+
+    val gqYears = listOf("2026", "2025", "2024", "2023")
+    val raceClasses = listOf("Whoop", "Pro Spec", "Open", "Micro", "Freedom", "E-Sport", "7 Inch Spec", "5 Inch Spec")
+    var selectedGqYearIndex by remember { mutableStateOf(gqYears.indexOf(initialGqYear).coerceAtLeast(0)) }
+    var selectedRaceClassIndex by remember { mutableStateOf(raceClasses.indexOf(initialRaceClass).coerceAtLeast(0)) }
 
     ModalBottomSheet(
         onDismissRequest = onBottomSheetDismiss,
@@ -125,6 +134,48 @@ fun DistanceConfigurationSheet(
                             index
                         )
                         onRadiusSelection(radius, unit)
+                    }
+                )
+            }
+            Row(
+                modifier = modifier.padding(top = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconText(
+                    text = stringResource(R.string.label_gq_year),
+                    icon = R.drawable.ic_calendar
+                )
+                CustomDropdownMenu(
+                    modifier = modifier
+                        .weight(1.0f)
+                        .padding(start = 16.dp),
+                    label = "",
+                    items = gqYears,
+                    selectedIndex = selectedGqYearIndex,
+                    onItemSelected = { index, item ->
+                        selectedGqYearIndex = index
+                        onGqYearSelected(item)
+                    }
+                )
+            }
+            Row(
+                modifier = modifier.padding(top = 24.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                IconText(
+                    text = stringResource(R.string.label_race_class),
+                    icon = R.drawable.ic_race_class
+                )
+                CustomDropdownMenu(
+                    modifier = modifier
+                        .weight(1.0f)
+                        .padding(start = 16.dp),
+                    label = "",
+                    items = raceClasses,
+                    selectedIndex = selectedRaceClassIndex,
+                    onItemSelected = { index, item ->
+                        selectedRaceClassIndex = index
+                        onRaceClassSelected(item)
                     }
                 )
             }

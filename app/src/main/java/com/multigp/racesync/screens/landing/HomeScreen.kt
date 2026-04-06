@@ -11,6 +11,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,7 +20,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -60,6 +63,8 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
+    val gqYear by viewModel.gqYear.collectAsState()
+    val raceClass by viewModel.raceClass.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -97,7 +102,11 @@ fun HomeScreen(
         topBar = {
             HomeScreenTabs(
                 tabs = landingTabs,
-                pagerState = pagerState
+                pagerState = pagerState,
+                titleOverrides = mapOf(
+                    3 to "GQ $gqYear",
+                    4 to raceClass
+                )
             )
         },
         floatingActionButton = {
@@ -142,6 +151,10 @@ fun HomeScreen(
                     gotoNearbyRaces = gotoNearbyRaces,
                     onJoinRace = onJoinRace
                 )
+
+                3 -> PlaceholderScreen(title = "GQ $gqYear")
+
+                4 -> PlaceholderScreen(title = raceClass)
             }
         }
 
@@ -150,9 +163,17 @@ fun HomeScreen(
             DistanceConfigurationSheet(
                 initialRadius = raceFeedOptions.first,
                 initialUnit = raceFeedOptions.second,
+                initialGqYear = gqYear,
+                initialRaceClass = raceClass,
                 onBottomSheetDismiss = { showBottomSheet = false },
                 onRadiusSelection = { radius, unit ->
                     viewModel.saveSearchRadius(radius, unit)
+                },
+                onGqYearSelected = { year ->
+                    viewModel.saveGqYear(year)
+                },
+                onRaceClassSelected = { selectedClass ->
+                    viewModel.saveRaceClass(selectedClass)
                 }
             )
         }
@@ -207,6 +228,24 @@ fun HomeScreen(
                 }
             )
         }
+    }
+}
+
+@Composable
+fun PlaceholderScreen(
+    title: String,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = "$title\nComing Soon",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }
 

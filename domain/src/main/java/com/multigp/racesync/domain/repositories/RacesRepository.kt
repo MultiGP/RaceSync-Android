@@ -15,6 +15,14 @@ interface RacesRepository {
 
     suspend fun fetchSearchRadius(): Flow<Pair<Double, String>>
 
+    suspend fun saveGqYear(year: String)
+
+    suspend fun getGqYear(): String
+
+    suspend fun saveRaceClass(raceClass: String)
+
+    suspend fun getRaceClass(): String
+
     suspend fun joinRace(pilotId: String, raceId: String): Flow<Boolean>
 
     suspend fun resignFromRace(raceId: String): Flow<Boolean>

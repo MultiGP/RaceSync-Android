@@ -66,6 +66,28 @@ class DataStoreManager(val context: Context) {
             preferences[KEY_NOTIFICATION_PREFERENCE] ?: false
         }
 
+    suspend fun saveGqYear(year: String) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_GQ_YEAR] = year
+        }
+    }
+
+    suspend fun getGqYear(): String {
+        val preferences = context.dataStore.data.first()
+        return preferences[KEY_GQ_YEAR] ?: DEFAULT_GQ_YEAR
+    }
+
+    suspend fun saveRaceClass(raceClass: String) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_RACE_CLASS] = raceClass
+        }
+    }
+
+    suspend fun getRaceClass(): String {
+        val preferences = context.dataStore.data.first()
+        return preferences[KEY_RACE_CLASS] ?: DEFAULT_RACE_CLASS
+    }
+
     suspend fun clearSession(){
         context.dataStore.edit { preferences ->
             preferences[KEY_USER_INFO] = ""
@@ -73,6 +95,8 @@ class DataStoreManager(val context: Context) {
             preferences[KEY_RADIUS_UNIT] = DEFAULT_RADIUS_UNIT
             preferences[KEY_RADIUS_VALUE] = DEFAULT_RADIUS_VALUE
             preferences[KEY_NOTIFICATION_PREFERENCE] = false
+            preferences[KEY_GQ_YEAR] = DEFAULT_GQ_YEAR
+            preferences[KEY_RACE_CLASS] = DEFAULT_RACE_CLASS
         }
     }
 
@@ -82,8 +106,12 @@ class DataStoreManager(val context: Context) {
         private val KEY_RADIUS_UNIT = stringPreferencesKey("key_radius_unit")
         private val KEY_RADIUS_VALUE = doublePreferencesKey("key_radius_value")
         private val KEY_NOTIFICATION_PREFERENCE = booleanPreferencesKey("key_notification_preference")
+        private val KEY_GQ_YEAR = stringPreferencesKey("key_gq_year")
+        private val KEY_RACE_CLASS = stringPreferencesKey("key_race_class")
 
         private const val DEFAULT_RADIUS_UNIT = "mi"
         private const val DEFAULT_RADIUS_VALUE = 100.0
+        const val DEFAULT_GQ_YEAR = "2026"
+        const val DEFAULT_RACE_CLASS = "Whoop"
     }
 }

@@ -14,6 +14,8 @@
     <string name="tab_title_race_details">Details</string>
     <string name="tab_title_race_roster">Roster</string>
     <string name="tab_title_pilot_races">Races</string>
+    <string name="tab_title_gq_2026">GQ 2026</string>
+    <string name="tab_title_spec">Spec</string>
     <string name="title_screen_design_tracks">MultiGP Track Designs</string>
     <string name="title_screen_obs_build_guide">Obstacles Build Guide</string>
     <string name="hud_login_progress">Login in progress, please wait…</string>
@@ -40,6 +42,8 @@
 
     <string name="label_search_radius">Search Radius</string>
     <string name="label_measurement_system">Measurement</string>
+    <string name="label_gq_year">GQ Year</string>
+    <string name="label_race_class">Race Class</string>
     <string name="aircraft_sheet_title">Select an Aircraft</string>
     <string name="race_feed_option_sheet_title">Race Feed Options</string>
 

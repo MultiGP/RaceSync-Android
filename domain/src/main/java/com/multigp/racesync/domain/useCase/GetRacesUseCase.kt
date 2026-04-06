@@ -136,6 +136,24 @@ class GetRacesUseCase(
 
     suspend fun fetchRaceFeedOptions() = racesRepository.fetchSearchRadius()
 
+    // ── GQ Year & Race Class ────────────────────────────────────────
+
+    suspend fun saveGqYear(year: String) {
+        racesRepository.saveGqYear(year)
+    }
+
+    suspend fun getGqYear(): String {
+        return racesRepository.getGqYear()
+    }
+
+    suspend fun saveRaceClass(raceClass: String) {
+        racesRepository.saveRaceClass(raceClass)
+    }
+
+    suspend fun getRaceClass(): String {
+        return racesRepository.getRaceClass()
+    }
+
     // ── Join / Resign ───────────────────────────────────────────────
 
     suspend fun joinRace(raceId: String): Flow<Boolean> {

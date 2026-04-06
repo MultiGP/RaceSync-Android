@@ -58,6 +58,12 @@ class LandingViewModel @Inject constructor(
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
 
+    private val _gqYear = MutableStateFlow("2026")
+    val gqYear: StateFlow<String> = _gqYear.asStateFlow()
+
+    private val _raceClass = MutableStateFlow("Whoop")
+    val raceClass: StateFlow<String> = _raceClass.asStateFlow()
+
     private val _joinRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val joinRaceUiState: StateFlow<UiState<Boolean>> = _joinRaceUiState.asStateFlow()
 
@@ -71,6 +77,14 @@ class LandingViewModel @Inject constructor(
     init {
         Log.d("viki", "Hello World")
         initializeUserProfile()
+        loadTabPreferences()
+    }
+
+    private fun loadTabPreferences() {
+        viewModelScope.launch {
+            _gqYear.value = useCases.getRacesUseCase.getGqYear()
+            _raceClass.value = useCases.getRacesUseCase.getRaceClass()
+        }
     }
 
     private fun initializeUserProfile(){
@@ -289,6 +303,22 @@ class LandingViewModel @Inject constructor(
             useCases.getRacesUseCase.fetchRaceFeedOptions().collect {
                 _raceFeedOoption.value = it
             }
+            _gqYear.value = useCases.getRacesUseCase.getGqYear()
+            _raceClass.value = useCases.getRacesUseCase.getRaceClass()
+        }
+    }
+
+    fun saveGqYear(year: String) {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.saveGqYear(year)
+            _gqYear.value = year
+        }
+    }
+
+    fun saveRaceClass(raceClass: String) {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.saveRaceClass(raceClass)
+            _raceClass.value = raceClass
         }
     }
 

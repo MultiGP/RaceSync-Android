@@ -181,6 +181,22 @@ class RacesRepositoryImpl(
         this.emit(dataStore.getSearchRadius())
     }
 
+    override suspend fun saveGqYear(year: String) {
+        dataStore.saveGqYear(year)
+    }
+
+    override suspend fun getGqYear(): String {
+        return dataStore.getGqYear()
+    }
+
+    override suspend fun saveRaceClass(raceClass: String) {
+        dataStore.saveRaceClass(raceClass)
+    }
+
+    override suspend fun getRaceClass(): String {
+        return dataStore.getRaceClass()
+    }
+
     override suspend fun joinRace(
         pilotId: String,
         raceId: String
