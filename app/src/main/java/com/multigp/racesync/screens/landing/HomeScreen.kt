@@ -11,7 +11,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -22,7 +21,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
@@ -81,6 +79,8 @@ fun HomeScreen(
             0 -> viewModel.fetchJoinedRaces()
             1 -> viewModel.fetchNearbyRaces()
             2 -> viewModel.fetchChapterRaces()
+            3 -> viewModel.fetchGqRaces()
+            4 -> viewModel.fetchRaceClassRaces()
         }
     }
 
@@ -152,9 +152,15 @@ fun HomeScreen(
                     onJoinRace = onJoinRace
                 )
 
-                3 -> PlaceholderScreen(title = "GQ $gqYear")
+                3 -> GqRacesScreen(
+                    onRaceSelected = onRaceSelected,
+                    onJoinRace = onJoinRace
+                )
 
-                4 -> PlaceholderScreen(title = raceClass)
+                4 -> RaceClassScreen(
+                    onRaceSelected = onRaceSelected,
+                    onJoinRace = onJoinRace
+                )
             }
         }
 
@@ -228,24 +234,6 @@ fun HomeScreen(
                 }
             )
         }
-    }
-}
-
-@Composable
-fun PlaceholderScreen(
-    title: String,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = "$title\nComing Soon",
-            style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            textAlign = TextAlign.Center
-        )
     }
 }
 

@@ -32,6 +32,11 @@
     <string name="placeholder_message_loaction_service_off">Please enable location service to load nearyby races</string>
 
 
+    <string name="placeholder_title_no_gq_races">No GQ Found</string>
+    <string name="placeholder_message_no_gq_races">There are no GQ races available for this year yet.</string>
+    <string name="placeholder_title_no_race_class_races">No Races Found</string>
+    <string name="placeholder_message_no_race_class_races">No upcoming races found for this class.</string>
+
     <string name="error_title_loading_races">Error Loading Races</string>
     <string name="error_title_loading_chapters">Error Loading Chapters</string>
     <string name="error_btn_title_retry">Retry</string>

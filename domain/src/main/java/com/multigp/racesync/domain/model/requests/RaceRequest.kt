@@ -16,7 +16,13 @@ data class RaceRequest(
     @SerializedName("id")
     val id:String? = null,
     @SerializedName("chapterId")
-    val chapterId:List<String>? = null
+    val chapterId:List<String>? = null,
+    @SerializedName("isQualifier")
+    val isQualifier: Boolean? = null,
+    @SerializedName("startDate")
+    val startDate: String? = null,
+    @SerializedName("raceClass")
+    val raceClass: String? = null
 )
 
 data class JoinedRaces(
@@ -37,7 +43,7 @@ data class UpcomingRaces(
     @SerializedName("limit")
     val limit: Int = 100,
     @SerializedName("orderByDistance")
-    val orderByDistance: Boolean = true
+    val orderByDistance: Boolean? = null
 )
 
 

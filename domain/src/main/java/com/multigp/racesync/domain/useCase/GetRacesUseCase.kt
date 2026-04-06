@@ -154,6 +154,43 @@ class GetRacesUseCase(
         return racesRepository.getRaceClass()
     }
 
+    // ── GQ Races ────────────────────────────────────────────────────
+
+    suspend fun fetchGqRaces(year: String): List<Race> {
+        val races = racesRepository.fetchGqRaces(year)
+        return races.sortedBy { it.formattedStartDate }
+    }
+
+    // ── Race Class Races ────────────────────────────────────────────
+
+    /**
+     * Maps display names to the numeric API IDs used by MultiGP.
+     * Matches iOS RaceClass enum raw values exactly.
+     */
+    companion object {
+        val raceClassIds = linkedMapOf(
+            "Whoop" to "1",
+            "Pro Spec" to "8",
+            "Open" to "0",
+            "Micro" to "2",
+            "Freedom" to "3",
+            "E-Sport" to "6",
+            "7 Inch Spec" to "4",
+            "5 Inch Spec" to "7"
+        )
+    }
+
+    /**
+     * Fetches upcoming races for the given race class display name.
+     * Converts the display name to the numeric API ID, then calls the API.
+     */
+    suspend fun fetchRaceClassRaces(raceClassName: String): List<Race> {
+        val raceClassId = raceClassIds[raceClassName]
+            ?: throw Exception("Unknown race class: $raceClassName")
+        val races = racesRepository.fetchRaceClassRaces(raceClassId)
+        return races.sortedBy { it.formattedStartDate }
+    }
+
     // ── Join / Resign ───────────────────────────────────────────────
 
     suspend fun joinRace(raceId: String): Flow<Boolean> {
