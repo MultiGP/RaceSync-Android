@@ -121,7 +121,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     modifier = modifier.size(32.dp),
-                    painter = painterResource(R.drawable.ic_fab_menu),
+                    painter = painterResource(R.drawable.ic_fab_tune),
                     contentDescription = null
                 )
             }

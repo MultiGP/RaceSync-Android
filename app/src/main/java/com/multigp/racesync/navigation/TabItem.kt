@@ -60,15 +60,15 @@ sealed class TabItem(
     )
 
     object GQ2026 : TabItem(
-        R.drawable.ic_tab_gq_outlined,
-        R.drawable.ic_tab_gq,
+        R.drawable.ic_tab_trophy_outlined,
+        R.drawable.ic_tab_trophy,
         R.string.tab_title_gq_2026,
         null
     )
 
     object Spec : TabItem(
-        R.drawable.ic_tab_spec_outlined,
-        R.drawable.ic_tab_spec,
+        R.drawable.ic_tab_clipboard_outlined,
+        R.drawable.ic_tab_clipboard,
         R.string.tab_title_spec,
         null
     )
