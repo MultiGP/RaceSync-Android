@@ -30,10 +30,11 @@ fun IconText(
     onClick: () -> Unit = {}
 ) {
     Row(
+        modifier = modifier,
         verticalAlignment = Alignment.CenterVertically
     ) {
         Icon(
-            modifier = modifier.size(24.dp),
+            modifier = Modifier.size(24.dp),
             painter = painterResource(id = icon),
             tint = color,
             contentDescription = null

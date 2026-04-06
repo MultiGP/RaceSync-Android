@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
@@ -86,8 +87,10 @@ fun DistanceConfigurationSheet(
         Column(
             modifier = modifier.padding(start = 16.dp, end = 16.dp, top = 16.dp, bottom = 60.dp)
         ) {
+            val labelWidth = 140.dp
             Row(verticalAlignment = Alignment.CenterVertically) {
                 IconText(
+                    modifier = Modifier.width(labelWidth),
                     text = stringResource(R.string.label_search_radius),
                     icon = R.drawable.ic_radius
                 )
@@ -115,6 +118,7 @@ fun DistanceConfigurationSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconText(
+                    modifier = Modifier.width(labelWidth),
                     text = stringResource(R.string.label_measurement_system),
                     icon = R.drawable.ic_ruler
                 )
@@ -142,6 +146,7 @@ fun DistanceConfigurationSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconText(
+                    modifier = Modifier.width(labelWidth),
                     text = stringResource(R.string.label_gq_year),
                     icon = R.drawable.ic_calendar
                 )
@@ -163,6 +168,7 @@ fun DistanceConfigurationSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconText(
+                    modifier = Modifier.width(labelWidth),
                     text = stringResource(R.string.label_race_class),
                     icon = R.drawable.ic_race_class
                 )
