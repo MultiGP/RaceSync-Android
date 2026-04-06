@@ -42,7 +42,6 @@ fun PilotInfoContainerScreen(
     modifier: Modifier = Modifier,
     viewModel: PilotViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
-    onClickAircrafts: (String) -> Unit = {},
     onRaceSelected: (Race) -> Unit = {}
 ) {
     var currentTab by remember { mutableStateOf(0) }
@@ -87,7 +86,7 @@ fun PilotInfoContainerScreen(
                         .padding(paddingValues)
                 ) {
                     item {
-                        PilotInformationView(profile, modifier, onClickAircrafts)
+                        PilotInformationView(profile, modifier)
                     }
                     stickyHeader {
                         CustomTabRow(tabs = pilotInfoTabs, currentTab = currentTab, onClickTab = {index ->

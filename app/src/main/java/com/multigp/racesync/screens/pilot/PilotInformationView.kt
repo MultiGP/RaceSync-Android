@@ -10,8 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -19,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -31,7 +28,6 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.image.AsyncCircularImage
 import com.multigp.racesync.composables.text.IconText
 import com.multigp.racesync.domain.model.Profile
-import com.multigp.racesync.ui.theme.PilotAircraftsButton
 import com.multigp.racesync.ui.theme.RaceCellDividerColor
 import com.multigp.racesync.ui.theme.RaceCellSubtitleColor
 import com.multigp.racesync.ui.theme.RaceCellTitleColor
@@ -40,7 +36,6 @@ import com.multigp.racesync.ui.theme.RaceCellTitleColor
 fun PilotInformationView(
     profile: Profile,
     modifier: Modifier = Modifier,
-    onClickAircrafts: (String) -> Unit = {},
 ) {
     Column {
         // ── Background + Avatar ──
@@ -95,7 +90,7 @@ fun PilotInformationView(
             )
         )
 
-        // ── Location + Aircrafts button ──
+        // ── Location ──
         Row(
             modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -107,24 +102,12 @@ fun PilotInformationView(
                 contentDescription = null
             )
             Text(
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .fillMaxWidth(0.6f),
+                modifier = Modifier.padding(start = 4.dp),
                 text = profile.getFormattedAddress(),
                 maxLines = 3,
                 color = MaterialTheme.colorScheme.primary,
                 style = TextStyle(fontSize = 16.sp)
             )
-            Spacer(modifier = Modifier.weight(1f))
-            Button(
-                onClick = { onClickAircrafts(profile.id) },
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = PilotAircraftsButton,
-                    contentColor = Color.White
-                )
-            ) {
-                Text(text = "Aircrafts", fontSize = 14.sp)
-            }
         }
 
         // ── Bottom divider ──
