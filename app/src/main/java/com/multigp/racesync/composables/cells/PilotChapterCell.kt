@@ -32,10 +32,8 @@ import com.multigp.racesync.composables.image.CircularImage
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Chapter
-import com.multigp.racesync.ui.theme.PilotJoinedGreen
-import com.multigp.racesync.ui.theme.PilotNotJoinedGray
+import com.multigp.racesync.ui.theme.JoinButtonGreen
 import com.multigp.racesync.ui.theme.RaceCellBackground
-import com.multigp.racesync.ui.theme.RaceCellDateColor
 import com.multigp.racesync.ui.theme.RaceCellDividerColor
 import com.multigp.racesync.ui.theme.RaceCellSubtitleColor
 import com.multigp.racesync.ui.theme.RaceCellTitleColor
@@ -101,14 +99,11 @@ fun PilotChapterCell(
                         onClick = {}
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    // Subtle join indicator — 20dp icon
+                    // Pilot profile only shows joined chapters — always green ✓
                     Icon(
-                        painter = painterResource(
-                            id = if (chapter.isJoined) R.drawable.ic_pilot_joined_race
-                            else R.drawable.ic_pilot_not_joined
-                        ),
-                        contentDescription = if (chapter.isJoined) "Joined" else "Not joined",
-                        tint = if (chapter.isJoined) PilotJoinedGreen else PilotNotJoinedGray,
+                        painter = painterResource(id = R.drawable.ic_pilot_joined_race),
+                        contentDescription = "Joined",
+                        tint = JoinButtonGreen,
                         modifier = Modifier.size(20.dp)
                     )
                 }

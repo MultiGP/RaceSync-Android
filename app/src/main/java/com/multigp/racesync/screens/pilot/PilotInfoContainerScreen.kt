@@ -106,8 +106,7 @@ fun PilotInfoContainerScreen(
                                     PilotRaceCell(
                                         race,
                                         modifier = modifier,
-                                        onClick = onRaceSelected,
-                                        onRaceAction = {}
+                                        onClick = onRaceSelected
                                     )
                                 }
                             }

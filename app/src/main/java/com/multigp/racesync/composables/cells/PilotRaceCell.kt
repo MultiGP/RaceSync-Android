@@ -30,8 +30,7 @@ import com.multigp.racesync.composables.image.CircularImage
 import com.multigp.racesync.domain.extensions.formatDate
 import com.multigp.racesync.domain.extensions.toDate
 import com.multigp.racesync.domain.model.Race
-import com.multigp.racesync.ui.theme.PilotJoinedGreen
-import com.multigp.racesync.ui.theme.PilotNotJoinedGray
+import com.multigp.racesync.ui.theme.JoinButtonGreen
 import com.multigp.racesync.ui.theme.RaceCellBackground
 import com.multigp.racesync.ui.theme.RaceCellDateColor
 import com.multigp.racesync.ui.theme.RaceCellDividerColor
@@ -42,9 +41,7 @@ import com.multigp.racesync.ui.theme.RaceCellTitleColor
 fun PilotRaceCell(
     race: Race,
     modifier: Modifier = Modifier,
-    showDistance: Boolean = false,
-    onClick: (Race) -> Unit = {},
-    onRaceAction: (Race) -> Unit = {}
+    onClick: (Race) -> Unit = {}
 ) {
     Column(
         modifier = modifier
@@ -97,15 +94,17 @@ fun PilotRaceCell(
                         text = "${race.participantCount}",
                         onClick = {}
                     )
+                    // Pilot profile only shows joined races, so every race here is joined.
+                    // Closed = gray ✗, otherwise = green ✓ (matches iOS compact join indicator)
+                    val isClosed = race.status.equals("Closed", ignoreCase = true)
                     Spacer(modifier = Modifier.width(8.dp))
-                    // Subtle join indicator — 20dp icon (iOS uses 25pt compact)
                     Icon(
                         painter = painterResource(
-                            id = if (race.isJoined) R.drawable.ic_pilot_joined_race
-                            else R.drawable.ic_pilot_not_joined
+                            id = if (isClosed) R.drawable.ic_pilot_not_joined
+                            else R.drawable.ic_pilot_joined_race
                         ),
-                        contentDescription = if (race.isJoined) "Joined" else "Not joined",
-                        tint = if (race.isJoined) PilotJoinedGreen else PilotNotJoinedGray,
+                        contentDescription = if (isClosed) "Closed" else "Joined",
+                        tint = if (isClosed) RaceCellTitleColor else JoinButtonGreen,
                         modifier = Modifier.size(20.dp)
                     )
                 }
