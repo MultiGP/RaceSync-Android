@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
@@ -34,6 +36,7 @@ import com.multigp.racesync.ui.theme.JoinButtonGreen
 import com.multigp.racesync.ui.theme.RaceCellBackground
 import com.multigp.racesync.ui.theme.RaceCellDateColor
 import com.multigp.racesync.ui.theme.RaceCellDividerColor
+import com.multigp.racesync.ui.theme.RaceCellSubtitleColor
 import com.multigp.racesync.ui.theme.RaceCellTitleColor
 
 
@@ -109,6 +112,14 @@ fun PilotRaceCell(
                     )
                 }
             }
+
+            // ── Disclosure chevron (clickable → race details) ──
+            Icon(
+                imageVector = Icons.Default.ChevronRight,
+                contentDescription = null,
+                tint = RaceCellSubtitleColor,
+                modifier = Modifier.size(24.dp)
+            )
         }
         // Indented divider matching RaceCell (avatar 50dp + spacer 16dp + padding 16dp = 82dp)
         HorizontalDivider(

@@ -137,8 +137,7 @@ fun PilotInfoContainerScreen(
                                 items(items = chapters, key = { it.id }) { chapter ->
                                     PilotChapterCell(
                                         chapter,
-                                        modifier = modifier,
-                                        onClick = {}
+                                        modifier = modifier
                                     )
                                 }
                             }

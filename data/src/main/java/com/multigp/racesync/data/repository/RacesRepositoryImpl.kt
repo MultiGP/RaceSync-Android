@@ -17,7 +17,6 @@ import com.multigp.racesync.domain.location.LocationCoordinate
 import com.multigp.racesync.domain.repositories.RacesRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
@@ -196,10 +195,11 @@ class RacesRepositoryImpl(
             if (response.isSuccessful) {
                 response.body()?.let { baseResponse ->
                     if (baseResponse.status) {
-                        val race = raceDao.getRace(raceId).first()
-                        race.isJoined = true
-                        race.participantCount += 1
-                        raceDao.updateRace(race)
+                        raceDao.getRace(raceId).firstOrNull()?.let { race ->
+                            race.isJoined = true
+                            race.participantCount += 1
+                            raceDao.updateRace(race)
+                        }
                         emit(true)
                     } else {
                         throw Exception(baseResponse.errorMessage())
@@ -223,10 +223,11 @@ class RacesRepositoryImpl(
             if (response.isSuccessful) {
                 response.body()?.let { baseResponse ->
                     if (baseResponse.status) {
-                        val race = raceDao.getRace(raceId).first()
-                        race.isJoined = false
-                        race.participantCount -= 1
-                        raceDao.updateRace(race)
+                        raceDao.getRace(raceId).firstOrNull()?.let { race ->
+                            race.isJoined = false
+                            race.participantCount -= 1
+                            raceDao.updateRace(race)
+                        }
                         emit(true)
                     } else {
                         throw Exception(baseResponse.errorMessage())
