@@ -1,7 +1,5 @@
 package com.multigp.racesync.screens.landing
 
-import android.content.Context
-import android.location.LocationManager
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
@@ -14,13 +12,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -34,52 +28,33 @@ import com.multigp.racesync.viewmodels.UiState
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NearbyRacesScreen(
+fun RaceClassScreen(
     modifier: Modifier = Modifier,
     viewModel: LandingViewModel = hiltViewModel(),
     onRaceSelected: (Race) -> Unit = {},
     onJoinRace: (Race) -> Unit = {}
 ) {
-    val context = LocalContext.current
-    val locationManager = context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
-    var isLocationEnabled by remember { mutableStateOf(isLocationServiceEnabled(context, locationManager)) }
-    val uiState by viewModel.nearbyRacesUiState.collectAsState()
+    val uiState by viewModel.raceClassRacesUiState.collectAsState()
     val refreshComplete by viewModel.refreshComplete.collectAsState()
     val loadingRaceId by viewModel.loadingRaceId.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
 
     // Initial load
     LaunchedEffect(Unit) {
-        viewModel.fetchNearbyRaces()
+        viewModel.fetchRaceClassRaces()
     }
 
     // Handle pull-to-refresh
     if (pullRefreshState.isRefreshing) {
         LaunchedEffect(true) {
-            isLocationEnabled = isLocationServiceEnabled(context, locationManager)
-            viewModel.fetchNearbyRaces()
+            viewModel.invalidateRaceClassCache()
+            viewModel.fetchRaceClassRaces()
         }
     }
 
-    // Stop refresh spinner when fetch completes (counter avoids StateFlow deduplication)
+    // Stop refresh spinner when fetch completes
     LaunchedEffect(refreshComplete) {
         pullRefreshState.endRefresh()
-    }
-
-    if (!isLocationEnabled) {
-        PlaceholderScreen(
-            modifier = modifier,
-            title = stringResource(R.string.placeholder_title_loaction_service_off),
-            message = stringResource(R.string.placeholder_message_loaction_service_off),
-            buttonTitle = stringResource(R.string.error_btn_title_retry),
-            isError = true,
-            canRetry = true,
-            onButtonClick = {
-                isLocationEnabled = isLocationServiceEnabled(context, locationManager)
-                if (isLocationEnabled) viewModel.fetchNearbyRaces()
-            }
-        )
-        return
     }
 
     Box(modifier = modifier.nestedScroll(pullRefreshState.nestedScrollConnection)) {
@@ -96,8 +71,9 @@ fun NearbyRacesScreen(
                     LazyColumn(modifier = Modifier.fillMaxSize()) {
                         item {
                             PlaceholderScreen(
-                                title = stringResource(R.string.placeholder_title_no_races),
-                                message = stringResource(R.string.placeholder_message_no_nearby_races),
+                                modifier = modifier,
+                                title = stringResource(R.string.placeholder_title_no_race_class_races),
+                                message = stringResource(R.string.placeholder_message_no_race_class_races),
                                 canRetry = false
                             )
                         }
@@ -111,7 +87,6 @@ fun NearbyRacesScreen(
                             RaceCell(
                                 race,
                                 modifier = Modifier,
-                                showDistance = true,
                                 isLoading = loadingRaceId == race.id,
                                 onClick = onRaceSelected,
                                 onRaceAction = onJoinRace
@@ -126,12 +101,13 @@ fun NearbyRacesScreen(
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
                     item {
                         PlaceholderScreen(
+                            modifier = modifier,
                             title = stringResource(R.string.error_title_loading_races),
                             message = errorMessage,
                             buttonTitle = stringResource(R.string.error_btn_title_retry),
                             isError = true,
                             canRetry = true,
-                            onButtonClick = { viewModel.fetchNearbyRaces() }
+                            onButtonClick = { viewModel.fetchRaceClassRaces() }
                         )
                     }
                 }
@@ -145,10 +121,4 @@ fun NearbyRacesScreen(
             modifier = Modifier.align(Alignment.TopCenter)
         )
     }
-}
-
-private fun isLocationServiceEnabled(context: Context, locationManager: LocationManager): Boolean {
-    val gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)
-    val networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER)
-    return gpsEnabled || networkEnabled
 }

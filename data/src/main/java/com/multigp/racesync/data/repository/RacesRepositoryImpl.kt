@@ -37,7 +37,7 @@ class RacesRepositoryImpl(
         if (chapterIds.isEmpty()) return emptyList()
 
         val raceRequest = RaceRequest(
-            upComing = UpcomingRaces(limit = 100, orderByDistance = false),
+            upComing = UpcomingRaces(limit = 100),
             chapterId = chapterIds
         )
         val request = BaseRequest(
@@ -64,7 +64,7 @@ class RacesRepositoryImpl(
     override suspend fun fetchJoinedRaces(pilotId: String): List<Race> {
         val raceRequest = RaceRequest(
             joined = JoinedRaces(pilotId = pilotId),
-            upComing = UpcomingRaces(limit = 100, orderByDistance = false)
+            upComing = UpcomingRaces(limit = 100)
         )
         val request = BaseRequest(
             apiKey = apiKey,
@@ -124,6 +124,61 @@ class RacesRepositoryImpl(
         return response.data ?: emptyList()
     }
 
+    /**
+     * Fetches Global Qualifier races for the given year.
+     * Matches iOS exactly: sends only isQualifier=true + startDate=year.
+     * No upcoming filter — iOS never adds one for GQ fetches.
+     */
+    override suspend fun fetchGqRaces(year: String): List<Race> {
+        val raceRequest = RaceRequest(
+            isQualifier = true,
+            startDate = year
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 300,
+            request = request
+        )
+
+        if (!response.status) {
+            throw Exception(response.errorMessage())
+        }
+        return response.data ?: emptyList()
+    }
+
+    /**
+     * Fetches upcoming races filtered by race class.
+     * Matches iOS: raceClass = numeric ID string, upcoming = {limit: 100}.
+     */
+    override suspend fun fetchRaceClassRaces(raceClassId: String): List<Race> {
+        val raceRequest = RaceRequest(
+            raceClass = raceClassId,
+            upComing = UpcomingRaces(limit = 100)
+        )
+        val request = BaseRequest(
+            apiKey = apiKey,
+            data = raceRequest,
+            sessionId = dataStore.getSessionId()!!
+        )
+
+        val response = raceSyncApi.fetchRaces(
+            page = 0,
+            pageSize = 100,
+            request = request
+        )
+
+        if (!response.status) {
+            throw Exception(response.errorMessage())
+        }
+        return response.data ?: emptyList()
+    }
+
     override suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {
         val request = BaseRequest(
             apiKey = apiKey,
@@ -179,6 +234,22 @@ class RacesRepositoryImpl(
 
     override suspend fun fetchSearchRadius() = flow {
         this.emit(dataStore.getSearchRadius())
+    }
+
+    override suspend fun saveGqYear(year: String) {
+        dataStore.saveGqYear(year)
+    }
+
+    override suspend fun getGqYear(): String {
+        return dataStore.getGqYear()
+    }
+
+    override suspend fun saveRaceClass(raceClass: String) {
+        dataStore.saveRaceClass(raceClass)
+    }
+
+    override suspend fun getRaceClass(): String {
+        return dataStore.getRaceClass()
     }
 
     override suspend fun joinRace(

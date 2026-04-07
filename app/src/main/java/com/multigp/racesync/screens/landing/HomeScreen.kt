@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -60,6 +61,8 @@ fun HomeScreen(
 
     val joinRaceUiState by viewModel.joinRaceUiState.collectAsState()
     val resignRaceUiState by viewModel.resignRaceUiState.collectAsState()
+    val gqYear by viewModel.gqYear.collectAsState()
+    val raceClass by viewModel.raceClass.collectAsState()
 
     val onJoinRace: (Race) -> Unit = { race ->
         selectedRace = race
@@ -76,6 +79,8 @@ fun HomeScreen(
             0 -> viewModel.fetchJoinedRaces()
             1 -> viewModel.fetchNearbyRaces()
             2 -> viewModel.fetchChapterRaces()
+            3 -> viewModel.fetchGqRaces()
+            4 -> viewModel.fetchRaceClassRaces()
         }
     }
 
@@ -97,7 +102,11 @@ fun HomeScreen(
         topBar = {
             HomeScreenTabs(
                 tabs = landingTabs,
-                pagerState = pagerState
+                pagerState = pagerState,
+                titleOverrides = mapOf(
+                    3 to "GQ $gqYear",
+                    4 to raceClass
+                )
             )
         },
         floatingActionButton = {
@@ -112,7 +121,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     modifier = modifier.size(32.dp),
-                    painter = painterResource(R.drawable.ic_fab_menu),
+                    painter = painterResource(R.drawable.ic_fab_tune),
                     contentDescription = null
                 )
             }
@@ -142,6 +151,16 @@ fun HomeScreen(
                     gotoNearbyRaces = gotoNearbyRaces,
                     onJoinRace = onJoinRace
                 )
+
+                3 -> GqRacesScreen(
+                    onRaceSelected = onRaceSelected,
+                    onJoinRace = onJoinRace
+                )
+
+                4 -> RaceClassScreen(
+                    onRaceSelected = onRaceSelected,
+                    onJoinRace = onJoinRace
+                )
             }
         }
 
@@ -150,9 +169,17 @@ fun HomeScreen(
             DistanceConfigurationSheet(
                 initialRadius = raceFeedOptions.first,
                 initialUnit = raceFeedOptions.second,
+                initialGqYear = gqYear,
+                initialRaceClass = raceClass,
                 onBottomSheetDismiss = { showBottomSheet = false },
                 onRadiusSelection = { radius, unit ->
                     viewModel.saveSearchRadius(radius, unit)
+                },
+                onGqYearSelected = { year ->
+                    viewModel.saveGqYear(year)
+                },
+                onRaceClassSelected = { selectedClass ->
+                    viewModel.saveRaceClass(selectedClass)
                 }
             )
         }

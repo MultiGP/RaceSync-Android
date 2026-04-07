@@ -15,6 +15,14 @@ interface RacesRepository {
 
     suspend fun fetchSearchRadius(): Flow<Pair<Double, String>>
 
+    suspend fun saveGqYear(year: String)
+
+    suspend fun getGqYear(): String
+
+    suspend fun saveRaceClass(raceClass: String)
+
+    suspend fun getRaceClass(): String
+
     suspend fun joinRace(pilotId: String, raceId: String): Flow<Boolean>
 
     suspend fun resignFromRace(raceId: String): Flow<Boolean>
@@ -46,4 +54,16 @@ interface RacesRepository {
         coordinate: LocationCoordinate,
         radiusMiles: Double
     ): List<Race>
+
+    /**
+     * Fetches Global Qualifier races for the given year.
+     * Matches iOS: isQualifier = true, startDate = year, pageSize = 300.
+     */
+    suspend fun fetchGqRaces(year: String): List<Race>
+
+    /**
+     * Fetches upcoming races filtered by race class.
+     * Matches iOS: raceClass = numeric ID, upcoming = {limit: 100}, pageSize = 100.
+     */
+    suspend fun fetchRaceClassRaces(raceClassId: String): List<Race>
 }

@@ -58,6 +58,18 @@ class LandingViewModel @Inject constructor(
     private val _raceFeedOoption = MutableStateFlow(Pair(100.0, "mi"))
     val raceFeedOption: StateFlow<Pair<Double, String>> = _raceFeedOoption.asStateFlow()
 
+    private val _gqYear = MutableStateFlow("2026")
+    val gqYear: StateFlow<String> = _gqYear.asStateFlow()
+
+    private val _raceClass = MutableStateFlow("Whoop")
+    val raceClass: StateFlow<String> = _raceClass.asStateFlow()
+
+    private val _gqRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val gqRacesUiState: StateFlow<UiState<List<Race>>> = _gqRacesUiState.asStateFlow()
+
+    private val _raceClassRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
+    val raceClassRacesUiState: StateFlow<UiState<List<Race>>> = _raceClassRacesUiState.asStateFlow()
+
     private val _joinRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val joinRaceUiState: StateFlow<UiState<Boolean>> = _joinRaceUiState.asStateFlow()
 
@@ -71,6 +83,14 @@ class LandingViewModel @Inject constructor(
     init {
         Log.d("viki", "Hello World")
         initializeUserProfile()
+        loadTabPreferences()
+    }
+
+    private fun loadTabPreferences() {
+        viewModelScope.launch {
+            _gqYear.value = useCases.getRacesUseCase.getGqYear()
+            _raceClass.value = useCases.getRacesUseCase.getRaceClass()
+        }
     }
 
     private fun initializeUserProfile(){
@@ -102,6 +122,10 @@ class LandingViewModel @Inject constructor(
     private var joinedRacesCache: List<Race>? = null
     private var nearbyRacesCache: List<Race>? = null
     private var chapterRacesCache: List<Race>? = null
+    private var gqRacesCache: List<Race>? = null
+    private var gqRacesCachedYear: String? = null
+    private var raceClassRacesCache: List<Race>? = null
+    private var raceClassRacesCachedClass: String? = null
 
     // Tracks whether a pull-to-refresh is in flight so the UI can dismiss the spinner.
     // Using a counter avoids StateFlow deduplication issues with identical UiState values.
@@ -227,6 +251,88 @@ class LandingViewModel @Inject constructor(
         chapterRacesCache = null
     }
 
+    /**
+     * Fetches GQ races using the same cache-first + background refresh pattern.
+     * Invalidates the cache if the year has changed since the last fetch.
+     */
+    fun fetchGqRaces() {
+        viewModelScope.launch {
+            val year = _gqYear.value
+
+            // Invalidate cache if the year changed
+            if (gqRacesCachedYear != year) {
+                gqRacesCache = null
+                gqRacesCachedYear = year
+            }
+
+            gqRacesCache?.let { cached ->
+                _gqRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                _gqRacesUiState.value = UiState.Loading
+            }
+
+            try {
+                val races = useCases.getRacesUseCase.fetchGqRaces(year)
+                gqRacesCache = races
+                _gqRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (gqRacesCache == null) {
+                    _gqRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load GQ races")
+                }
+            } finally {
+                _refreshComplete.value++
+            }
+        }
+    }
+
+    /** Clears the GQ cache so the next fetch hits the API. */
+    fun invalidateGqCache() {
+        gqRacesCache = null
+        gqRacesCachedYear = null
+    }
+
+    /**
+     * Fetches race class races using the same cache-first + background refresh pattern.
+     * Invalidates the cache if the selected race class has changed.
+     */
+    fun fetchRaceClassRaces() {
+        viewModelScope.launch {
+            val className = _raceClass.value
+
+            // Invalidate cache if the race class changed
+            if (raceClassRacesCachedClass != className) {
+                raceClassRacesCache = null
+                raceClassRacesCachedClass = className
+            }
+
+            raceClassRacesCache?.let { cached ->
+                _raceClassRacesUiState.value = UiState.Success(cached)
+            } ?: run {
+                _raceClassRacesUiState.value = UiState.Loading
+            }
+
+            try {
+                val races = useCases.getRacesUseCase.fetchRaceClassRaces(className)
+                raceClassRacesCache = races
+                _raceClassRacesUiState.value = UiState.Success(races)
+            } catch (e: Exception) {
+                if (raceClassRacesCache == null) {
+                    _raceClassRacesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load $className races")
+                }
+            } finally {
+                _refreshComplete.value++
+            }
+        }
+    }
+
+    /** Clears the race class cache so the next fetch hits the API. */
+    fun invalidateRaceClassCache() {
+        raceClassRacesCache = null
+        raceClassRacesCachedClass = null
+    }
+
     fun fetchRaceView(raceId: String) {
         viewModelScope.launch {
             try {
@@ -289,6 +395,26 @@ class LandingViewModel @Inject constructor(
             useCases.getRacesUseCase.fetchRaceFeedOptions().collect {
                 _raceFeedOoption.value = it
             }
+            _gqYear.value = useCases.getRacesUseCase.getGqYear()
+            _raceClass.value = useCases.getRacesUseCase.getRaceClass()
+        }
+    }
+
+    fun saveGqYear(year: String) {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.saveGqYear(year)
+            _gqYear.value = year
+            invalidateGqCache()
+            fetchGqRaces()
+        }
+    }
+
+    fun saveRaceClass(raceClass: String) {
+        viewModelScope.launch {
+            useCases.getRacesUseCase.saveRaceClass(raceClass)
+            _raceClass.value = raceClass
+            invalidateRaceClassCache()
+            fetchRaceClassRaces()
         }
     }
 
@@ -343,11 +469,15 @@ class LandingViewModel @Inject constructor(
         joinedRacesCache = joinedRacesCache?.updateRace()
         nearbyRacesCache = nearbyRacesCache?.updateRace()
         chapterRacesCache = chapterRacesCache?.updateRace()
+        gqRacesCache = gqRacesCache?.updateRace()
+        raceClassRacesCache = raceClassRacesCache?.updateRace()
 
         // Re-emit current tab states so Compose picks up the mutation
         joinedRacesCache?.let { _joinedRacesUiState.value = UiState.Success(it) }
         nearbyRacesCache?.let { _nearbyRacesUiState.value = UiState.Success(it) }
         chapterRacesCache?.let { _chapterRacesUiState.value = UiState.Success(it) }
+        gqRacesCache?.let { _gqRacesUiState.value = UiState.Success(it) }
+        raceClassRacesCache?.let { _raceClassRacesUiState.value = UiState.Success(it) }
     }
 
     fun updateJoinRaceUiState(isClosed: Boolean = true) {
