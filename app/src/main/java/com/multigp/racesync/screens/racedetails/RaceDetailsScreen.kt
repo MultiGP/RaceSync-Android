@@ -1,10 +1,14 @@
 package com.multigp.racesync.screens.racedetails
 
+import android.webkit.WebChromeClient
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -13,13 +17,17 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,9 +41,11 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -43,7 +53,6 @@ import com.multigp.racesync.R
 import com.multigp.racesync.composables.CustomAlertDialog
 import com.multigp.racesync.composables.CustomMap
 import com.multigp.racesync.composables.JoinRaceUI
-import com.multigp.racesync.composables.RSWebView
 import com.multigp.racesync.composables.ResignRaceUI
 import com.multigp.racesync.composables.buttons.JoinButton
 import com.multigp.racesync.composables.buttons.ParticipantsButton
@@ -335,15 +344,115 @@ fun RaceContentsScreen(
 }
 
 /**
- * Full-screen dialog showing the ZippyQ schedule in an in-app WebView.
- * Matches iOS WebViewController behavior for the ZippyQ link.
+ * Two-phase ZippyQ flow:
+ * 1. Prompt user for MultiGP email & password
+ * 2. Open a full-screen WebView that auto-logs in, then redirects to ZippyQ
  */
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ZippyQDialog(
     raceId: String,
     onDismiss: () -> Unit
 ) {
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var credentialsReady by remember { mutableStateOf(false) }
+
+    if (!credentialsReady) {
+        // Phase 1: credential prompt
+        ZippyQLoginPrompt(
+            email = email,
+            password = password,
+            onEmailChange = { email = it },
+            onPasswordChange = { password = it },
+            onConfirm = { credentialsReady = true },
+            onDismiss = onDismiss
+        )
+    } else {
+        // Phase 2: auto-login WebView
+        ZippyQWebViewDialog(
+            raceId = raceId,
+            email = email,
+            password = password,
+            onDismiss = onDismiss
+        )
+    }
+}
+
+/**
+ * Simple dialog asking for the user's MultiGP email and password.
+ * These credentials are only held in memory for the WebView login — not persisted.
+ */
+@Composable
+private fun ZippyQLoginPrompt(
+    email: String,
+    password: String,
+    onEmailChange: (String) -> Unit,
+    onPasswordChange: (String) -> Unit,
+    onConfirm: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text("ZippyQ Login") },
+        text = {
+            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(
+                    "Enter your MultiGP credentials to access ZippyQ.",
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                OutlinedTextField(
+                    value = email,
+                    onValueChange = onEmailChange,
+                    label = { Text("Email") },
+                    singleLine = true,
+                    modifier = Modifier.fillMaxWidth()
+                )
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = onPasswordChange,
+                    label = { Text("Password") },
+                    singleLine = true,
+                    visualTransformation = PasswordVisualTransformation(),
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        },
+        confirmButton = {
+            TextButton(
+                onClick = onConfirm,
+                enabled = email.isNotBlank() && password.isNotBlank()
+            ) {
+                Text("Continue")
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text("Cancel")
+            }
+        }
+    )
+}
+
+/**
+ * Full-screen WebView dialog that:
+ * 1. Loads the MultiGP login page
+ * 2. Injects JS to fill the email/password fields and submit the form
+ * 3. After successful login (redirect), navigates to the ZippyQ page
+ *
+ * The user never sees the login page — they see a loading spinner until ZippyQ loads.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun ZippyQWebViewDialog(
+    raceId: String,
+    email: String,
+    password: String,
+    onDismiss: () -> Unit
+) {
+    val zippyQUrl = "https://www.multigp.com/MultiGP/views/zippyq.php?raceId=$raceId"
+    val loginUrl = "https://www.multigp.com/login/"
+    var isLoggingIn by remember { mutableStateOf(true) }
+
     Dialog(
         onDismissRequest = onDismiss,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -363,9 +472,94 @@ fun ZippyQDialog(
                 )
             }
         ) { paddingValues ->
-            RSWebView(
-                modifier = Modifier.padding(paddingValues),
-                url = "https://www.multigp.com/MultiGP/views/zippyq.php?raceId=$raceId"
+            // Escape credentials for safe JS injection
+            val safeEmail = remember(email) {
+                email.replace("\\", "\\\\").replace("'", "\\'")
+            }
+            val safePassword = remember(password) {
+                password.replace("\\", "\\\\").replace("'", "\\'")
+            }
+
+            if (isLoggingIn) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(paddingValues),
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    CircularProgressIndicator()
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text("Signing in…", style = MaterialTheme.typography.bodyLarge)
+                }
+            }
+
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = true
+                        settings.domStorageEnabled = true
+                        webChromeClient = WebChromeClient()
+
+                        webViewClient = object : WebViewClient() {
+                            private var loginSubmitted = false
+
+                            override fun onPageFinished(view: WebView?, url: String?) {
+                                super.onPageFinished(view, url)
+                                val currentUrl = url ?: return
+
+                                if (!loginSubmitted && currentUrl.contains("/login")) {
+                                    // Login page loaded → fill form and submit
+                                    loginSubmitted = true
+                                    view?.evaluateJavascript("""
+                                        (function() {
+                                            setTimeout(function() {
+                                                var emailField = document.getElementById('LoginForm_username');
+                                                var passField = document.getElementById('LoginForm_password');
+                                                if (emailField && passField) {
+                                                    // Set values using native setter to trigger framework bindings
+                                                    var nativeInputValueSetter = Object.getOwnPropertyDescriptor(
+                                                        window.HTMLInputElement.prototype, 'value').set;
+                                                    nativeInputValueSetter.call(emailField, '$safeEmail');
+                                                    nativeInputValueSetter.call(passField, '$safePassword');
+
+                                                    // Dispatch events so Yii's client validation recognizes the input
+                                                    ['input', 'change', 'blur'].forEach(function(evt) {
+                                                        emailField.dispatchEvent(new Event(evt, {bubbles: true}));
+                                                        passField.dispatchEvent(new Event(evt, {bubbles: true}));
+                                                    });
+
+                                                    // Submit after a tick to let validation complete
+                                                    setTimeout(function() {
+                                                        var form = document.getElementById('login-form');
+                                                        if (form) { form.submit(); }
+                                                    }, 300);
+                                                }
+                                            }, 500);
+                                        })();
+                                    """.trimIndent(), null)
+                                } else if (loginSubmitted && currentUrl.contains("/login")) {
+                                    // Login failed (redirected back to login, e.g. ?s=f)
+                                    // Show the page so user can see the error / retry manually
+                                    isLoggingIn = false
+                                } else if (!currentUrl.contains("/login")) {
+                                    // Login succeeded (redirected away from login page)
+                                    // Now navigate to ZippyQ
+                                    if (!currentUrl.contains("zippyq.php")) {
+                                        view?.loadUrl(zippyQUrl)
+                                    }
+                                    isLoggingIn = false
+                                }
+                            }
+                        }
+
+                        // Start by loading the login page
+                        loadUrl(loginUrl)
+                    }
+                }
             )
         }
     }
