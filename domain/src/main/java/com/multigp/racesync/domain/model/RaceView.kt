@@ -143,7 +143,17 @@ data class RaceView(
     val zippyNoKiosk: String,
     @SerializedName("zippyqIterator")
     val zippyqIterator: String
-)
+) {
+    /**
+     * Matches iOS: isZippyQEnabled = (maxZippyqDepth > 0 && disableSlotAutoPopulation == .open)
+     * iOS QualifyingType.open = "1" (see RaceEnums.swift)
+     */
+    val isZippyQEnabled: Boolean
+        get() {
+            val depth = maxZippyqDepth.toIntOrNull() ?: 0
+            return depth > 0 && disableSlotAutoPopulation == "1"
+        }
+}
 
 @Keep
 data class RaceEntry(

@@ -23,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +62,7 @@ fun RaceDetailsScreen(
     var selectedRace by remember { mutableStateOf<Race?>(null) }
 
     val (profile, race, raceView) = data
+    val uriHandler = LocalUriHandler.current
 
     val onJoinRace: (Race) -> Unit = { raceToJoin ->
         selectedRace = raceToJoin
@@ -76,7 +78,10 @@ fun RaceDetailsScreen(
         raceView = raceView,
         modifier = modifier,
         onJoinRace = onJoinRace,
-        onShowMap = { showRaceMap = true }
+        onShowMap = { showRaceMap = true },
+        onZippyQClick = {
+            uriHandler.openUri("https://www.multigp.com/MultiGP/views/zippyq.php?raceId=${race.id}")
+        }
     )
 
     if (showRaceMap) {
@@ -149,7 +154,12 @@ fun raceClassBadgeRes(raceClass: String?): Int? {
 }
 
 @Composable
-fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
+fun RaceDetailsActions(
+    race: Race,
+    raceView: RaceView? = null,
+    modifier: Modifier = Modifier,
+    onZippyQClick: () -> Unit = {}
+) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         HorizontalDivider(color = Color.LightGray)
         RaceDetailsCell(
@@ -164,6 +174,15 @@ fun RaceDetailsActions(race: Race, modifier: Modifier = Modifier) {
         HorizontalDivider(color = Color.LightGray)
         RaceDetailsCell("Season", race.seasonName ?: "—")
         HorizontalDivider(color = Color.LightGray)
+        // ZippyQ row — only shown when the race has ZippyQ enabled (matches iOS)
+        if (raceView?.isZippyQEnabled == true) {
+            RaceDetailsCell(
+                label = "ZippyQ",
+                value = "multigp.com",
+                onClick = onZippyQClick
+            )
+            HorizontalDivider(color = Color.LightGray)
+        }
     }
 }
 
@@ -174,6 +193,7 @@ fun RaceContentsScreen(
     modifier: Modifier = Modifier,
     onJoinRace: (Race) -> Unit = {},
     onShowMap: () -> Unit = {},
+    onZippyQClick: () -> Unit = {},
 ) {
     val state = rememberScrollState()
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -290,7 +310,11 @@ fun RaceContentsScreen(
             }
 
             // Bottom detail cells
-            RaceDetailsActions(race)
+            RaceDetailsActions(
+                race = race,
+                raceView = raceView,
+                onZippyQClick = onZippyQClick
+            )
         }
     }
 }

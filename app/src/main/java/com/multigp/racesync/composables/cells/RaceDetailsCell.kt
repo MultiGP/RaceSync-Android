@@ -2,6 +2,7 @@ package com.multigp.racesync.composables.cells
 
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,12 +30,14 @@ fun RaceDetailsCell(
     label: String,
     value: String,
     modifier: Modifier = Modifier,
-    @DrawableRes badgeImageRes: Int? = null
+    @DrawableRes badgeImageRes: Int? = null,
+    onClick: (() -> Unit)? = null
 ) {
     Row(
         modifier = Modifier
             .height(56.dp)
-            .fillMaxWidth(),
+            .fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
         verticalAlignment = Alignment.CenterVertically
     ) {
         Text(
