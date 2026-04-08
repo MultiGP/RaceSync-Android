@@ -1,0 +1,21 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="40dp"
+    android:viewportWidth="20"
+    android:viewportHeight="40">
+  <!-- Top filled circle (start date) -->
+  <path
+      android:pathData="M10,6m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"
+      android:fillColor="#000000"/>
+  <!-- Connecting vertical line -->
+  <path
+      android:pathData="M10,10v20"
+      android:strokeColor="#000000"
+      android:strokeWidth="1.8"
+      android:strokeLineCap="round"
+      android:fillColor="#00000000"/>
+  <!-- Bottom filled circle (end date — continuous/multi-day) -->
+  <path
+      android:pathData="M10,34m-4,0a4,4 0,1 1,8 0a4,4 0,1 1,-8 0"
+      android:fillColor="#000000"/>
+</vector>

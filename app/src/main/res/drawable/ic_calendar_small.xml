@@ -1,0 +1,49 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="20dp"
+    android:height="20dp"
+    android:viewportWidth="20"
+    android:viewportHeight="20">
+  <!-- Calendar body -->
+  <path
+      android:pathData="M3,4.5C3,3.67 3.67,3 4.5,3h11C16.33,3 17,3.67 17,4.5v12c0,0.83 -0.67,1.5 -1.5,1.5h-11C3.67,18 3,17.33 3,16.5z"
+      android:strokeColor="#000000"
+      android:strokeWidth="1.4"
+      android:fillColor="#00000000"/>
+  <!-- Top bar -->
+  <path
+      android:pathData="M3,7h14"
+      android:strokeColor="#000000"
+      android:strokeWidth="1.4"
+      android:fillColor="#00000000"/>
+  <!-- Left hanger -->
+  <path
+      android:pathData="M7,1.5v3"
+      android:strokeColor="#000000"
+      android:strokeWidth="1.4"
+      android:strokeLineCap="round"
+      android:fillColor="#00000000"/>
+  <!-- Right hanger -->
+  <path
+      android:pathData="M13,1.5v3"
+      android:strokeColor="#000000"
+      android:strokeWidth="1.4"
+      android:strokeLineCap="round"
+      android:fillColor="#00000000"/>
+  <!-- Dot row 1 -->
+  <path
+      android:pathData="M7,10.5m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#000000"/>
+  <path
+      android:pathData="M10,10.5m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#000000"/>
+  <path
+      android:pathData="M13,10.5m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#000000"/>
+  <!-- Dot row 2 -->
+  <path
+      android:pathData="M7,14m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#000000"/>
+  <path
+      android:pathData="M10,14m-1,0a1,1 0,1 1,2 0a1,1 0,1 1,-2 0"
+      android:fillColor="#000000"/>
+</vector>

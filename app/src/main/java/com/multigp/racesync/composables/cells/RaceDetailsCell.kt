@@ -1,8 +1,11 @@
 package com.multigp.racesync.composables.cells
 
+import androidx.annotation.DrawableRes
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -16,11 +19,17 @@ import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
 import com.multigp.racesync.ui.theme.RaceSyncTheme
 
+/**
+ * A detail row showing a label and either a text value or a badge image.
+ * Used in the bottom section of the race detail page.
+ * When [badgeImageRes] is provided, it displays the badge image instead of [value] text.
+ */
 @Composable
 fun RaceDetailsCell(
     label: String,
     value: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    @DrawableRes badgeImageRes: Int? = null
 ) {
     Row(
         modifier = Modifier
@@ -34,12 +43,23 @@ fun RaceDetailsCell(
             style = MaterialTheme.typography.bodyLarge,
             modifier = modifier.weight(0.3f)
         )
-        Text(
-            text = value,
-            color = Color.Gray,
-            style = MaterialTheme.typography.bodyLarge,
-            modifier = modifier.weight(0.7f)
-        )
+        if (badgeImageRes != null) {
+            Image(
+                painter = painterResource(id = badgeImageRes),
+                contentDescription = value,
+                modifier = modifier
+                    .weight(0.7f)
+                    .height(32.dp),
+                alignment = Alignment.CenterStart
+            )
+        } else {
+            Text(
+                text = value,
+                color = Color.Gray,
+                style = MaterialTheme.typography.bodyLarge,
+                modifier = modifier.weight(0.7f)
+            )
+        }
         Icon(
             painter = painterResource(id = R.drawable.ic_arrow_forward),
             tint = Color.Gray,
@@ -51,7 +71,7 @@ fun RaceDetailsCell(
 
 @Preview(showBackground = true, widthDp = 340)
 @Composable
-fun RaceDetailsCell() {
+fun RaceDetailsCellPreview() {
     RaceSyncTheme {
         RaceDetailsCell("Season", "Indian National Open FPV 2024 Season")
     }
