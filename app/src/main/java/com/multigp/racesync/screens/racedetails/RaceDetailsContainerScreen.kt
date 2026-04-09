@@ -73,6 +73,11 @@ fun RaceDetailsContainerScreen(
                     when (page) {
                         0 -> RaceDetailsScreen(data, modifier, joinRaceUiState, resignRaceUiState)
                         1 -> RaceRosterScreen(data, modifier, onPilotSelected = onPilotSelected)
+                        2 -> RaceScheduleScreen(
+                            race = data.second,
+                            raceView = data.third,
+                            modifier = modifier
+                        )
                     }
                 }
             }

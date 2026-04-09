@@ -134,6 +134,43 @@ data class Race(
     val snippet: String
         get() = "Race will be held at ${startDate?.toDate()?.formatDate()}"
 
+    /**
+     * Compact single-line date format matching iOS: "Sat, Sep 14 @ 9:00 AM"
+     */
+    fun formatStartDateCompact(): String {
+        return startDate?.toDate()?.formatDate("EEE, MMM d @ h:mm a") ?: "—"
+    }
+
+    /**
+     * Compact end date. If same day as start, shows just the time: "@ 9:30 PM".
+     * If different day, shows full: "Sun, Sep 15 @ 5:00 PM".
+     */
+    fun formatEndDateCompact(): String {
+        val end = endDate?.toDate() ?: return "—"
+        val start = startDate?.toDate()
+        if (start != null) {
+            val dayFmt = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
+            if (dayFmt.format(start) == dayFmt.format(end)) {
+                // Same day — show just the end time
+                return end.formatDate("@ h:mm a") ?: "—"
+            }
+        }
+        return end.formatDate("EEE, MMM d @ h:mm a") ?: "—"
+    }
+
+    /** True when an end date exists and is parseable. Matches iOS canDisplayEndDate. */
+    val canDisplayEndDate: Boolean
+        get() = endDate?.toDate() != null
+
+    /** True when start and end fall on the same calendar day. Matches iOS sameDay. */
+    val isSameDay: Boolean
+        get() {
+            val start = startDate?.toDate() ?: return false
+            val end = endDate?.toDate() ?: return false
+            val dayFmt = java.text.SimpleDateFormat("yyyyMMdd", java.util.Locale.getDefault())
+            return dayFmt.format(start) == dayFmt.format(end)
+        }
+
     val formattedStartDate: Date?
         get() = startDate?.toDate()
 

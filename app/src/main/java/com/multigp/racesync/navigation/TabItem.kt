@@ -52,6 +52,14 @@ sealed class TabItem(
             null
         )
 
+    object RaceSchedule :
+        TabItem(
+            R.drawable.ic_bottom_schedule,
+            R.drawable.ic_bottom_schedule,
+            R.string.tab_title_race_schedule,
+            null
+        )
+
     object PilotRace : TabItem(
         R.drawable.ic_pilot_race_outlined,
         R.drawable.ic_pilot_race,
@@ -76,5 +84,5 @@ sealed class TabItem(
 }
 
 val landingTabs = listOf(TabItem.Joined, TabItem.Nearby, TabItem.Chapters, TabItem.GQ2026, TabItem.Spec)
-val raceDetailTabs = listOf(TabItem.RaceDetails, TabItem.RaceRoster)
+val raceDetailTabs = listOf(TabItem.RaceDetails, TabItem.RaceRoster, TabItem.RaceSchedule)
 val pilotInfoTabs = listOf(TabItem.PilotRace, TabItem.Chapters)
