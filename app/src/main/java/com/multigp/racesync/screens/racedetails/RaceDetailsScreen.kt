@@ -30,7 +30,9 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -82,9 +84,26 @@ fun RaceDetailsScreen(
 
     val (profile, race, raceView) = data
 
+    // Local UI state for instant join/resign feedback
+    var isJoined by remember { mutableStateOf(race.isJoined) }
+    var participantCount by remember { mutableIntStateOf(race.participantCount) }
+    val loadingRaceId by viewModel.loadingRaceId.collectAsState()
+    val isLoading = loadingRaceId == race.id
+
+    // React to successful join — update local state immediately
+    if (joinRaceUiState is UiState.Success && !isJoined) {
+        isJoined = true
+        participantCount += 1
+    }
+    // React to successful resign — update local state immediately
+    if (resignRaceUiState is UiState.Success && isJoined) {
+        isJoined = false
+        participantCount -= 1
+    }
+
     val onJoinRace: (Race) -> Unit = { raceToJoin ->
         selectedRace = raceToJoin
-        if (!race.isJoined) {
+        if (!isJoined) {
             viewModel.joinRace(raceToJoin.id)
         } else {
             showResignRaceDialog = true
@@ -95,6 +114,9 @@ fun RaceDetailsScreen(
         race,
         raceView = raceView,
         modifier = modifier,
+        isJoined = isJoined,
+        isLoading = isLoading,
+        participantCount = participantCount,
         onJoinRace = onJoinRace,
         onShowMap = { showRaceMap = true },
         onZippyQClick = { showZippyQ = true }
@@ -215,6 +237,9 @@ fun RaceContentsScreen(
     race: Race,
     raceView: RaceView? = null,
     modifier: Modifier = Modifier,
+    isJoined: Boolean = race.isJoined,
+    isLoading: Boolean = false,
+    participantCount: Int = race.participantCount,
     onJoinRace: (Race) -> Unit = {},
     onShowMap: () -> Unit = {},
     onZippyQClick: () -> Unit = {},
@@ -299,9 +324,14 @@ fun RaceContentsScreen(
                     horizontalAlignment = Alignment.End,
                     verticalArrangement = Arrangement.Top
                 ) {
-                    JoinButton(race.isJoined, race.status, onClick = { onJoinRace(race) })
+                    JoinButton(
+                        isJoined = isJoined,
+                        status = race.status,
+                        isLoading = isLoading,
+                        onClick = { onJoinRace(race) }
+                    )
                     Spacer(modifier = Modifier.height(8.dp))
-                    ParticipantsButton(text = "${race.participantCount}", onClick = {})
+                    ParticipantsButton(text = "$participantCount", onClick = {})
                 }
             }
 
