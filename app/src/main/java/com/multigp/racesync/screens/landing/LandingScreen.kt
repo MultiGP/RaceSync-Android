@@ -2,6 +2,7 @@ package com.multigp.racesync.screens.landing
 
 import android.Manifest
 import android.os.Build
+import com.multigp.racesync.BuildConfig
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -387,6 +388,14 @@ fun DrawerContent(
                 modifier = modifier.align(Alignment.Start),
 
                 )
+            Text(
+                text = "v${BuildConfig.VERSION_NAME}",
+                color = Color.LightGray,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = modifier
+                    .align(Alignment.Start)
+                    .padding(top = 4.dp),
+            )
         }
         if (showRationaleDialog) {
             RationaleDialog(onDismiss = { showRationaleDialog = false })

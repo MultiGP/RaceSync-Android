@@ -7,6 +7,45 @@ plugins {
     id("com.google.gms.google-services")
 }
 
+// ── Git tag-based versioning ──────────────────────────────────────────
+// Tag format: v<MAJOR>.<MINOR>.<PATCH>  (e.g. v1.3.0)
+//
+// versionName  → derived from the latest tag (e.g. "1.3.0")
+// versionCode  → MAJOR*10000 + MINOR*100 + PATCH  (e.g. 10300)
+//
+// Workflow:   git tag v1.3.0 && ./gradlew assembleProductionRelease
+// ──────────────────────────────────────────────────────────────────────
+fun gitVersionName(): String {
+    return try {
+        val process = ProcessBuilder("git", "describe", "--tags", "--abbrev=0")
+            .directory(projectDir)
+            .redirectErrorStream(true)
+            .start()
+        val tag = process.inputStream.bufferedReader().readText().trim()
+        process.waitFor()
+        if (process.exitValue() == 0 && tag.startsWith("v")) {
+            tag.removePrefix("v")
+        } else {
+            "1.2.0" // fallback until first tag is created
+        }
+    } catch (e: Exception) {
+        "1.2.0"
+    }
+}
+
+fun gitVersionCode(): Int {
+    val name = gitVersionName()
+    val parts = name.split(".")
+    return try {
+        val major = parts.getOrElse(0) { "1" }.toInt()
+        val minor = parts.getOrElse(1) { "0" }.toInt()
+        val patch = parts.getOrElse(2) { "0" }.toInt()
+        major * 10000 + minor * 100 + patch
+    } catch (e: Exception) {
+        10200 // fallback matching 1.2.0
+    }
+}
+
 android {
     signingConfigs {
         create("release") {
@@ -23,8 +62,8 @@ android {
         applicationId = "com.multigp.racesync"
         minSdk = 24
         targetSdk = 35
-        versionCode = 18
-        versionName = "1.2.0"
+        versionCode = gitVersionCode()
+        versionName = gitVersionName()
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
