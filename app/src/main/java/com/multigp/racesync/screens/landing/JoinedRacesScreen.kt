@@ -1,20 +1,20 @@
 package com.multigp.racesync.screens.landing
 
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.pulltorefresh.PullToRefreshContainer
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -39,26 +39,28 @@ fun JoinedRacesScreen(
     val refreshComplete by viewModel.refreshComplete.collectAsState()
     val loadingRaceId by viewModel.loadingRaceId.collectAsState()
     val pullRefreshState = rememberPullToRefreshState()
+    var isRefreshing by remember { mutableStateOf(false) }
 
     // Initial load
     LaunchedEffect(Unit) {
         viewModel.fetchJoinedRaces()
     }
 
-    // Handle pull-to-refresh
-    if (pullRefreshState.isRefreshing) {
-        LaunchedEffect(true) {
+    // Stop refresh spinner when fetch completes
+    LaunchedEffect(refreshComplete) {
+        isRefreshing = false
+    }
+
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = {
+            isRefreshing = true
             viewModel.invalidateJoinedCache()
             viewModel.fetchJoinedRaces()
-        }
-    }
-
-    // Stop refresh spinner when fetch completes (counter avoids StateFlow deduplication)
-    LaunchedEffect(refreshComplete) {
-        pullRefreshState.endRefresh()
-    }
-
-    Box(modifier = modifier.nestedScroll(pullRefreshState.nestedScrollConnection)) {
+        },
+        state = pullRefreshState,
+        modifier = modifier
+    ) {
         when (uiState) {
             is UiState.Loading -> {
                 LazyColumn(modifier = Modifier.fillMaxSize()) {
@@ -119,9 +121,5 @@ fun JoinedRacesScreen(
             is UiState.None -> { /* Initial state — nothing to show yet */ }
         }
 
-        PullToRefreshContainer(
-            state = pullRefreshState,
-            modifier = Modifier.align(Alignment.TopCenter)
-        )
     }
 }
