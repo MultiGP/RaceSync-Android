@@ -99,6 +99,8 @@
 
     <!-- Standings -->
     <string name="standings_back">Back</string>
+    <string name="standings_show_seasons">View all seasons</string>
+    <string name="standings_seasons_sheet_title">Select Season</string>
     <string name="standings_filter_pilots">Filter pilots</string>
     <string name="standings_clear_search">Clear search</string>
     <string name="standings_share">Share standing</string>

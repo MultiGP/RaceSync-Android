@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,12 +34,15 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun StandingsScreen(
-    season: StandingSeason,
     modifier: Modifier = Modifier,
     viewModel: StandingsViewModel = hiltViewModel(),
-    onGoBack: () -> Unit = {},
     onPilotSelected: (String) -> Unit = {}
 ) {
+    var selectedSeason by rememberSaveable {
+        mutableStateOf(StandingSeason.entries.first())
+    }
+    var showSeasonSheet by rememberSaveable { mutableStateOf(false) }
+
     val standingsUiState by viewModel.standingsUiState.collectAsState()
     val searchQuery by viewModel.searchQuery.collectAsState()
     val myUserId by viewModel.myUserId.collectAsState()
@@ -50,8 +54,8 @@ fun StandingsScreen(
 
     var showBadgeDialog by remember { mutableStateOf(false) }
 
-    LaunchedEffect(season) {
-        viewModel.fetchStandings(season)
+    LaunchedEffect(selectedSeason) {
+        viewModel.fetchStandings(selectedSeason)
     }
 
     // Track where the user's row is relative to the visible viewport
@@ -73,9 +77,9 @@ fun StandingsScreen(
 
     Scaffold(
         topBar = {
-            StandingsTopBar(
-                title = season.shortTitle,
-                onGoBack = onGoBack
+            StandingsHeader(
+                title = selectedSeason.shortTitle,
+                onShowSeasons = { showSeasonSheet = true }
             )
         }
     ) { paddingValues ->
@@ -191,17 +195,28 @@ fun StandingsScreen(
         }
     }
 
+    if (showSeasonSheet) {
+        SeasonBottomSheet(
+            selectedSeason = selectedSeason,
+            onSeasonSelected = { season ->
+                selectedSeason = season
+                showSeasonSheet = false
+            },
+            onDismiss = { showSeasonSheet = false }
+        )
+    }
+
     // Badge share dialog
     if (showBadgeDialog) {
         myStanding?.let { standing ->
             StandingBadgeDialog(
                 standing = standing,
-                season = season,
+                season = selectedSeason,
                 profilePictureUrl = myProfilePictureUrl,
                 onDismiss = { showBadgeDialog = false },
                 onShare = {
                     scope.launch {
-                        shareBadgeImage(context, standing, season, myProfilePictureUrl)
+                        shareBadgeImage(context, standing, selectedSeason, myProfilePictureUrl)
                     }
                     showBadgeDialog = false
                 }
