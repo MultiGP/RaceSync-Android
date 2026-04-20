@@ -53,9 +53,17 @@ fun StandingsScreen(
     val scope = rememberCoroutineScope()
 
     var showBadgeDialog by remember { mutableStateOf(false) }
+    var isRefreshing by remember { mutableStateOf(false) }
 
     LaunchedEffect(selectedSeason) {
         viewModel.fetchStandings(selectedSeason)
+    }
+
+    // Dismiss the pull-to-refresh spinner once the refresh produces a result.
+    LaunchedEffect(standingsUiState) {
+        if (isRefreshing && standingsUiState !is UiState.Loading) {
+            isRefreshing = false
+        }
     }
 
     // Track where the user's row is relative to the visible viewport
@@ -163,9 +171,13 @@ fun StandingsScreen(
                                 standings = standings,
                                 listState = listState,
                                 myUserId = myUserId,
+                                isRefreshing = isRefreshing,
                                 onShareClicked = { showBadgeDialog = true },
                                 onPilotSelected = onPilotSelected,
-                                onPullToRefresh = { viewModel.refresh() }
+                                onPullToRefresh = {
+                                    isRefreshing = true
+                                    viewModel.refresh()
+                                }
                             )
 
                             val standing = myStanding

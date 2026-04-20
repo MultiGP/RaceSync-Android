@@ -82,11 +82,19 @@ data class Standing(
     }
 }
 
-enum class StandingSeason(val value: String, val isDualSeason: Boolean) {
-    Y2026("2026", false),
-    Y2025("2025", true),
-    Y2024("2024", true),
-    Y2023("2023", false);
+enum class StandingSeason(
+    val value: String,
+    val isDualSeason: Boolean,
+    val pilotCount: Int? = null
+) {
+    Y2026("2026", false, pilotCount = null),
+    Y2025("2025", true, pilotCount = 1113),
+    Y2024("2024", true, pilotCount = 932),
+    Y2023("2023", false, pilotCount = 824),
+    Y2022("2022", false, pilotCount = 712),
+    Y2021("2021", false, pilotCount = 685),
+    Y2020("2020", false, pilotCount = 604),
+    Y2019("2019", false, pilotCount = 1011);
 
     val title: String get() = "$value MultiGP Global Qualifier"
     val shortTitle: String get() = "MultiGP GQ $value"

@@ -5,7 +5,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,6 +33,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -44,7 +45,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -132,17 +132,25 @@ private fun SeasonSheetRow(
         modifier = modifier
             .fillMaxWidth()
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 14.dp),
+            .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = season.title,
-            style = MaterialTheme.typography.bodyLarge,
-            fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
-            color = if (isSelected) MaterialTheme.colorScheme.primary
-                else MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.weight(1f)
-        )
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = season.title,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                color = if (isSelected) MaterialTheme.colorScheme.primary
+                    else MaterialTheme.colorScheme.onSurface
+            )
+            season.pilotCount?.let { count ->
+                Text(
+                    text = "$count Pilots",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
         if (isSelected) {
             Icon(
                 imageVector = Icons.Filled.Check,
@@ -221,46 +229,47 @@ internal fun SectionHeader(
     )
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun StandingsList(
     standings: List<Standing>,
     listState: LazyListState,
     myUserId: String?,
+    isRefreshing: Boolean,
     modifier: Modifier = Modifier,
     onShareClicked: () -> Unit = {},
     onPilotSelected: (String) -> Unit = {},
     onPullToRefresh: () -> Unit = {}
 ) {
-    val canScrollUp by remember { derivedStateOf { listState.canScrollBackward } }
+    val pullRefreshState = rememberPullToRefreshState()
 
-    LazyColumn(
-        state = listState,
-        modifier = modifier
-            .fillMaxSize()
-            .pointerInput(Unit) {
-                detectVerticalDragGestures { _, dragAmount ->
-                    if (!canScrollUp && dragAmount > 80f) {
-                        onPullToRefresh()
-                    }
-                }
-            }
+    PullToRefreshBox(
+        isRefreshing = isRefreshing,
+        onRefresh = onPullToRefresh,
+        state = pullRefreshState,
+        modifier = modifier.fillMaxSize()
     ) {
-        itemsIndexed(
-            items = standings,
-            key = { _, standing -> "${standing.position}_${standing.userId}" }
-        ) { index, standing ->
-            val isCurrentUser = myUserId != null && standing.userId == myUserId
-            StandingRow(
-                standing = standing,
-                isAlternateRow = index % 2 == 1,
-                isCurrentUser = isCurrentUser,
-                onShareClicked = if (isCurrentUser) onShareClicked else null,
-                onTap = { onPilotSelected(standing.userName) }
-            )
-            HorizontalDivider(
-                thickness = 0.5.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
+        LazyColumn(
+            state = listState,
+            modifier = Modifier.fillMaxSize()
+        ) {
+            itemsIndexed(
+                items = standings,
+                key = { _, standing -> "${standing.position}_${standing.userId}" }
+            ) { index, standing ->
+                val isCurrentUser = myUserId != null && standing.userId == myUserId
+                StandingRow(
+                    standing = standing,
+                    isAlternateRow = index % 2 == 1,
+                    isCurrentUser = isCurrentUser,
+                    onShareClicked = if (isCurrentUser) onShareClicked else null,
+                    onTap = { onPilotSelected(standing.userName) }
+                )
+                HorizontalDivider(
+                    thickness = 0.5.dp,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                )
+            }
         }
     }
 }
