@@ -99,7 +99,7 @@ class LandingViewModel @Inject constructor(
                 useCases.getProfileUseCase()
                     .collect { profile ->
                         _uiState.value = UiState.Success(profile)
-                        fetchPilotHomeChapter(profile.userName, profile.homeChapterId)
+                        fetchPilotHomeChapter(profile.id, profile.homeChapterId)
                     }
             }catch (exception: Exception){
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "Failed to fetch profile")
@@ -346,11 +346,11 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchPilotChapters(pilotUserName: String) {
+    fun fetchPilotChapters(pilotId: String) {
         viewModelScope.launch {
             _chaptersUiState.value = UiState.Loading
             try {
-                useCases.getChaptersUseCase.fetchPilotChapters(pilotUserName)
+                useCases.getChaptersUseCase.fetchPilotChapters(pilotId)
                     .collect { races ->
                         _chaptersUiState.value = UiState.Success(races)
                     }
@@ -369,9 +369,9 @@ class LandingViewModel @Inject constructor(
         }
     }
 
-    fun fetchPilotHomeChapter(pilotUserName: String, homeChapterId: String?) {
+    fun fetchPilotHomeChapter(pilotId: String, homeChapterId: String?) {
         viewModelScope.launch {
-            fetchPilotChapters(pilotUserName)
+            fetchPilotChapters(pilotId)
             homeChapterId?.let { id ->
                 useCases.getChaptersUseCase(id).collect { chapter ->
                     _homeChapterImageUiState.value = UiState.Success(chapter?.mainImageFileName ?: "")

@@ -96,12 +96,8 @@ class GetRacesUseCase(
         return races.sortedBy { it.formattedStartDate }
     }
 
-    suspend fun fetchPilotRaces(pilotUserName: String): Flow<List<Race>> {
-        profileUseCase.getPilotId(pilotUserName)?.let { pilotId ->
-            return racesRepository.fetchPilotRaces(pilotId)
-        } ?: run {
-            throw Exception("Invalid pilot username")
-        }
+    suspend fun fetchPilotRaces(pilotId: String): Flow<List<Race>> {
+        return racesRepository.fetchPilotRaces(pilotId)
     }
 
     // ── Chapter Races ───────────────────────────────────────────────

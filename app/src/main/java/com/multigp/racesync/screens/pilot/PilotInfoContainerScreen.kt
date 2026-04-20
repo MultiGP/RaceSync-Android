@@ -61,7 +61,7 @@ fun PilotInfoContainerScreen(
             (uiState as? UiState.Success)?.data?.let { (profile, userInfo) ->
                 PilotInfoTopBar(
                     title = profile.userName,
-                    countryCode = profile.country.capitalize(Locale.current),
+                    countryCode = profile.country?.capitalize(Locale.current) ?: "",
                     isLoggedInUser = profile.id == userInfo.id,
                     onGoBack = { multipleEventsCutter.processEvent(onGoBack) },
                     onClickShowQRCode = {

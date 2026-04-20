@@ -19,11 +19,7 @@ class GetChaptersUseCase(
 
     operator fun invoke(chapterId: String) = chaptersRepository.fetchChapter(chapterId)
 
-    suspend fun fetchPilotChapters(pilotUserName:String): Flow<List<Chapter>> {
-        profileUseCase.getPilotId(pilotUserName)?.let {pilotId ->
-            return chaptersRepository.fetchPilotChapters(pilotId)
-        } ?: kotlin.run {
-            throw Exception("Invalid pilot username")
-        }
+    suspend fun fetchPilotChapters(pilotId: String): Flow<List<Chapter>> {
+        return chaptersRepository.fetchPilotChapters(pilotId)
     }
 }

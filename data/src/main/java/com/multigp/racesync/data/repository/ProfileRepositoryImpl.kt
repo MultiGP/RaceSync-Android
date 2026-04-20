@@ -61,27 +61,21 @@ class ProfileRepositoryImpl(
 
     override suspend fun fetchProfile(pilotName: String) = flow {
         val userInfo = dataStore.getUserInfo()!!
-        val profile = profileDao.get(pilotName).firstOrNull()
-        if (profile != null) {
-            emit(Pair(profile, userInfo))
-        }else{
-            val request = BaseRequest(apiKey, SearchRequest(pilotName), dataStore.getSessionId()!!)
-            val response = raceSyncApi.searchUser(request)
-            if (response.isSuccessful) {
-                response.body()?.let { baseResponse ->
-                    if (baseResponse.status) {
-                        baseResponse.data?.let { profile ->
-                            profileDao.add(profile)
-                            emit(Pair(profile, userInfo))
-                        }
-                    } else {
-                        throw Exception(baseResponse.errorMessage())
+        val request = BaseRequest(apiKey, SearchRequest(pilotName), dataStore.getSessionId()!!)
+        val response = raceSyncApi.searchUser(request)
+        if (response.isSuccessful) {
+            response.body()?.let { baseResponse ->
+                if (baseResponse.status) {
+                    baseResponse.data?.let { profile ->
+                        emit(Pair(profile, userInfo))
                     }
+                } else {
+                    throw Exception(baseResponse.errorMessage())
                 }
-            } else {
-                val errorResponse = BaseResponse.convertFromErrorResponse(response)
-                throw Exception(errorResponse.statusDescription)
             }
+        } else {
+            val errorResponse = BaseResponse.convertFromErrorResponse(response)
+            throw Exception(errorResponse.statusDescription)
         }
     }
         .flowOn(Dispatchers.IO)

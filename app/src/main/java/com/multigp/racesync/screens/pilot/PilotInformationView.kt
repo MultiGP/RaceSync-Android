@@ -82,7 +82,7 @@ fun PilotInformationView(
         // ── Display name (iOS: 16pt regular) ──
         Text(
             modifier = modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-            text = profile.displayName,
+            text = profile.displayName ?: "",
             style = TextStyle(
                 fontSize = 16.sp,
                 fontWeight = FontWeight.Normal,

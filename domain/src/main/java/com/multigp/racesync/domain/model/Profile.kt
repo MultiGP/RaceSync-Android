@@ -12,45 +12,45 @@ data class Profile(
     @field:SerializedName("id")
     val id: String,
     @field:SerializedName("addressOne")
-    val addressOne: String,
+    val addressOne: String? = null,
     @field:SerializedName("addressTwo")
-    val addressTwo: String,
+    val addressTwo: String? = null,
     @field:SerializedName("authType")
-    val authType: String,
+    val authType: String? = null,
     @field:SerializedName("chapterCount")
-    val chapterCount: Int,
+    val chapterCount: Int = 0,
     @field:SerializedName("chapterIds")
-    val chapterIds: List<String>,
+    val chapterIds: List<String> = emptyList(),
     @field:SerializedName("city")
-    val city: String?,
+    val city: String? = null,
     @field:SerializedName("country")
-    val country: String,
+    val country: String? = null,
     @field:SerializedName("dateAdded")
-    val dateAdded: String,
+    val dateAdded: String? = null,
     @field:SerializedName("dateModified")
-    val dateModified: String,
+    val dateModified: String? = null,
     @field:SerializedName("displayName")
-    val displayName: String,
+    val displayName: String? = null,
     @field:SerializedName("firstName")
-    val firstName: String,
+    val firstName: String? = null,
     @field:SerializedName("homeChapterId")
-    val homeChapterId: String?,
+    val homeChapterId: String? = null,
     @field:SerializedName("isPublic")
-    val isPublic: Boolean,
+    val isPublic: Boolean = false,
     @field:SerializedName("language")
-    val language: String,
+    val language: String? = null,
     @field:SerializedName("lastName")
-    val lastName: String,
+    val lastName: String? = null,
     @field:SerializedName("latitude")
-    val latitude: Double?,
+    val latitude: Double? = null,
     @field:SerializedName("longitude")
-    val longitude: Double?,
+    val longitude: Double? = null,
     @field:SerializedName("phoneNumber")
-    val phoneNumber: String?,
+    val phoneNumber: String? = null,
     @field:SerializedName("profileBackgroundUrl")
-    val profileBackgroundUrl: String,
+    val profileBackgroundUrl: String? = null,
     @field:SerializedName("profilePictureUrl")
-    val profilePictureUrl: String,
+    val profilePictureUrl: String? = null,
     @field:SerializedName("raceCount")
     val raceCount: Int? = 0,
     @field:SerializedName("state")

@@ -33,10 +33,11 @@ class PilotViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 _uiState.value = UiState.Loading
-                useCases.getProfileUseCase(pilotName).collect {
-                    _uiState.value = UiState.Success(it)
-                    fetchRaces(pilotName)
-                    fetchChapters(pilotName)
+                useCases.getProfileUseCase(pilotName).collect { pair ->
+                    _uiState.value = UiState.Success(pair)
+                    val pilotId = pair.first.id
+                    fetchRaces(pilotId)
+                    fetchChapters(pilotId)
                 }
             } catch (exception: Exception) {
                 _uiState.value = UiState.Error(exception.localizedMessage ?: "")
@@ -44,11 +45,11 @@ class PilotViewModel @Inject constructor(
         }
     }
 
-    fun fetchRaces(pilotUserName: String) {
+    fun fetchRaces(pilotId: String) {
         viewModelScope.launch {
             _racesUiState.value = UiState.Loading
             try {
-                useCases.getRacesUseCase.fetchPilotRaces(pilotUserName)
+                useCases.getRacesUseCase.fetchPilotRaces(pilotId)
                     .collect { races ->
                         val sortedRaces = races.sortedByDescending { it.formattedStartDate }
                         _racesUiState.value = UiState.Success(sortedRaces)
@@ -60,11 +61,11 @@ class PilotViewModel @Inject constructor(
         }
     }
 
-    fun fetchChapters(pilotUserName: String) {
+    fun fetchChapters(pilotId: String) {
         viewModelScope.launch {
             _chaptersUiState.value = UiState.Loading
             try {
-                useCases.getChaptersUseCase.fetchPilotChapters(pilotUserName)
+                useCases.getChaptersUseCase.fetchPilotChapters(pilotId)
                     .collect { races ->
                         _chaptersUiState.value = UiState.Success(races)
                     }

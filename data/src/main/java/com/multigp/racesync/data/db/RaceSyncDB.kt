@@ -22,7 +22,7 @@ import com.multigp.racesync.domain.model.RaceRemoteKeys
         Pilot::class,
         Profile::class,
     ],
-    version = 2,
+    version = 3,
     exportSchema = false
 )
 @TypeConverters(StringListConverter::class)
