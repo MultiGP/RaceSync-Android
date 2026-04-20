@@ -63,18 +63,18 @@ fun PilotInformationView(
         }
 
         // ── Stats row (Race count + Chapter count) ──
+        val raceCount = profile.raceCount ?: 0
+        val chapterCount = profile.chapterCount
         Row(modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
             IconText(
-                text = "${profile.raceCount} Races",
+                text = "$raceCount ${if (raceCount == 1) "Race" else "Races"}",
                 icon = R.drawable.icn_race_small,
-                modifier = modifier.size(24.dp, 16.dp),
                 color = RaceCellSubtitleColor
             )
             Spacer(modifier = Modifier.weight(1f))
             IconText(
-                text = "${profile.chapterCount} Chapters",
+                text = "$chapterCount ${if (chapterCount == 1) "Chapter" else "Chapters"}",
                 icon = R.drawable.icn_chapter_small,
-                modifier = modifier.size(24.dp, 16.dp),
                 color = RaceCellSubtitleColor
             )
         }
