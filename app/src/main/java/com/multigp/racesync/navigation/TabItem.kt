@@ -81,8 +81,29 @@ sealed class TabItem(
         null
     )
 
+    object SeriesDetails : TabItem(
+        R.drawable.ic_bottom_bar_details,
+        R.drawable.ic_bottom_bar_details,
+        R.string.series_details_tab_details,
+        null
+    )
+
+    object SeriesRaces : TabItem(
+        R.drawable.ic_tab_nearby_outlined,
+        R.drawable.ic_tab_nearby,
+        R.string.series_details_tab_races,
+        null
+    )
+
+    object SeriesLeaderboard : TabItem(
+        R.drawable.ic_tab_trophy_outlined,
+        R.drawable.ic_tab_trophy,
+        R.string.series_details_tab_leaderboard,
+        null
+    )
 }
 
 val landingTabs = listOf(TabItem.Joined, TabItem.Nearby, TabItem.Chapters, TabItem.GQ2026, TabItem.Spec)
 val raceDetailTabs = listOf(TabItem.RaceDetails, TabItem.RaceRoster, TabItem.RaceSchedule)
 val pilotInfoTabs = listOf(TabItem.PilotRace, TabItem.Chapters)
+val seriesDetailTabs = listOf(TabItem.SeriesDetails, TabItem.SeriesRaces, TabItem.SeriesLeaderboard)

@@ -171,6 +171,18 @@ object Series : NavDestination {
     override val webUrl = null
 }
 
+object SeriesDetails : NavDestination {
+    override val icon = null
+    override val title = "Series Details"
+    override val route = "series_details"
+    override val webUrl = null
+    const val seriesIdArg = "seriesId"
+    val routeWithArgs = "$route/{$seriesIdArg}"
+    val arguments = listOf(
+        navArgument(seriesIdArg) { type = NavType.StringType }
+    )
+}
+
 object GqRanking : NavDestination {
     override val iconPainterId = R.drawable.ic_tropy
     override val title = "Standings"

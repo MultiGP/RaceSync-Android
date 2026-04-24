@@ -2,6 +2,7 @@ package com.multigp.racesync.data.repository
 
 import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.prefs.DataStoreManager
+import com.multigp.racesync.domain.model.BaseResponse
 import com.multigp.racesync.domain.model.Series
 import com.multigp.racesync.domain.model.requests.BaseRequest
 import com.multigp.racesync.domain.repositories.SeriesRepository
@@ -15,15 +16,10 @@ class SeriesRepositoryImpl(
 ) : SeriesRepository {
 
     override suspend fun fetchSeries(): List<Series> {
-        val request = BaseRequest<Nothing>(
-            apiKey = apiKey,
-            sessionId = dataStore.getSessionId()!!
-        )
-
         val response = raceSyncApi.fetchSeries(
             page = 0,
             pageSize = PAGE_SIZE,
-            request = request
+            request = baseRequest()
         )
 
         if (!response.status) {
@@ -31,4 +27,23 @@ class SeriesRepositoryImpl(
         }
         return response.data ?: emptyList()
     }
+
+    override suspend fun fetchSeriesDetail(seriesId: String): Series {
+        val response = raceSyncApi.fetchSeriesDetail(seriesId, baseRequest())
+
+        if (!response.isSuccessful) {
+            val errorResponse = BaseResponse.convertFromErrorResponse(response)
+            throw Exception(errorResponse.statusDescription)
+        }
+        val body = response.body() ?: throw Exception("Empty response")
+        if (!body.status) {
+            throw Exception(body.errorMessage())
+        }
+        return body.data ?: throw Exception("Series not found")
+    }
+
+    private suspend fun baseRequest() = BaseRequest<Nothing>(
+        apiKey = apiKey,
+        sessionId = dataStore.getSessionId()!!
+    )
 }

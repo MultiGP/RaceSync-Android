@@ -20,6 +20,7 @@ import com.multigp.racesync.screens.landing.NotificationWebViewScreen
 import com.multigp.racesync.screens.landing.SeriesScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
+import com.multigp.racesync.screens.series.SeriesDetailsContainerScreen
 import com.multigp.racesync.screens.standings.StandingsScreen
 
 @Composable
@@ -49,7 +50,24 @@ fun LandingNavGraph(
         }
 
         composable(route = Series.route) {
-            SeriesScreen()
+            SeriesScreen(
+                onSeriesSelected = { series ->
+                    navController.navigate("${SeriesDetails.route}/${series.id}")
+                }
+            )
+        }
+
+        composable(
+            route = SeriesDetails.routeWithArgs,
+            arguments = SeriesDetails.arguments
+        ) { navBackStackEntry ->
+            val seriesId = navBackStackEntry.arguments?.getString(SeriesDetails.seriesIdArg)
+            if (seriesId != null) {
+                SeriesDetailsContainerScreen(
+                    seriesId = seriesId,
+                    onGoBack = { navController.popBackStack() }
+                )
+            }
         }
 
         composable(route = ObstaclesBuildGuide.route) {

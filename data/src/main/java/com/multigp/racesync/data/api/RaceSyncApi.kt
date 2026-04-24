@@ -117,4 +117,10 @@ interface RaceSyncApi {
         @Query("pageSize") pageSize: Int,
         @Body request: BaseRequest<Nothing>
     ): BaseResponse<List<Series>>
+
+    @POST("series/view")
+    suspend fun fetchSeriesDetail(
+        @Query("id") seriesId: String,
+        @Body request: BaseRequest<Nothing>
+    ): Response<BaseResponse<Series>>
 }

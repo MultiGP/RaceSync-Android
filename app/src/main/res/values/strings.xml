@@ -104,6 +104,20 @@
     <string name="error_title_loading_series">Error Loading Series</string>
     <string name="series_pilots_participating">%1$d pilots participating</string>
     <string name="series_pilot_participating">%1$d pilot participating</string>
+    <string name="series_details_tab_details">Details</string>
+    <string name="series_details_tab_races">Races</string>
+    <string name="series_details_tab_leaderboard">Leaderboard</string>
+    <string name="series_details_title">Series</string>
+    <string name="series_details_races_count">%1$d Races</string>
+    <string name="series_details_race_count">%1$d Race</string>
+    <string name="series_details_pilots_count">%1$d Pilots</string>
+    <string name="series_details_pilot_count">%1$d Pilot</string>
+    <string name="series_details_date_range">%1$s — %2$s</string>
+    <string name="series_details_description_title">About</string>
+    <string name="series_details_no_description">No description available.</string>
+    <string name="series_details_coming_soon">Coming soon</string>
+    <string name="series_details_error_title">Couldn\'t load series</string>
+    <string name="series_details_loading">Loading series, please wait…</string>
 
     <!-- Standings -->
     <string name="standings_back">Back</string>
