@@ -65,7 +65,10 @@ fun LandingNavGraph(
             if (seriesId != null) {
                 SeriesDetailsContainerScreen(
                     seriesId = seriesId,
-                    onGoBack = { navController.popBackStack() }
+                    onGoBack = { navController.popBackStack() },
+                    onRaceSelected = { race ->
+                        navController.navigate("${RaceDetails.route}/${race.id}")
+                    }
                 )
             }
         }

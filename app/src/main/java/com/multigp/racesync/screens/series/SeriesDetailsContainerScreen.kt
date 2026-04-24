@@ -18,6 +18,7 @@ import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.bottombars.RaceDetailsBottomBar
 import com.multigp.racesync.composables.topbars.RaceDetailsTopBar
+import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.Series
 import com.multigp.racesync.navigation.seriesDetailTabs
 import com.multigp.racesync.viewmodels.SeriesDetailsViewModel
@@ -29,7 +30,8 @@ fun SeriesDetailsContainerScreen(
     seriesId: String,
     modifier: Modifier = Modifier,
     viewModel: SeriesDetailsViewModel = hiltViewModel(),
-    onGoBack: () -> Unit = {}
+    onGoBack: () -> Unit = {},
+    onRaceSelected: (Race) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
     val state by viewModel.state.collectAsState()
@@ -69,6 +71,7 @@ fun SeriesDetailsContainerScreen(
             is UiState.Success -> SeriesDetailsPager(
                 series = current.data,
                 pagerState = pagerState,
+                onRaceSelected = onRaceSelected,
                 modifier = modifier.padding(paddingValues)
             )
         }
@@ -80,6 +83,7 @@ fun SeriesDetailsContainerScreen(
 private fun SeriesDetailsPager(
     series: Series,
     pagerState: com.google.accompanist.pager.PagerState,
+    onRaceSelected: (Race) -> Unit,
     modifier: Modifier = Modifier
 ) {
     HorizontalPager(
@@ -90,7 +94,7 @@ private fun SeriesDetailsPager(
     ) { page ->
         when (page) {
             0 -> SeriesDetailsTab(series = series)
-            1 -> SeriesRacesTab(series = series)
+            1 -> SeriesRacesTab(series = series, onRaceSelected = onRaceSelected)
             2 -> SeriesLeaderboardTab(series = series)
         }
     }

@@ -34,7 +34,9 @@ data class Series(
     @field:SerializedName("raceApprovedCount")
     val raceApprovedCount: Int = 0,
     @field:SerializedName("chapterCount")
-    val chapterCount: Int = 0
+    val chapterCount: Int = 0,
+    @field:SerializedName("races")
+    val races: List<Race>? = null
 ) : Serializable {
 
     val isRegional: Boolean
