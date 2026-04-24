@@ -6,7 +6,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -56,13 +55,8 @@ fun SeriesScreen(
     var isRefreshing by remember { mutableStateOf(false) }
     var selectedFilter by rememberSaveable { mutableStateOf(SeriesFilter.Default) }
 
-    LaunchedEffect(Unit) {
-        viewModel.fetchSeries()
-    }
-
-    LaunchedEffect(refreshComplete) {
-        isRefreshing = false
-    }
+    LaunchedEffect(Unit) { viewModel.fetchSeries() }
+    LaunchedEffect(refreshComplete) { isRefreshing = false }
 
     PullToRefreshBox(
         isRefreshing = isRefreshing,
@@ -80,83 +74,102 @@ fun SeriesScreen(
                 onSelected = { selectedFilter = it }
             )
 
-            when (uiState) {
-                is UiState.Loading -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(6) { ChapterLoadingCell() }
-                    }
-                }
-
-                is UiState.Success -> {
-                    val series = (uiState as UiState.Success<List<Series>>).data
-                    val filtered = remember(series, selectedFilter) {
-                        series.filteredAndSorted(selectedFilter)
-                    }
-                    // Carousel always shows regionals (iOS parity).
-                    val banner = remember(series) {
-                        series.filteredAndSorted(SeriesFilter.Regionals)
-                    }
-
-                    if (filtered.isEmpty() && banner.isEmpty()) {
-                        PlaceholderScreen(
-                            modifier = modifier,
-                            title = stringResource(R.string.placeholder_title_no_series),
-                            message = emptyStateMessage(selectedFilter)
-                        )
-                    } else {
-                        LazyColumn(
-                            modifier = Modifier.fillMaxSize(),
-                            contentPadding = PaddingValues(bottom = 80.dp)
-                        ) {
-                            if (banner.isNotEmpty()) {
-                                item(key = "carousel") {
-                                    Column(modifier = Modifier.fillMaxWidth()) {
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                        SeriesCarousel(
-                                            series = banner,
-                                            onSeriesSelected = onSeriesSelected
-                                        )
-                                        Spacer(modifier = Modifier.height(8.dp))
-                                    }
-                                }
-                            }
-                            if (filtered.isEmpty()) {
-                                item(key = "empty") {
-                                    PlaceholderScreen(
-                                        modifier = modifier,
-                                        title = stringResource(R.string.placeholder_title_no_series),
-                                        message = emptyStateMessage(selectedFilter)
-                                    )
-                                }
-                            } else {
-                                items(items = filtered, key = { it.id }) { item ->
-                                    SeriesCell(
-                                        series = item,
-                                        onClick = onSeriesSelected
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
-
-                is UiState.Error -> {
-                    val errorMessage = (uiState as UiState.Error).message
-                    PlaceholderScreen(
-                        modifier = modifier,
-                        title = stringResource(R.string.error_title_loading_series),
-                        message = errorMessage,
-                        buttonTitle = stringResource(R.string.error_btn_title_retry),
-                        isError = true,
-                        canRetry = true,
-                        onButtonClick = { viewModel.fetchSeries() }
-                    )
-                }
-
-                is UiState.None -> { /* Initial state — nothing to show yet */ }
+            when (val state = uiState) {
+                is UiState.Loading -> LoadingList()
+                is UiState.Error -> ErrorState(
+                    message = state.message,
+                    onRetry = viewModel::fetchSeries
+                )
+                is UiState.Success -> SuccessContent(
+                    series = state.data,
+                    selectedFilter = selectedFilter,
+                    onSeriesSelected = onSeriesSelected
+                )
+                is UiState.None -> Unit
             }
         }
     }
+}
+
+@Composable
+private fun LoadingList(modifier: Modifier = Modifier) {
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        items(6) { ChapterLoadingCell() }
+    }
+}
+
+@Composable
+private fun ErrorState(
+    message: String,
+    onRetry: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    PlaceholderScreen(
+        modifier = modifier,
+        title = stringResource(R.string.error_title_loading_series),
+        message = message,
+        buttonTitle = stringResource(R.string.error_btn_title_retry),
+        isError = true,
+        canRetry = true,
+        onButtonClick = onRetry
+    )
+}
+
+@Composable
+private fun SuccessContent(
+    series: List<Series>,
+    selectedFilter: SeriesFilter,
+    onSeriesSelected: (Series) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val filtered = remember(series, selectedFilter) {
+        series.filteredAndSorted(selectedFilter)
+    }
+    // The banner always shows Regionals regardless of the active filter.
+    val banner = remember(series) {
+        series.filteredAndSorted(SeriesFilter.Regionals)
+    }
+
+    if (banner.isEmpty() && filtered.isEmpty()) {
+        EmptyState(selectedFilter, modifier)
+        return
+    }
+
+    LazyColumn(
+        modifier = modifier.fillMaxSize(),
+        contentPadding = PaddingValues(bottom = 80.dp)
+    ) {
+        if (banner.isNotEmpty()) {
+            item(key = "carousel") {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(modifier = Modifier.height(8.dp))
+                    SeriesCarousel(series = banner, onSeriesSelected = onSeriesSelected)
+                    Spacer(modifier = Modifier.height(8.dp))
+                }
+            }
+        }
+        if (filtered.isEmpty()) {
+            item(key = "empty") { EmptyState(selectedFilter) }
+        } else {
+            items(items = filtered, key = { it.id }) { item ->
+                SeriesCell(series = item, onClick = onSeriesSelected)
+            }
+        }
+    }
+}
+
+@Composable
+private fun EmptyState(filter: SeriesFilter, modifier: Modifier = Modifier) {
+    val messageRes = when (filter) {
+        SeriesFilter.Joined -> R.string.placeholder_message_no_joined_series
+        SeriesFilter.Regionals -> R.string.placeholder_message_no_regional_series
+        SeriesFilter.All -> R.string.placeholder_message_no_series
+    }
+    PlaceholderScreen(
+        modifier = modifier,
+        title = stringResource(R.string.placeholder_title_no_series),
+        message = stringResource(messageRes)
+    )
 }
 
 @Composable
@@ -198,14 +211,4 @@ private fun SeriesFilterBar(
             )
         }
     }
-}
-
-@Composable
-private fun emptyStateMessage(filter: SeriesFilter): String {
-    val resId = when (filter) {
-        SeriesFilter.Joined -> R.string.placeholder_message_no_joined_series
-        SeriesFilter.Regionals -> R.string.placeholder_message_no_regional_series
-        SeriesFilter.All -> R.string.placeholder_message_no_series
-    }
-    return stringResource(resId)
 }

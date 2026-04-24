@@ -3,12 +3,7 @@ package com.multigp.racesync.domain.model
 import java.util.Calendar
 
 /**
- * Mirrors iOS `SeriesFilter` (SeriesFeedController.swift):
- *   - Joined    → user's joined series, sorted recent-first
- *   - Regionals → scoreType == regionals, joined-first then default sort
- *   - All       → everything, sorted recent-first
- *
- * iOS default is Regionals on first launch.
+ * User-visible filter for the Series tab. Titles are used directly in the UI.
  */
 enum class SeriesFilter(val title: String) {
     Joined("My Series"),
@@ -20,27 +15,25 @@ enum class SeriesFilter(val title: String) {
     }
 }
 
-/** Applies the iOS per-filter selection + sort rules to a raw series list. */
-fun List<Series>.filteredAndSorted(filter: SeriesFilter): List<Series> {
-    return when (filter) {
-        SeriesFilter.Joined ->
-            filter { it.isJoined }.sortedSeries(prioritizeRecent = true)
-        SeriesFilter.Regionals ->
-            filter { it.isRegional }.sortedSeries(prioritizeJoined = true)
-        SeriesFilter.All ->
-            sortedSeries(prioritizeRecent = true)
-    }
+/**
+ * Returns [this] filtered by [filter] and sorted by [sortedSeries] with filter-appropriate
+ * priorities. See [sortedSeries] for the ordering rules.
+ */
+fun List<Series>.filteredAndSorted(filter: SeriesFilter): List<Series> = when (filter) {
+    SeriesFilter.Joined -> filter { it.isJoined }.sortedSeries(prioritizeRecent = true)
+    SeriesFilter.Regionals -> filter { it.isRegional }.sortedSeries(prioritizeJoined = true)
+    SeriesFilter.All -> sortedSeries(prioritizeRecent = true)
 }
 
 /**
- * Ports iOS SeriesFeedController.sortedSeries:
- *   1. (optional) joined first
- *   2. ended (endDate < now) always last
- *   3. no participation (pilotCount == 0) just before ended
- *   4. (optional) recency by year of endDate ?: startDate, desc
- *   5. popularity (pilotCount desc) as tie-breaker
+ * Sort order (highest priority first):
+ *   1. Joined series first      — only when [prioritizeJoined] is true
+ *   2. Ended series last        — endDate strictly before now
+ *   3. Empty series before ended — pilotCount == 0
+ *   4. Most recent year first   — only when [prioritizeRecent] is true
+ *   5. Higher pilot count first — tie-breaker
  */
-private fun List<Series>.sortedSeries(
+internal fun List<Series>.sortedSeries(
     prioritizeJoined: Boolean = false,
     prioritizeRecent: Boolean = false
 ): List<Series> {
@@ -53,30 +46,26 @@ private fun List<Series>.sortedSeries(
         return calendar.get(Calendar.YEAR)
     }
 
-    val comparator = Comparator<Series> { a, b ->
-        val aEnded = a.endDate?.let { it.time < now } ?: false
-        val bEnded = b.endDate?.let { it.time < now } ?: false
-        val aNoParticipation = a.pilotCount == 0
-        val bNoParticipation = b.pilotCount == 0
-
+    return sortedWith(Comparator { a, b ->
         if (prioritizeJoined && a.isJoined != b.isJoined) {
             return@Comparator if (a.isJoined) -1 else 1
         }
+
+        val aEnded = a.endDate?.let { it.time < now } ?: false
+        val bEnded = b.endDate?.let { it.time < now } ?: false
         if (aEnded != bEnded) return@Comparator if (aEnded) 1 else -1
-        if (aNoParticipation != bNoParticipation) return@Comparator if (aNoParticipation) 1 else -1
+
+        val aEmpty = a.pilotCount == 0
+        val bEmpty = b.pilotCount == 0
+        if (aEmpty != bEmpty) return@Comparator if (aEmpty) 1 else -1
 
         if (prioritizeRecent) {
             val ay = year(a)
             val by = year(b)
-            if (ay != null && by != null && ay != by) {
-                return@Comparator by.compareTo(ay)
-            }
-            if ((ay == null) != (by == null)) {
-                return@Comparator if (ay == null) 1 else -1
-            }
+            if (ay != null && by != null && ay != by) return@Comparator by.compareTo(ay)
+            if ((ay == null) != (by == null)) return@Comparator if (ay == null) 1 else -1
         }
 
         b.pilotCount.compareTo(a.pilotCount)
-    }
-    return sortedWith(comparator)
+    })
 }

@@ -338,10 +338,7 @@ class LandingViewModel @Inject constructor(
         raceClassRacesCachedClass = null
     }
 
-    /**
-     * Fetches series using the same cache-first + background refresh pattern
-     * used by the races tabs. Matches iOS SeriesFeedViewController.fetchSeries.
-     */
+    /** Cache-first + background refresh, same pattern as the races tabs. */
     fun fetchSeries() {
         viewModelScope.launch {
             seriesCache?.let { cached ->

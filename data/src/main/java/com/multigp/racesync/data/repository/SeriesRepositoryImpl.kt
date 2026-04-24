@@ -4,8 +4,9 @@ import com.multigp.racesync.data.api.RaceSyncApi
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.Series
 import com.multigp.racesync.domain.model.requests.BaseRequest
-import com.multigp.racesync.domain.model.requests.SeriesRequest
 import com.multigp.racesync.domain.repositories.SeriesRepository
+
+private const val PAGE_SIZE = 100
 
 class SeriesRepositoryImpl(
     private val raceSyncApi: RaceSyncApi,
@@ -14,15 +15,14 @@ class SeriesRepositoryImpl(
 ) : SeriesRepository {
 
     override suspend fun fetchSeries(): List<Series> {
-        val request = BaseRequest(
+        val request = BaseRequest<Nothing>(
             apiKey = apiKey,
-            data = SeriesRequest(),
             sessionId = dataStore.getSessionId()!!
         )
 
         val response = raceSyncApi.fetchSeries(
             page = 0,
-            pageSize = 100,
+            pageSize = PAGE_SIZE,
             request = request
         )
 

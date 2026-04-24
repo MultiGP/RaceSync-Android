@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -32,16 +31,18 @@ import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.rememberPagerState
 import com.multigp.racesync.R
 import com.multigp.racesync.domain.model.Series
+import com.multigp.racesync.ui.theme.SeriesCarouselDotActive
+import com.multigp.racesync.ui.theme.SeriesCarouselDotInactive
+import com.multigp.racesync.ui.theme.SeriesPlaceholderTint
 import kotlinx.coroutines.delay
 
 private const val AUTO_SCROLL_INTERVAL_MS = 5000L
+private val CarouselHeight = 200.dp
+private val CarouselSidePadding = 30.dp
+private val CarouselItemSpacing = 12.dp
+private val CarouselCornerRadius = 12.dp
+private val DotSize = 6.dp
 
-/**
- * iOS SliderTableViewHeaderView analogue:
- *   - 70% width card, aspect-fill image, 12dp corner radius + subtle shadow
- *   - Page indicator dots under the card
- *   - Auto-advances every 5s, pauses while the user drags
- */
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun SeriesCarousel(
@@ -54,7 +55,6 @@ fun SeriesCarousel(
     val pagerState = rememberPagerState(initialPage = 0)
     val isDragged by pagerState.interactionSource.collectIsDraggedAsState()
 
-    // Auto-advance every 5s, but only while the user isn't dragging.
     LaunchedEffect(pagerState, isDragged, series.size) {
         if (series.size <= 1 || isDragged) return@LaunchedEffect
         while (true) {
@@ -68,15 +68,16 @@ fun SeriesCarousel(
         HorizontalPager(
             count = series.size,
             state = pagerState,
-            contentPadding = PaddingValues(horizontal = 30.dp),
-            itemSpacing = 12.dp,
+            contentPadding = PaddingValues(horizontal = CarouselSidePadding),
+            itemSpacing = CarouselItemSpacing,
             modifier = Modifier
                 .fillMaxWidth()
-                .height(200.dp)
+                .height(CarouselHeight)
         ) { page ->
+            val item = series[page]
             SeriesCarouselItem(
-                series = series[page],
-                onClick = { onSeriesSelected(series[page]) }
+                series = item,
+                onClick = { onSeriesSelected(item) }
             )
         }
 
@@ -93,8 +94,8 @@ fun SeriesCarousel(
 @Composable
 private fun SeriesCarouselItem(
     series: Series,
-    modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Box(
         modifier = modifier
@@ -102,21 +103,22 @@ private fun SeriesCarouselItem(
             .padding(vertical = 8.dp)
             .shadow(
                 elevation = 4.dp,
-                shape = RoundedCornerShape(12.dp),
+                shape = RoundedCornerShape(CarouselCornerRadius),
                 ambientColor = Color.Black.copy(alpha = 0.35f),
                 spotColor = Color.Black.copy(alpha = 0.35f)
             )
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color(0xFFEFEFF2))
+            .clip(RoundedCornerShape(CarouselCornerRadius))
+            .background(SeriesPlaceholderTint)
             .clickable { onClick() }
     ) {
+        val placeholder = painterResource(R.drawable.placeholder_series_medium)
         AsyncImage(
             model = series.mainImageUrl,
             contentDescription = series.name,
             contentScale = ContentScale.Crop,
-            placeholder = painterResource(R.drawable.placeholder_series_medium),
-            error = painterResource(R.drawable.placeholder_series_medium),
-            fallback = painterResource(R.drawable.placeholder_series_medium),
+            placeholder = placeholder,
+            error = placeholder,
+            fallback = placeholder,
             modifier = Modifier.fillMaxSize()
         )
     }
@@ -135,18 +137,13 @@ private fun PageIndicator(
         verticalAlignment = Alignment.CenterVertically
     ) {
         repeat(pageCount) { index ->
-            val selected = index == currentPage
+            val color = if (index == currentPage) SeriesCarouselDotActive else SeriesCarouselDotInactive
             Box(
                 modifier = Modifier
-                    .size(if (selected) 8.dp else 6.dp)
+                    .size(DotSize)
                     .clip(CircleShape)
-                    .background(
-                        if (selected) Color(0xFF6D6D77) else Color(0xFFCACACF)
-                    )
+                    .background(color)
             )
-            if (index < pageCount - 1) {
-                Spacer(modifier = Modifier.size(0.dp))
-            }
         }
     }
 }

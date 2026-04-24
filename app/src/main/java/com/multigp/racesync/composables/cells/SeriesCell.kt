@@ -19,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -35,6 +34,15 @@ import com.multigp.racesync.ui.theme.RaceCellBackground
 import com.multigp.racesync.ui.theme.RaceCellDividerColor
 import com.multigp.racesync.ui.theme.RaceCellSubtitleColor
 import com.multigp.racesync.ui.theme.RaceCellTitleColor
+import com.multigp.racesync.ui.theme.SeriesPlaceholderTint
+
+private val ThumbnailWidth = 110.dp
+private val ThumbnailHeight = 76.dp
+private val RowHorizontalPadding = 16.dp
+private val ThumbnailToTextGap = 16.dp
+
+// Keeps the divider aligned with the text column start.
+private val DividerIndent = RowHorizontalPadding + ThumbnailWidth + ThumbnailToTextGap
 
 @Composable
 fun SeriesCell(
@@ -51,24 +59,25 @@ fun SeriesCell(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(100.dp)
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+                .padding(horizontal = RowHorizontalPadding, vertical = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            val placeholder = painterResource(R.drawable.placeholder_series_small)
             AsyncImage(
                 model = series.mainImageUrl,
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
-                placeholder = painterResource(R.drawable.placeholder_series_small),
-                error = painterResource(R.drawable.placeholder_series_small),
-                fallback = painterResource(R.drawable.placeholder_series_small),
+                placeholder = placeholder,
+                error = placeholder,
+                fallback = placeholder,
                 modifier = Modifier
-                    .size(width = 110.dp, height = 76.dp)
+                    .size(width = ThumbnailWidth, height = ThumbnailHeight)
                     .clip(RoundedCornerShape(6.dp))
-                    .background(Color(0xFFEFEFF2))
+                    .background(SeriesPlaceholderTint)
             )
-            Spacer(modifier = Modifier.width(16.dp))
+            Spacer(modifier = Modifier.width(ThumbnailToTextGap))
             Column(
-                modifier = Modifier.weight(1.0f),
+                modifier = Modifier.weight(1f),
                 verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 Text(
@@ -89,10 +98,7 @@ fun SeriesCell(
                         else R.string.series_pilots_participating,
                         series.pilotCount
                     ),
-                    style = TextStyle(
-                        fontSize = 14.sp,
-                        letterSpacing = 0.sp
-                    ),
+                    style = TextStyle(fontSize = 14.sp),
                     color = RaceCellSubtitleColor,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
@@ -106,7 +112,7 @@ fun SeriesCell(
             )
         }
         HorizontalDivider(
-            modifier = Modifier.padding(start = 142.dp),
+            modifier = Modifier.padding(start = DividerIndent),
             thickness = 0.5.dp,
             color = RaceCellDividerColor
         )

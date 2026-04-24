@@ -95,7 +95,8 @@
     <string name="tab_races">Races</string>
     <string name="tab_series">Series</string>
     <string name="tab_standings">Standings</string>
-    <string name="series_coming_soon">Series feature coming soon</string>
+
+    <!-- Series -->
     <string name="placeholder_title_no_series">No Series Found</string>
     <string name="placeholder_message_no_series">There are no series available right now.</string>
     <string name="placeholder_message_no_joined_series">You haven\'t joined any series yet.</string>
