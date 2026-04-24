@@ -17,9 +17,9 @@ import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
 import com.multigp.racesync.screens.landing.DesignTrackScreen
 import com.multigp.racesync.screens.landing.HomeScreen
 import com.multigp.racesync.screens.landing.NotificationWebViewScreen
+import com.multigp.racesync.screens.landing.SeriesScreen
 import com.multigp.racesync.screens.pilot.PilotInfoContainerScreen
 import com.multigp.racesync.screens.racedetails.RaceDetailsContainerScreen
-import com.multigp.racesync.screens.series.SeriesPlaceholderScreen
 import com.multigp.racesync.screens.standings.StandingsScreen
 
 @Composable
@@ -49,7 +49,7 @@ fun LandingNavGraph(
         }
 
         composable(route = Series.route) {
-            SeriesPlaceholderScreen()
+            SeriesScreen()
         }
 
         composable(route = ObstaclesBuildGuide.route) {

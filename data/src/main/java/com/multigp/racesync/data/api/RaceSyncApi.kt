@@ -7,6 +7,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
+import com.multigp.racesync.domain.model.Series
 import com.multigp.racesync.domain.model.UserInfo
 import com.multigp.racesync.domain.model.requests.AircraftRequest
 import com.multigp.racesync.domain.model.requests.BaseRequest
@@ -16,6 +17,7 @@ import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.requests.LogoutRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
+import com.multigp.racesync.domain.model.requests.SeriesRequest
 import com.multigp.racesync.domain.model.requests.UpdateFCMTokenRequest
 import com.multigp.racesync.domain.model.requests.SearchRequest
 import retrofit2.Response
@@ -109,4 +111,11 @@ interface RaceSyncApi {
         @Query("id") raceId: String,
         @Body request: BaseRequest<Nothing>
     ): Response<BaseResponse<RaceView>>
+
+    @POST("series/list")
+    suspend fun fetchSeries(
+        @Query("currentPage") page: Int,
+        @Query("pageSize") pageSize: Int,
+        @Body request: BaseRequest<SeriesRequest>
+    ): BaseResponse<List<Series>>
 }

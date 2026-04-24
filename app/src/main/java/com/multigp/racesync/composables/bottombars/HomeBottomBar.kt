@@ -46,8 +46,7 @@ enum class HomeTab(
     Series(
         titleRes = R.string.tab_series,
         selectedIcon = Icons.Filled.Layers,
-        unselectedIcon = Icons.Outlined.Layers,
-        enabled = false
+        unselectedIcon = Icons.Outlined.Layers
     ),
     Standings(
         titleRes = R.string.tab_standings,

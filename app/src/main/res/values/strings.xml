@@ -96,6 +96,13 @@
     <string name="tab_series">Series</string>
     <string name="tab_standings">Standings</string>
     <string name="series_coming_soon">Series feature coming soon</string>
+    <string name="placeholder_title_no_series">No Series Found</string>
+    <string name="placeholder_message_no_series">There are no series available right now.</string>
+    <string name="placeholder_message_no_joined_series">You haven\'t joined any series yet.</string>
+    <string name="placeholder_message_no_regional_series">No regional series available right now.</string>
+    <string name="error_title_loading_series">Error Loading Series</string>
+    <string name="series_pilots_participating">%1$d pilots participating</string>
+    <string name="series_pilot_participating">%1$d pilot participating</string>
 
     <!-- Standings -->
     <string name="standings_back">Back</string>

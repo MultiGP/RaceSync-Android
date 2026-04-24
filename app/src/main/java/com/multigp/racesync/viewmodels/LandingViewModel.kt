@@ -7,6 +7,7 @@ import com.multigp.racesync.domain.model.Chapter
 import com.multigp.racesync.domain.model.Profile
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.RaceView
+import com.multigp.racesync.domain.model.Series
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -70,6 +71,9 @@ class LandingViewModel @Inject constructor(
     private val _raceClassRacesUiState = MutableStateFlow<UiState<List<Race>>>(UiState.None)
     val raceClassRacesUiState: StateFlow<UiState<List<Race>>> = _raceClassRacesUiState.asStateFlow()
 
+    private val _seriesUiState = MutableStateFlow<UiState<List<Series>>>(UiState.None)
+    val seriesUiState: StateFlow<UiState<List<Series>>> = _seriesUiState.asStateFlow()
+
     private val _joinRaceUiState = MutableStateFlow<UiState<Boolean>>(UiState.None)
     val joinRaceUiState: StateFlow<UiState<Boolean>> = _joinRaceUiState.asStateFlow()
 
@@ -126,6 +130,7 @@ class LandingViewModel @Inject constructor(
     private var gqRacesCachedYear: String? = null
     private var raceClassRacesCache: List<Race>? = null
     private var raceClassRacesCachedClass: String? = null
+    private var seriesCache: List<Series>? = null
 
     // Tracks whether a pull-to-refresh is in flight so the UI can dismiss the spinner.
     // Using a counter avoids StateFlow deduplication issues with identical UiState values.
@@ -331,6 +336,38 @@ class LandingViewModel @Inject constructor(
     fun invalidateRaceClassCache() {
         raceClassRacesCache = null
         raceClassRacesCachedClass = null
+    }
+
+    /**
+     * Fetches series using the same cache-first + background refresh pattern
+     * used by the races tabs. Matches iOS SeriesFeedViewController.fetchSeries.
+     */
+    fun fetchSeries() {
+        viewModelScope.launch {
+            seriesCache?.let { cached ->
+                _seriesUiState.value = UiState.Success(cached)
+            } ?: run {
+                _seriesUiState.value = UiState.Loading
+            }
+
+            try {
+                val series = useCases.getSeriesUseCase()
+                seriesCache = series
+                _seriesUiState.value = UiState.Success(series)
+            } catch (e: Exception) {
+                if (seriesCache == null) {
+                    _seriesUiState.value =
+                        UiState.Error(e.localizedMessage ?: "Failed to load series")
+                }
+            } finally {
+                _refreshComplete.value++
+            }
+        }
+    }
+
+    /** Clears the series cache so the next fetch hits the API. */
+    fun invalidateSeriesCache() {
+        seriesCache = null
     }
 
     fun fetchRaceView(raceId: String) {
