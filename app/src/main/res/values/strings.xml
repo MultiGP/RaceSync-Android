@@ -118,6 +118,10 @@
     <string name="series_details_coming_soon">Coming soon</string>
     <string name="series_races_empty_title">No Races</string>
     <string name="series_races_empty_message">This series doesn\'t have any races yet.</string>
+    <string name="series_leaderboard_empty_title">No Results Yet</string>
+    <string name="series_leaderboard_empty_message">Results will appear here once races complete.</string>
+    <string name="series_leaderboard_filter_pilots">Pilots</string>
+    <string name="series_leaderboard_filter_chapters">Chapters</string>
     <string name="series_details_error_title">Couldn\'t load series</string>
     <string name="series_details_loading">Loading series, please wait…</string>
 

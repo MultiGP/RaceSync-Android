@@ -36,7 +36,11 @@ data class Series(
     @field:SerializedName("chapterCount")
     val chapterCount: Int = 0,
     @field:SerializedName("races")
-    val races: List<Race>? = null
+    val races: List<Race>? = null,
+    @field:SerializedName("pilot-results")
+    val pilotResults: List<SeriesResult>? = null,
+    @field:SerializedName("chapter-results")
+    val chapterResults: List<SeriesResult>? = null
 ) : Serializable {
 
     val isRegional: Boolean

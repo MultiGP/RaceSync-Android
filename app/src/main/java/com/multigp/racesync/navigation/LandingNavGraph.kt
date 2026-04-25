@@ -68,6 +68,19 @@ fun LandingNavGraph(
                     onGoBack = { navController.popBackStack() },
                     onRaceSelected = { race ->
                         navController.navigate("${RaceDetails.route}/${race.id}")
+                    },
+                    onPilotSelected = { result ->
+                        // Pilot rows expose userName via displayName; the pilot info
+                        // route is keyed on userName, so use it directly.
+                        val username = result.resolvedDisplayName
+                        if (username.isNotBlank()) {
+                            navController.navigate("${PilotInfo.route}/$username")
+                        }
+                    },
+                    onChapterSelected = { result ->
+                        result.chapterId?.let { id ->
+                            navController.navigate("${ChapterDetails.route}/$id")
+                        }
                     }
                 )
             }

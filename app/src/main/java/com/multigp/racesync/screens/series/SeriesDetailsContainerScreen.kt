@@ -20,6 +20,7 @@ import com.multigp.racesync.composables.bottombars.RaceDetailsBottomBar
 import com.multigp.racesync.composables.topbars.RaceDetailsTopBar
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.Series
+import com.multigp.racesync.domain.model.SeriesResult
 import com.multigp.racesync.navigation.seriesDetailTabs
 import com.multigp.racesync.viewmodels.SeriesDetailsViewModel
 import com.multigp.racesync.viewmodels.UiState
@@ -31,7 +32,9 @@ fun SeriesDetailsContainerScreen(
     modifier: Modifier = Modifier,
     viewModel: SeriesDetailsViewModel = hiltViewModel(),
     onGoBack: () -> Unit = {},
-    onRaceSelected: (Race) -> Unit = {}
+    onRaceSelected: (Race) -> Unit = {},
+    onPilotSelected: (SeriesResult) -> Unit = {},
+    onChapterSelected: (SeriesResult) -> Unit = {}
 ) {
     val pagerState = rememberPagerState()
     val state by viewModel.state.collectAsState()
@@ -72,6 +75,8 @@ fun SeriesDetailsContainerScreen(
                 series = current.data,
                 pagerState = pagerState,
                 onRaceSelected = onRaceSelected,
+                onPilotSelected = onPilotSelected,
+                onChapterSelected = onChapterSelected,
                 modifier = modifier.padding(paddingValues)
             )
         }
@@ -84,6 +89,8 @@ private fun SeriesDetailsPager(
     series: Series,
     pagerState: com.google.accompanist.pager.PagerState,
     onRaceSelected: (Race) -> Unit,
+    onPilotSelected: (SeriesResult) -> Unit,
+    onChapterSelected: (SeriesResult) -> Unit,
     modifier: Modifier = Modifier
 ) {
     HorizontalPager(
@@ -95,7 +102,11 @@ private fun SeriesDetailsPager(
         when (page) {
             0 -> SeriesDetailsTab(series = series)
             1 -> SeriesRacesTab(series = series, onRaceSelected = onRaceSelected)
-            2 -> SeriesLeaderboardTab(series = series)
+            2 -> SeriesLeaderboardTab(
+                series = series,
+                onPilotSelected = onPilotSelected,
+                onChapterSelected = onChapterSelected
+            )
         }
     }
 }
