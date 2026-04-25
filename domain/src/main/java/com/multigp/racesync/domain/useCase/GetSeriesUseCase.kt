@@ -10,4 +10,13 @@ class GetSeriesUseCase(
 
     suspend fun detail(seriesId: String): Series =
         seriesRepository.fetchSeriesDetail(seriesId)
+
+    suspend fun approveRace(seriesId: String, raceId: String) =
+        seriesRepository.approveRace(seriesId, raceId)
+
+    suspend fun unapproveRace(seriesId: String, raceId: String) =
+        seriesRepository.unapproveRace(seriesId, raceId)
+
+    suspend fun removeRaceFromSeries(seriesId: String, raceId: String) =
+        seriesRepository.removeRaceFromSeries(seriesId, raceId)
 }

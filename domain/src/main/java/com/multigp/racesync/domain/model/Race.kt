@@ -114,6 +114,21 @@ data class Race(
     var isChapterRace: Boolean = false
 ) : Serializable {
 
+    /**
+     * Series-only fields. Populated by Gson from the `series/view` payload, then read via
+     * [isApproved] / [isFinalized] in [RaceApproval.kt]. They live outside the primary
+     * constructor and are `@Ignore`d so Room doesn't include them in the persisted schema —
+     * races cached from `race/list` never carry approver state.
+     */
+    @Ignore
+    @SerializedName("approved")
+    var approvedRaw: String? = null
+
+    @Ignore
+    @SerializedName("finalized")
+    var finalizedRaw: String? = null
+
+
     val location: LatLng
         get() = LatLng(latitude ?: 0.0, longitude ?: 0.0)
 

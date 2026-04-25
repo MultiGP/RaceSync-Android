@@ -11,20 +11,29 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
-import com.multigp.racesync.composables.cells.RaceCell
+import com.multigp.racesync.composables.cells.SeriesRaceAction
+import com.multigp.racesync.composables.cells.SeriesRaceCell
 import com.multigp.racesync.domain.model.Race
 import com.multigp.racesync.domain.model.Series
+import com.multigp.racesync.domain.model.approvalState
+import com.multigp.racesync.domain.model.canBeEditedBy
 import com.multigp.racesync.domain.model.sortedByStartDateAscending
 
 @Composable
 fun SeriesRacesTab(
     series: Series,
     modifier: Modifier = Modifier,
-    onRaceSelected: (Race) -> Unit = {}
+    myUserId: String? = null,
+    loadingRaceId: String? = null,
+    onRaceSelected: (Race) -> Unit = {},
+    onJoinRace: (Race) -> Unit = {},
+    onApproveRace: (Race) -> Unit = {},
+    onRemoveRace: (Race) -> Unit = {}
 ) {
     val races = remember(series) {
         series.races.orEmpty().sortedByStartDateAscending()
     }
+    val canEdit = remember(series, myUserId) { series.canBeEditedBy(myUserId) }
 
     if (races.isEmpty()) {
         PlaceholderScreen(
@@ -40,10 +49,19 @@ fun SeriesRacesTab(
         contentPadding = PaddingValues(bottom = 16.dp)
     ) {
         items(items = races, key = { it.id }) { race ->
-            RaceCell(
+            val action = if (canEdit) {
+                SeriesRaceAction.Approve(state = race.approvalState())
+            } else {
+                SeriesRaceAction.Join
+            }
+            SeriesRaceCell(
                 race = race,
+                action = action,
+                isLoading = loadingRaceId == race.id,
                 onClick = onRaceSelected,
-                onRaceAction = onRaceSelected
+                onJoinClick = onJoinRace,
+                onApproveClick = onApproveRace,
+                onRemoveClick = onRemoveRace
             )
         }
     }

@@ -21,6 +21,8 @@ data class Series(
     val scoreType: String? = null,
     @field:SerializedName("typeString")
     val scoreTypeString: String? = null,
+    @field:SerializedName("ownerId")
+    val ownerId: String? = null,
     @field:SerializedName("mainImageUrl")
     val mainImageUrl: String? = null,
     @field:SerializedName("primary_color")

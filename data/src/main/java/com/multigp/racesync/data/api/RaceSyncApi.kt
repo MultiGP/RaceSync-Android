@@ -16,6 +16,7 @@ import com.multigp.racesync.domain.model.requests.JoinRaceRequest
 import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.model.requests.LogoutRequest
 import com.multigp.racesync.domain.model.requests.ProfileRequest
+import com.multigp.racesync.domain.model.requests.RaceIdRequest
 import com.multigp.racesync.domain.model.requests.RaceRequest
 import com.multigp.racesync.domain.model.requests.UpdateFCMTokenRequest
 import com.multigp.racesync.domain.model.requests.SearchRequest
@@ -123,4 +124,22 @@ interface RaceSyncApi {
         @Query("id") seriesId: String,
         @Body request: BaseRequest<Nothing>
     ): Response<BaseResponse<Series>>
+
+    @POST("series/approve")
+    suspend fun approveRaceInSeries(
+        @Query("id") seriesId: String,
+        @Body request: BaseRequest<RaceIdRequest>
+    ): Response<BaseResponse<Any>>
+
+    @POST("series/unapprove")
+    suspend fun unapproveRaceInSeries(
+        @Query("id") seriesId: String,
+        @Body request: BaseRequest<RaceIdRequest>
+    ): Response<BaseResponse<Any>>
+
+    @POST("series/remove")
+    suspend fun removeRaceFromSeries(
+        @Query("id") seriesId: String,
+        @Body request: BaseRequest<RaceIdRequest>
+    ): Response<BaseResponse<Any>>
 }

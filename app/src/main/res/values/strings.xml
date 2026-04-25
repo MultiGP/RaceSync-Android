@@ -122,6 +122,13 @@
     <string name="series_leaderboard_empty_message">Results will appear here once races complete.</string>
     <string name="series_leaderboard_filter_pilots">Pilots</string>
     <string name="series_leaderboard_filter_chapters">Chapters</string>
+    <string name="alert_unapprove_race_title">Unapprove Race</string>
+    <string name="alert_unapprove_race_message">Are you sure you want to unapprove this race?</string>
+    <string name="alert_unapprove_race_confirm">Yes, Unapprove</string>
+    <string name="alert_remove_race_title">Remove Race</string>
+    <string name="alert_remove_race_message">Remove this race from the series?</string>
+    <string name="alert_remove_race_confirm">Yes, Remove</string>
+    <string name="approver_action_error_title">Action Failed</string>
     <string name="series_details_error_title">Couldn\'t load series</string>
     <string name="series_details_loading">Loading series, please wait…</string>
 
