@@ -31,7 +31,7 @@ fun LandingNavGraph(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Landing.route,
+        startDestination = Series.route,
         modifier = modifier,
         enterTransition = { EnterTransition.None },
         exitTransition = { ExitTransition.None }

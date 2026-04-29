@@ -97,7 +97,7 @@ fun LandingScreen(
     var selectedMenuItem by rememberSaveable {
         mutableStateOf(Landing.route)
     }
-    var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Races) }
+    var selectedTab by rememberSaveable { mutableStateOf(HomeTab.Series) }
 
     // Observe current route to control bottom bar visibility
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -133,7 +133,7 @@ fun LandingScreen(
                     } else {
                         selectedMenuItem = route
                         navController.navigate(route) {
-                            popUpTo(Landing.route) { saveState = true }
+                            popUpTo(Series.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
@@ -183,7 +183,7 @@ fun LandingScreen(
                             HomeTab.Standings -> GqRanking.route
                         }
                         navController.navigate(route) {
-                            popUpTo(Landing.route) { saveState = true }
+                            popUpTo(Series.route) { saveState = true }
                             launchSingleTop = true
                             restoreState = true
                         }
