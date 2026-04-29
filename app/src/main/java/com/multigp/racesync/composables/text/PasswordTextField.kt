@@ -2,6 +2,7 @@ package com.multigp.racesync.composables.text
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
@@ -22,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -36,7 +38,8 @@ fun PasswordTextField(
     icon: ImageVector,
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Password,
-    imeAction: ImeAction = ImeAction.Default,
+    imeAction: ImeAction = ImeAction.Done,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     onPasswordChanged: (String) -> Unit = {}
 ) {
     var passwordVisibility by remember { mutableStateOf(false) }
@@ -45,54 +48,52 @@ fun PasswordTextField(
         modifier = modifier,
         value = password,
         onValueChange = onPasswordChanged,
+        singleLine = true,
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = Color.Transparent,
             focusedContainerColor = Color.Transparent
         ),
-        placeholder = {
-            Text(stringResource(id = placeholder))
+        placeholder = { Text(stringResource(id = placeholder)) },
+        visualTransformation = if (passwordVisibility) {
+            VisualTransformation.None
+        } else {
+            PasswordVisualTransformation()
         },
-        visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
         leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
+            Icon(imageVector = icon, contentDescription = null)
         },
         trailingIcon = {
-            IconButton(
-                onClick = {
-                    passwordVisibility = !passwordVisibility
-                }
-            ) {
+            IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
                 Icon(
-                    painter = if (passwordVisibility)
+                    painter = if (passwordVisibility) {
                         painterResource(R.drawable.ic_visibility)
-                    else
-                        painterResource(R.drawable.ic_visibility_off),
+                    } else {
+                        painterResource(R.drawable.ic_visibility_off)
+                    },
                     contentDescription = null
                 )
-
             }
         },
-        keyboardOptions = KeyboardOptions.Default.copy(
+        keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType,
             imeAction = imeAction,
-            showKeyboardOnFocus = true
-        )
+            capitalization = KeyboardCapitalization.None,
+            autoCorrectEnabled = false
+        ),
+        keyboardActions = keyboardActions
     )
 }
 
-
 @Preview(showBackground = true, heightDp = 120)
 @Composable
-fun PasswordTextFieldPreview() {
+private fun PasswordTextFieldPreview() {
     RaceSyncTheme {
-        Box(
-            modifier = Modifier,
-            contentAlignment = Alignment.Center
-        ) {
-            PasswordTextField("", R.string.login_password_placeholder, Icons.Default.Lock)
+        Box(modifier = Modifier, contentAlignment = Alignment.Center) {
+            PasswordTextField(
+                password = "",
+                placeholder = R.string.login_password_placeholder,
+                icon = Icons.Default.Lock
+            )
         }
     }
 }

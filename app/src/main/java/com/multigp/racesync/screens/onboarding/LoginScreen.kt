@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -24,7 +25,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,16 +35,22 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.ProgressHUD
@@ -71,121 +77,126 @@ fun LoginScreen(
 
     Box(modifier = modifier.fillMaxSize()) {
         Image(
-            painter = painterResource(id = R.mipmap.launch_bkgd_foreground), // Replace with your image resource
+            painter = painterResource(id = R.mipmap.launch_bkgd_foreground),
             contentDescription = null,
             modifier = Modifier.matchParentSize(),
             contentScale = ContentScale.Crop,
             alpha = 0.25f
         )
         Scaffold(
-            snackbarHost = {
-                SnackbarHost(hostState = snackbarHostState)
-            },
-            containerColor = Color.Transparent // Makes Scaffold background transparent
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+            containerColor = Color.Transparent
         ) { paddingValues ->
-            Box(modifier = modifier.padding(paddingValues = paddingValues)) {
-                Surface(
-                    modifier = modifier.padding(all = 16.dp),
-                    color = Color.Transparent, // Semi-transparent background
-                ) {
-                    LoginScreenContent(
-                        uiState = formUiState,
-                        viewModel = loginViewModel,
-                        modifier = modifier,
-                        onClickRegisterAccount = onClickRegisterAccount,
-                        onClickRecoverPassword = onClickRecoverPassword
-                    )
-                }
+            LoginScreenContent(
+                uiState = formUiState,
+                onEmailChanged = loginViewModel::onEmailChanged,
+                onPasswordChanged = loginViewModel::onPasswordChanged,
+                onClickLogin = loginViewModel::onLogin,
+                onClickRegisterAccount = onClickRegisterAccount,
+                onClickRecoverPassword = onClickRecoverPassword,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues)
+            )
 
-                when (loginUiState) {
-                    is LoginUiState.Loading -> {
-                        ProgressHUD(
-                            modifier = modifier,
-                            text = loginUiState.messageId
+            when (loginUiState) {
+                is LoginUiState.Loading -> ProgressHUD(text = loginUiState.messageId)
+                is LoginUiState.Error -> {
+                    LaunchedEffect(loginUiState) {
+                        snackbarHostState.showSnackbar(
+                            message = loginUiState.message,
+                            duration = SnackbarDuration.Long
                         )
                     }
-                    is LoginUiState.Error -> {
-                        LaunchedEffect(Unit) {
-                            snackbarHostState.showSnackbar(
-                                message = loginUiState.message,
-                                duration = SnackbarDuration.Long
-                            )
-                        }
-                    }
-                    else -> {}
                 }
+                else -> Unit
             }
         }
     }
 }
 
 @Composable
-fun LoginScreenContent(
+private fun LoginScreenContent(
     uiState: LoginFormUiState,
-    viewModel: LoginViewModel,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onClickLogin: () -> Unit,
+    onClickRegisterAccount: () -> Unit,
+    onClickRecoverPassword: () -> Unit,
     modifier: Modifier = Modifier,
-    onClickRegisterAccount: () -> Unit = {},
-    onClickRecoverPassword: () -> Unit = {}
 ) {
-    val state = rememberScrollState()
+    val scrollState = rememberScrollState()
+
     Column(
         modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(state),
-        verticalArrangement = Arrangement.Center,
+            .verticalScroll(scrollState)
+            .imePadding()
+            .padding(horizontal = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = modifier.weight(1f))
+        Spacer(Modifier.height(64.dp))
         Image(
             painter = painterResource(id = R.drawable.racesync_logo_splash),
-            contentDescription = "RaceSync Logo"
+            contentDescription = stringResource(R.string.app_name)
         )
-        Spacer(modifier = modifier.weight(1f))
+        Spacer(Modifier.height(40.dp))
         LoginForm(
-            uiState.email,
-            uiState.password,
+            email = uiState.email,
+            password = uiState.password,
             isValidForm = uiState.isValidForm,
-            onEmailChanged = { viewModel.onEmailChanged(it) },
-            onPasswordChanged = { viewModel.onPasswordChanged(it) },
-            modifier = modifier,
-            onClickLogin = { viewModel.onLogin() },
+            onEmailChanged = onEmailChanged,
+            onPasswordChanged = onPasswordChanged,
+            onClickLogin = onClickLogin,
             onClickRegisterAccount = onClickRegisterAccount,
             onClickRecoverPassword = onClickRecoverPassword
         )
         Text(
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 8.dp),
             style = MaterialTheme.typography.bodyMedium,
             text = stringResource(R.string.login_term_of_use),
             textAlign = TextAlign.Start
         )
-        Spacer(modifier = modifier.weight(1f))
+        Spacer(Modifier.height(48.dp))
         Footer()
+        Spacer(Modifier.height(24.dp))
     }
 }
 
 @Composable
-fun LoginForm(
+private fun LoginForm(
     email: String,
     password: String,
-    modifier: Modifier = Modifier,
-    isValidForm: Boolean = false,
-    onEmailChanged: (String) -> Unit = {},
-    onPasswordChanged: (String) -> Unit = {},
-    onClickLogin: () -> Unit = {},
-    onClickRegisterAccount: () -> Unit = {},
-    onClickRecoverPassword: () -> Unit = {}
+    isValidForm: Boolean,
+    onEmailChanged: (String) -> Unit,
+    onPasswordChanged: (String) -> Unit,
+    onClickLogin: () -> Unit,
+    onClickRegisterAccount: () -> Unit,
+    onClickRecoverPassword: () -> Unit,
 ) {
     val scope = rememberCoroutineScope()
-    val shakeState = ShakingState()
+    val shakeState = remember { ShakingState() }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val passwordFocusRequester = remember { FocusRequester() }
+
+    val submit = {
+        if (isValidForm) {
+            keyboardController?.hide()
+            focusManager.clearFocus()
+            onClickLogin()
+        } else {
+            scope.launch { shakeState.shake(animationDuration = 40) }
+        }
+    }
 
     Column(
-        modifier = modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            modifier = modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth(),
             text = stringResource(R.string.login_title),
             style = MaterialTheme.typography.bodyMedium
         )
@@ -193,27 +204,30 @@ fun LoginForm(
             text = email,
             placeholder = R.string.login_email_placeholder,
             icon = Icons.Default.Email,
-            modifier = modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            imeAction = ImeAction.Next,
+            modifier = Modifier.fillMaxWidth(),
             keyboardType = KeyboardType.Email,
+            imeAction = ImeAction.Next,
+            capitalization = KeyboardCapitalization.None,
+            autoCorrectEnabled = false,
+            keyboardActions = KeyboardActions(
+                onNext = { passwordFocusRequester.requestFocus() }
+            ),
             onTextChanged = onEmailChanged
         )
         PasswordTextField(
             password = password,
             placeholder = R.string.login_password_placeholder,
             icon = Icons.Default.Lock,
-            modifier = modifier
+            modifier = Modifier
                 .fillMaxWidth()
-                .height(56.dp),
-            imeAction = ImeAction.Next,
-            keyboardType = KeyboardType.Password,
+                .focusRequester(passwordFocusRequester),
+            imeAction = ImeAction.Done,
+            keyboardActions = KeyboardActions(onDone = { submit() }),
             onPasswordChanged = onPasswordChanged
         )
         TextButton(
             onClick = onClickRecoverPassword,
-            modifier = modifier.padding(top = 8.dp),
+            modifier = Modifier.padding(top = 8.dp),
             contentPadding = PaddingValues(start = 0.dp)
         ) {
             Text(
@@ -224,7 +238,7 @@ fun LoginForm(
         }
         TextButton(
             onClick = onClickRegisterAccount,
-            modifier = modifier.padding(top = 4.dp),
+            modifier = Modifier.padding(top = 4.dp),
             contentPadding = PaddingValues(start = 0.dp)
         ) {
             Text(
@@ -234,90 +248,61 @@ fun LoginForm(
             )
         }
         Button(
-            modifier = Modifier.shakable(shakeState)
+            modifier = Modifier
+                .shakable(shakeState)
                 .fillMaxWidth()
                 .padding(top = 8.dp),
-            onClick = {
-                scope.launch {
-                    if(isValidForm){
-                        onClickLogin()
-                    } else {
-                        shakeState.shake(
-                            animationDuration = 40
-                        )
-                    }
-                }
-            },
+            onClick = { submit() },
             shape = RoundedCornerShape(7.dp),
             colors = ButtonDefaults.buttonColors(
-                containerColor = Color.White.copy(alpha = 0.7f),
-                contentColor = Color.Black,
-                disabledContainerColor = Color.White.copy(alpha = 0.7f),
-                disabledContentColor = Color.DarkGray
+                containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                contentColor = MaterialTheme.colorScheme.onSurface,
+                disabledContainerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.7f),
+                disabledContentColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
             )
         ) {
             Text(
                 text = stringResource(R.string.login_btn_login),
-                style = MaterialTheme.typography.titleMedium,
-                color = Color.Black
+                style = MaterialTheme.typography.titleMedium
             )
         }
     }
 }
 
-
 @Composable
-fun Footer(modifier: Modifier = Modifier) {
-    Surface(
-        color = Color.Transparent
+private fun Footer(modifier: Modifier = Modifier) {
+    Column(
+        modifier = modifier,
+        horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-        ) {
-            Text(
-                modifier = modifier,
-                color = Color.Gray,
-                style = MaterialTheme.typography.bodyMedium,
-                text = stringResource(R.string.footer_powered_by),
-                fontSize = 8.sp
-
-            )
-            Spacer(modifier = modifier.height(10.dp))
-            Image(
-                modifier = modifier.width(80.dp),
-                painter = painterResource(id = R.drawable.logo_powered_by),
-                contentDescription = null,
-                contentScale = ContentScale.Crop
-            )
-        }
+        Text(
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodyMedium,
+            text = stringResource(R.string.footer_powered_by),
+            fontSize = 8.sp
+        )
+        Spacer(Modifier.height(10.dp))
+        Image(
+            modifier = Modifier.width(80.dp),
+            painter = painterResource(id = R.drawable.logo_powered_by),
+            contentDescription = null,
+            contentScale = ContentScale.Crop
+        )
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginScreenPreview() {
+private fun LoginScreenPreview() {
     RaceSyncTheme {
-        Surface(
-            color = MaterialTheme.colorScheme.background
-        ) {
-            LoginScreen(LoginUiState.None)
-        }
+        LoginScreen(LoginUiState.None)
     }
 }
 
 @Preview(showBackground = true)
 @Composable
-fun LoginFormPreview() {
-    RaceSyncTheme {
-        LoginForm("farooq.zaman@me.com", "qwer1234")
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun FooterPreview() {
+private fun FooterPreview() {
     RaceSyncTheme {
         Footer()
     }
 }
-

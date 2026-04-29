@@ -2,6 +2,7 @@ package com.multigp.racesync.composables.text
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Email
@@ -16,6 +17,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import com.multigp.racesync.R
@@ -29,45 +31,43 @@ fun CustomTextField(
     modifier: Modifier = Modifier,
     keyboardType: KeyboardType = KeyboardType.Text,
     imeAction: ImeAction = ImeAction.Default,
+    capitalization: KeyboardCapitalization = KeyboardCapitalization.Sentences,
+    autoCorrectEnabled: Boolean = true,
+    keyboardActions: KeyboardActions = KeyboardActions.Default,
     onTextChanged: (String) -> Unit = {},
 ) {
     TextField(
         modifier = modifier,
         value = text,
         onValueChange = onTextChanged,
+        singleLine = true,
         leadingIcon = {
-            Icon(
-                imageVector = icon,
-                contentDescription = null
-            )
+            Icon(imageVector = icon, contentDescription = null)
         },
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = Color.Transparent,
             focusedContainerColor = Color.Transparent
         ),
-        placeholder = {
-            Text(stringResource(id = placeholder))
-        },
-        keyboardOptions = KeyboardOptions.Default.copy(
+        placeholder = { Text(stringResource(id = placeholder)) },
+        keyboardOptions = KeyboardOptions(
             keyboardType = keyboardType,
             imeAction = imeAction,
-            showKeyboardOnFocus = true
-        )
+            capitalization = capitalization,
+            autoCorrectEnabled = autoCorrectEnabled
+        ),
+        keyboardActions = keyboardActions
     )
 }
 
 @Preview(showBackground = true, heightDp = 120)
 @Composable
-fun CustomTextField() {
+private fun CustomTextFieldPreview() {
     RaceSyncTheme {
-        Box(
-            modifier = Modifier,
-            contentAlignment = Alignment.Center
-        ) {
+        Box(modifier = Modifier, contentAlignment = Alignment.Center) {
             CustomTextField(
-                "farooq.zaman@me.com",
-                R.string.login_email_placeholder,
-                Icons.Default.Email
+                text = "farooq.zaman@me.com",
+                placeholder = R.string.login_email_placeholder,
+                icon = Icons.Default.Email
             )
         }
     }
