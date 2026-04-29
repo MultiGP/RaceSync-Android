@@ -52,6 +52,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.ProgressHUD
 import com.multigp.racesync.composables.text.CustomTextField
@@ -299,6 +300,12 @@ private fun Footer(modifier: Modifier = Modifier) {
             painter = painterResource(id = R.drawable.logo_powered_by),
             contentDescription = null,
             contentScale = ContentScale.Crop
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "v${BuildConfig.VERSION_NAME}",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            style = MaterialTheme.typography.bodySmall
         )
     }
 }
