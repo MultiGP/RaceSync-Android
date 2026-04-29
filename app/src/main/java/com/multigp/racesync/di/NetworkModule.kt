@@ -7,6 +7,9 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonParseException
 import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.data.api.RaceSyncApi
+import com.multigp.racesync.data.api.SessionExpiryInterceptor
+import com.multigp.racesync.data.prefs.DataStoreManager
+import com.multigp.racesync.data.session.SessionManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,11 +38,25 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideHttpClient(interceptor: HttpLoggingInterceptor): OkHttpClient {
+    fun provideSessionManager(dataStore: DataStoreManager): SessionManager =
+        SessionManager(dataStore)
+
+    @Provides
+    @Singleton
+    fun provideSessionExpiryInterceptor(sessionManager: SessionManager): SessionExpiryInterceptor =
+        SessionExpiryInterceptor(sessionManager)
+
+    @Provides
+    @Singleton
+    fun provideHttpClient(
+        loggingInterceptor: HttpLoggingInterceptor,
+        sessionExpiryInterceptor: SessionExpiryInterceptor
+    ): OkHttpClient {
         return OkHttpClient.Builder()
             .readTimeout(20, TimeUnit.SECONDS)
             .connectTimeout(20, TimeUnit.SECONDS)
-            .addInterceptor(interceptor)
+            .addInterceptor(sessionExpiryInterceptor)
+            .addInterceptor(loggingInterceptor)
             .build()
     }
 

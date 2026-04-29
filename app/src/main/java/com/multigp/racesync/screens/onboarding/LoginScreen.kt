@@ -73,7 +73,19 @@ fun LoginScreen(
     onClickRecoverPassword: () -> Unit = {}
 ) {
     val formUiState by loginViewModel.formUiState.collectAsState()
+    val sessionExpired by loginViewModel.sessionExpired.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    val sessionExpiredMessage = stringResource(R.string.session_expired_message)
+
+    LaunchedEffect(sessionExpired) {
+        if (sessionExpired) {
+            snackbarHostState.showSnackbar(
+                message = sessionExpiredMessage,
+                duration = SnackbarDuration.Long
+            )
+            loginViewModel.consumeSessionExpired()
+        }
+    }
 
     Box(modifier = modifier.fillMaxSize()) {
         Image(

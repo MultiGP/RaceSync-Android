@@ -8,6 +8,7 @@ import com.google.firebase.Firebase
 import com.google.firebase.messaging.messaging
 import com.multigp.racesync.BuildConfig
 import com.multigp.racesync.R
+import com.multigp.racesync.data.session.SessionManager
 import com.multigp.racesync.domain.model.requests.LoginRequest
 import com.multigp.racesync.domain.useCase.RaceSyncUseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -40,6 +41,7 @@ sealed class LoginUiState {
 @HiltViewModel
 class LoginViewModel @Inject constructor(
     val useCases: RaceSyncUseCases,
+    private val sessionManager: SessionManager,
 ) : ViewModel() {
 
     private val _formUiState = MutableStateFlow(LoginFormUiState())
@@ -47,6 +49,9 @@ class LoginViewModel @Inject constructor(
 
     private val _loginUiState = MutableStateFlow<LoginUiState>(LoginUiState.Initializing)
     val loginUiState: StateFlow<LoginUiState> = _loginUiState.asStateFlow()
+
+    private val _sessionExpired = MutableStateFlow(false)
+    val sessionExpired: StateFlow<Boolean> = _sessionExpired.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -60,6 +65,13 @@ class LoginViewModel @Inject constructor(
                     }
                 }
         }
+        viewModelScope.launch {
+            sessionManager.expiredEvents.collect { _sessionExpired.value = true }
+        }
+    }
+
+    fun consumeSessionExpired() {
+        _sessionExpired.value = false
     }
 
     fun onEmailChanged(newValue: String): Unit {
