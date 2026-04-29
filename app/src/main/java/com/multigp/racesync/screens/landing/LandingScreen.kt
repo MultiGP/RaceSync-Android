@@ -123,7 +123,7 @@ fun LandingScreen(
         drawerState = drawerState,
         gesturesEnabled = false,
         drawerContent = {
-            ModalDrawerSheet {
+            ModalDrawerSheet(drawerContainerColor = MaterialTheme.colorScheme.surface) {
                 DrawerContent(menus = drawerMenu, selectedMenuItem = selectedMenuItem) { route ->
                     scope.launch {
                         drawerState.close()
@@ -375,7 +375,7 @@ fun DrawerContent(
             Spacer(modifier = modifier.height(16.dp))
 
             Text(
-                text = "Copyright @ 2015 - 2025 MultiGP, Inc.",
+                text = "Copyright @ 2015 - 2026 MultiGP, Inc.",
                 color = Color.Gray,
                 style = MaterialTheme.typography.titleSmall,
                 modifier = modifier.align(Alignment.Start),
