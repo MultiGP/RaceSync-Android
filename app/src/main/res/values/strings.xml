@@ -111,6 +111,7 @@
     <string name="io_empty_message_all">There are no events scheduled this day.</string>
     <string name="io_empty_message_my_schedule">Browse the schedule and tap the star on sessions you want to attend.</string>
     <string name="io_empty_message_filter">There are no events scheduled this day for %1$s.</string>
+    <string name="io_empty_message_tracks_only">No events on the selected tracks this day.</string>
     <string name="io_error_title_loading">Couldn\'t load IO schedule</string>
     <string name="io_star_add">Add to my schedule</string>
     <string name="io_star_remove">Remove from my schedule</string>

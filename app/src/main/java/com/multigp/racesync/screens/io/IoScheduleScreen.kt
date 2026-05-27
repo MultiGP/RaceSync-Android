@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -45,8 +46,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.multigp.racesync.R
 import com.multigp.racesync.composables.PlaceholderScreen
 import com.multigp.racesync.domain.model.io.Event
+import com.multigp.racesync.domain.model.io.EventActivityCategory
 import com.multigp.racesync.domain.model.io.EventSession
-import com.multigp.racesync.domain.model.io.EventSessionFilter
 import com.multigp.racesync.domain.model.io.MGP_EVENT_TIMEZONE_ID
 import com.multigp.racesync.domain.model.io.endInstant
 import com.multigp.racesync.domain.model.io.startInstant
@@ -67,10 +68,12 @@ fun IoScheduleScreen(
     val eventState by viewModel.eventUiState.collectAsState()
     val dates by viewModel.dates.collectAsState()
     val selectedDate by viewModel.selectedDate.collectAsState()
-    val selectedFilter by viewModel.selectedFilter.collectAsState()
+    val selectedCategory by viewModel.selectedCategory.collectAsState()
+    val selectedTrackIds by viewModel.selectedTrackIds.collectAsState()
     val sessions by viewModel.displayedSessions.collectAsState()
     val bucketedIds by viewModel.bucketedIds.collectAsState()
     val pendingAlertActivity by viewModel.pendingAlertActivity.collectAsState()
+    val tracks = (eventState as? UiState.Success)?.data?.tracks.orEmpty()
 
     val pullState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
@@ -92,9 +95,13 @@ fun IoScheduleScreen(
             EventScheduleHeader(
                 dates = dates,
                 selectedDate = selectedDate,
-                selectedFilter = selectedFilter,
+                selectedCategory = selectedCategory,
+                tracks = tracks,
+                selectedTrackIds = selectedTrackIds,
                 onDateSelected = viewModel::selectDate,
-                onFilterSelected = viewModel::selectFilter,
+                onCategorySelected = viewModel::selectCategory,
+                onToggleTrack = viewModel::toggleTrack,
+                onClearTracks = viewModel::clearTracks,
                 enabled = eventState is UiState.Success,
             )
 
@@ -113,7 +120,7 @@ fun IoScheduleScreen(
                 is UiState.Success -> {
                     val event = state.data
                     if (sessions.isEmpty()) {
-                        EmptyView(filter = selectedFilter)
+                        EmptyView(category = selectedCategory, trackFilterActive = selectedTrackIds.isNotEmpty())
                     } else {
                         SessionList(
                             event = event,
@@ -187,10 +194,19 @@ private fun SessionRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
-            .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp),
+            .clickable(onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // 4 dp colored rail — strong visual anchor for "all the X-track rows".
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(trackColor)
+        )
+
+        Spacer(modifier = Modifier.width(12.dp))
+
         Column(
             modifier = Modifier.width(60.dp),
             verticalArrangement = Arrangement.Center,
@@ -249,6 +265,8 @@ private fun SessionRow(
                 else MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
+
+        Spacer(modifier = Modifier.width(8.dp))
     }
 }
 
@@ -270,10 +288,16 @@ private fun SessionRowSkeleton() {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(90.dp)
-            .padding(horizontal = 16.dp),
+            .height(90.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
+        Box(
+            modifier = Modifier
+                .width(4.dp)
+                .fillMaxHeight()
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        )
+        Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.width(60.dp)) {
             Box(
                 Modifier
@@ -312,15 +336,21 @@ private fun SessionRowSkeleton() {
                 .background(MaterialTheme.colorScheme.surfaceVariant)
                 .shimmerLoadingAnimation()
         )
+        Spacer(Modifier.width(16.dp))
     }
 }
 
 @Composable
-private fun EmptyView(filter: EventSessionFilter) {
-    val message = when (filter) {
-        EventSessionFilter.All -> stringResource(R.string.io_empty_message_all)
-        EventSessionFilter.MySchedule -> stringResource(R.string.io_empty_message_my_schedule)
-        else -> stringResource(R.string.io_empty_message_filter, filter.title)
+private fun EmptyView(category: EventActivityCategory, trackFilterActive: Boolean) {
+    val message = when {
+        category == EventActivityCategory.MySchedule ->
+            stringResource(R.string.io_empty_message_my_schedule)
+        category == EventActivityCategory.All && !trackFilterActive ->
+            stringResource(R.string.io_empty_message_all)
+        category == EventActivityCategory.All && trackFilterActive ->
+            stringResource(R.string.io_empty_message_tracks_only)
+        else ->
+            stringResource(R.string.io_empty_message_filter, category.title)
     }
     PlaceholderScreen(
         title = stringResource(R.string.io_empty_title),

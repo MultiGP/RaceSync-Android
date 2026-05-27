@@ -105,16 +105,26 @@ fun List<EventSession>.merged(gapMinutes: Long = 5): List<EventSession> {
     return out
 }
 
-/** Filter a list of sessions by [filter]. [bucketedIds] is required for [EventSessionFilter.MySchedule]. */
-fun List<EventSession>.filtered(
-    filter: EventSessionFilter,
+/**
+ * Filter sessions by activity [category]. [bucketedIds] is required for
+ * [EventActivityCategory.MySchedule]; sessions whose activity doesn't bucket into the
+ * requested category are dropped.
+ */
+fun List<EventSession>.byCategory(
+    category: EventActivityCategory,
     bucketedIds: Set<String> = emptySet(),
-): List<EventSession> = when (filter) {
-    EventSessionFilter.All -> this
-    EventSessionFilter.MySchedule -> filter { it.id in bucketedIds }
-    EventSessionFilter.Spec -> filter { it.activity.orEmpty().containsAny(listOf("spec", "AER")) }
-    EventSessionFilter.OpenFly -> filter { it.activity.orEmpty().containsAny(listOf("open fly", "openfly")) }
+): List<EventSession> = when (category) {
+    EventActivityCategory.All -> this
+    EventActivityCategory.MySchedule -> filter { it.id in bucketedIds }
+    else -> filter { categorizeActivity(it.activity) == category }
 }
+
+/**
+ * Filter sessions by [trackIds]. An empty set is treated as "all tracks" — the unfiltered
+ * default — rather than as a never-match.
+ */
+fun List<EventSession>.byTracks(trackIds: Set<String>): List<EventSession> =
+    if (trackIds.isEmpty()) this else filter { it.trackId in trackIds }
 
 private fun isConsecutive(a: EventSession, b: EventSession, gapMinutes: Long): Boolean {
     val aEnd = a.endInstant()?.time ?: return false
@@ -129,5 +139,3 @@ private fun earlierTime(a: String?, b: String?): String? = when {
     else -> b
 }
 
-private fun String.containsAny(needles: List<String>): Boolean =
-    needles.any { contains(it, ignoreCase = true) }

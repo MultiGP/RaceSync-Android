@@ -175,54 +175,149 @@ class EventHelpersTest {
     }
 
     @Test
-    fun `filtered All returns everything`() {
+    fun `byCategory All returns everything`() {
         val sessions = listOf(
-            session("a", activity = "Spec Race"),
+            session("a", activity = "Pro Spec Qualifying"),
             session("b", activity = "Open Fly")
         )
-        assertEquals(sessions, sessions.filtered(EventSessionFilter.All))
+        assertEquals(sessions, sessions.byCategory(EventActivityCategory.All))
     }
 
     @Test
-    fun `filtered Spec matches both 'spec' and 'AER' case-insensitively`() {
-        val sessions = listOf(
-            session("a", activity = "Spec Race"),
-            session("b", activity = "AER Qualifier"),
-            session("c", activity = "Open Fly")
-        )
-        val ids = sessions.filtered(EventSessionFilter.Spec).map { it.id }
-        assertEquals(listOf("a", "b"), ids)
-    }
-
-    @Test
-    fun `filtered OpenFly matches 'open fly' or 'openfly'`() {
+    fun `byCategory OpenFly matches both spellings and beats spec keyword`() {
         val sessions = listOf(
             session("a", activity = "Open Fly Block"),
             session("b", activity = "OpenFly Practice"),
-            session("c", activity = "Spec Race")
+            session("c", activity = "Pro Spec Qualifying")
         )
-        val ids = sessions.filtered(EventSessionFilter.OpenFly).map { it.id }
+        val ids = sessions.byCategory(EventActivityCategory.OpenFly).map { it.id }
         assertEquals(listOf("a", "b"), ids)
     }
 
     @Test
-    fun `filtered MySchedule keeps only sessions whose id is bucketed`() {
+    fun `byCategory Spec matches Pro Spec, IO Spec, AER, Freedom Spec`() {
+        val sessions = listOf(
+            session("ps", activity = "Pro Spec Qualifying"),
+            session("io", activity = "IO Spec Oval"),
+            session("aer", activity = "AER Individual & Team Qualifying"),
+            session("fs", activity = "Freedom Spec Oval"),
+            session("noise", activity = "Open Fly"),
+        )
+        val ids = sessions.byCategory(EventActivityCategory.Spec).map { it.id }
+        assertEquals(listOf("ps", "io", "aer", "fs"), ids)
+    }
+
+    @Test
+    fun `byCategory WorldCup matches Qualifying, Practice, Finals, Rain Day`() {
+        val sessions = listOf(
+            session("q", activity = "World Cup Qualifying"),
+            session("p", activity = "World Cup Practice"),
+            session("f", activity = "World Cup Finals Brackets of 8, 64 pilots"),
+            session("rd", activity = "World Cup Rain Day"),
+            session("noise", activity = "Open Fly"),
+        )
+        val ids = sessions.byCategory(EventActivityCategory.WorldCup).map { it.id }
+        assertEquals(listOf("q", "p", "f", "rd"), ids)
+    }
+
+    @Test
+    fun `byCategory GlobalQualifier tolerates the upstream typo`() {
+        val sessions = listOf(
+            session("a", activity = "Global Qualifier"),
+            session("b", activity = "Second Global Qualifier"),
+            session("typo", activity = "Global Qualifer"), // upstream typo
+            session("noise", activity = "Open Fly"),
+        )
+        val ids = sessions.byCategory(EventActivityCategory.GlobalQualifier).map { it.id }
+        assertEquals(listOf("a", "b", "typo"), ids)
+    }
+
+    @Test
+    fun `byCategory ClassRaces covers lipo, voltage, hammers, cracked, burnt + burn typo`() {
+        val sessions = listOf(
+            session("l", activity = "Lipo Fires Race"),
+            session("v", activity = "High Voltage Race"),
+            session("h", activity = "Hammers Race"),
+            session("c", activity = "Cracked Props Race"),
+            session("b", activity = "Burnt Motors Race"),
+            session("typo", activity = "Burn Motors Race"), // upstream typo
+        )
+        val ids = sessions.byCategory(EventActivityCategory.ClassRaces).map { it.id }
+        assertEquals(listOf("l", "v", "h", "c", "b", "typo"), ids)
+    }
+
+    @Test
+    fun `byCategory Whoop matches Qualifying, Finals, Last Chance`() {
+        val sessions = listOf(
+            session("q", activity = "Whoop Qualifying"),
+            session("f", activity = "Whoop Finals"),
+            session("lc", activity = "Last Chance Whoop Qualifying"),
+            session("noise", activity = "Open Fly"),
+        )
+        val ids = sessions.byCategory(EventActivityCategory.Whoop).map { it.id }
+        assertEquals(listOf("q", "f", "lc"), ids)
+    }
+
+    @Test
+    fun `byCategory MySchedule keeps only sessions whose id is bucketed`() {
         val sessions = listOf(
             session("a"),
             session("b"),
-            session("c")
+            session("c"),
         )
-        val ids = sessions.filtered(EventSessionFilter.MySchedule, bucketedIds = setOf("b"))
+        val ids = sessions.byCategory(EventActivityCategory.MySchedule, bucketedIds = setOf("b"))
             .map { it.id }
         assertEquals(listOf("b"), ids)
     }
 
     @Test
-    fun `EventSessionFilter from title round-trips and falls back to All`() {
-        assertEquals(EventSessionFilter.MySchedule, EventSessionFilter.fromTitle("My Schedule"))
-        assertEquals(EventSessionFilter.Spec, EventSessionFilter.fromTitle("spec"))
-        assertEquals(EventSessionFilter.All, EventSessionFilter.fromTitle("unknown"))
-        assertEquals(EventSessionFilter.All, EventSessionFilter.fromTitle(null))
+    fun `byCategory drops null activities and special one-offs from buckets`() {
+        val sessions = listOf(
+            session("null", activity = null),
+            session("movie", activity = "Movie Night After the Racing"),
+            session("masters", activity = "40-49 Masters"),
+        )
+        // None of these match any specific category — only visible under All.
+        assertEquals(emptyList<EventSession>(), sessions.byCategory(EventActivityCategory.WorldCup))
+        assertEquals(emptyList<EventSession>(), sessions.byCategory(EventActivityCategory.Spec))
+        assertEquals(sessions, sessions.byCategory(EventActivityCategory.All))
+    }
+
+    @Test
+    fun `byTracks with empty set is the unfiltered default`() {
+        val sessions = listOf(
+            session("a", trackId = "main_stage"),
+            session("b", trackId = "spec"),
+        )
+        assertEquals(sessions, sessions.byTracks(emptySet()))
+    }
+
+    @Test
+    fun `byTracks keeps only sessions on the selected tracks`() {
+        val sessions = listOf(
+            session("a", trackId = "main_stage"),
+            session("b", trackId = "spec"),
+            session("c", trackId = "world_cup_1"),
+        )
+        val ids = sessions.byTracks(setOf("main_stage", "world_cup_1")).map { it.id }
+        assertEquals(listOf("a", "c"), ids)
+    }
+
+    @Test
+    fun `EventActivityCategory from title round-trips and falls back to All`() {
+        assertEquals(EventActivityCategory.MySchedule, EventActivityCategory.fromTitle("My Schedule"))
+        assertEquals(EventActivityCategory.WorldCup, EventActivityCategory.fromTitle("World Cup"))
+        assertEquals(EventActivityCategory.ClassRaces, EventActivityCategory.fromTitle("class races"))
+        assertEquals(EventActivityCategory.All, EventActivityCategory.fromTitle("unknown"))
+        assertEquals(EventActivityCategory.All, EventActivityCategory.fromTitle(null))
+    }
+
+    @Test
+    fun `categorizeActivity returns null for missing or unknown activities`() {
+        assertEquals(null, categorizeActivity(null))
+        assertEquals(null, categorizeActivity(""))
+        assertEquals(null, categorizeActivity("Movie Night"))
+        assertEquals(null, categorizeActivity("Kung Fu Fightn"))
     }
 
     private fun session(
@@ -231,8 +326,8 @@ class EventHelpersTest {
         rawStartTime: String? = "10:00",
         rawEndTime: String? = "11:00",
         status: String = "scheduled",
-        activity: String = "Open Fly",
-        trackId: String = "main_stage",
+        activity: String? = "Open Fly",
+        trackId: String? = "main_stage",
     ) = EventSession(
         id = id,
         dayName = "Wednesday",

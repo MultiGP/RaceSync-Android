@@ -4,10 +4,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.multigp.racesync.data.prefs.DataStoreManager
 import com.multigp.racesync.domain.model.io.Event
+import com.multigp.racesync.domain.model.io.EventActivityCategory
 import com.multigp.racesync.domain.model.io.EventSession
-import com.multigp.racesync.domain.model.io.EventSessionFilter
 import com.multigp.racesync.domain.model.io.MGP_EVENT_TIMEZONE_ID
-import com.multigp.racesync.domain.model.io.filtered
+import com.multigp.racesync.domain.model.io.byCategory
+import com.multigp.racesync.domain.model.io.byTracks
 import com.multigp.racesync.domain.model.io.forDay
 import com.multigp.racesync.domain.model.io.initialDate
 import com.multigp.racesync.domain.model.io.io26Dates
@@ -44,8 +45,11 @@ class IoScheduleViewModel @Inject constructor(
     private val _selectedDate = MutableStateFlow<Date?>(null)
     val selectedDate: StateFlow<Date?> = _selectedDate.asStateFlow()
 
-    private val _selectedFilter = MutableStateFlow(EventSessionFilter.All)
-    val selectedFilter: StateFlow<EventSessionFilter> = _selectedFilter.asStateFlow()
+    private val _selectedCategory = MutableStateFlow(EventActivityCategory.All)
+    val selectedCategory: StateFlow<EventActivityCategory> = _selectedCategory.asStateFlow()
+
+    private val _selectedTrackIds = MutableStateFlow<Set<String>>(emptySet())
+    val selectedTrackIds: StateFlow<Set<String>> = _selectedTrackIds.asStateFlow()
 
     val bucketedIds: StateFlow<Set<String>> = bucketlist.bucketedIds
 
@@ -61,24 +65,27 @@ class IoScheduleViewModel @Inject constructor(
         .map { state -> if (state is UiState.Success) io26Dates(EVENT_START, EVENT_END) else emptyList() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Sessions for the selected day, merged then filtered. */
+    /** Sessions for the selected day, merged then filtered by category AND track. */
     val displayedSessions: StateFlow<List<EventSession>> = combine(
         _eventUiState,
         _selectedDate,
-        _selectedFilter,
+        _selectedCategory,
+        _selectedTrackIds,
         bucketedIds,
-    ) { state, date, filter, ids ->
+    ) { state, date, category, trackIds, ids ->
         val event = (state as? UiState.Success)?.data ?: return@combine emptyList()
         val day = date ?: return@combine emptyList()
         event.sessions
             .forDay(day, eventZone)
             .merged()
-            .filtered(filter, ids)
+            .byCategory(category, ids)
+            .byTracks(trackIds)
     }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     init {
         viewModelScope.launch {
-            _selectedFilter.value = prefs.getSelectedEventFilter.first()
+            _selectedCategory.value = prefs.getSelectedIoCategory.first()
+            _selectedTrackIds.value = prefs.getSelectedIoTrackIds.first()
         }
         load()
     }
@@ -107,10 +114,24 @@ class IoScheduleViewModel @Inject constructor(
         _selectedDate.value = date
     }
 
-    fun selectFilter(filter: EventSessionFilter) {
-        if (_selectedFilter.value == filter) return
-        _selectedFilter.value = filter
-        viewModelScope.launch { prefs.setSelectedEventFilter(filter) }
+    fun selectCategory(category: EventActivityCategory) {
+        if (_selectedCategory.value == category) return
+        _selectedCategory.value = category
+        viewModelScope.launch { prefs.setSelectedIoCategory(category) }
+    }
+
+    fun toggleTrack(trackId: String) {
+        val next = _selectedTrackIds.value.toMutableSet().apply {
+            if (!add(trackId)) remove(trackId)
+        }
+        _selectedTrackIds.value = next
+        viewModelScope.launch { prefs.setSelectedIoTrackIds(next) }
+    }
+
+    fun clearTracks() {
+        if (_selectedTrackIds.value.isEmpty()) return
+        _selectedTrackIds.value = emptySet()
+        viewModelScope.launch { prefs.setSelectedIoTrackIds(emptySet()) }
     }
 
     /** Toggles bucket membership for [session] and schedules / cancels the 1-hour-before alarm. */
