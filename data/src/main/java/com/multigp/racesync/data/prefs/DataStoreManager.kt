@@ -9,6 +9,7 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.multigp.racesync.domain.model.UserInfo
+import com.multigp.racesync.domain.model.io.EventSessionFilter
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -66,6 +67,26 @@ class DataStoreManager(val context: Context) {
             preferences[KEY_NOTIFICATION_PREFERENCE] ?: false
         }
 
+    suspend fun setHideIoSchedulerAlerts(hide: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_HIDE_IO_SCHEDULER_ALERTS] = hide
+        }
+    }
+
+    val getHideIoSchedulerAlerts: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[KEY_HIDE_IO_SCHEDULER_ALERTS] ?: false
+        }
+
+    suspend fun setSelectedEventFilter(filter: EventSessionFilter) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_SELECTED_EVENT_FILTER] = filter.title
+        }
+    }
+
+    val getSelectedEventFilter: Flow<EventSessionFilter> = context.dataStore.data
+        .map { preferences -> EventSessionFilter.fromTitle(preferences[KEY_SELECTED_EVENT_FILTER]) }
+
     suspend fun saveGqYear(year: String) {
         context.dataStore.edit { preferences ->
             preferences[KEY_GQ_YEAR] = year
@@ -106,6 +127,8 @@ class DataStoreManager(val context: Context) {
         private val KEY_RADIUS_UNIT = stringPreferencesKey("key_radius_unit")
         private val KEY_RADIUS_VALUE = doublePreferencesKey("key_radius_value")
         private val KEY_NOTIFICATION_PREFERENCE = booleanPreferencesKey("key_notification_preference")
+        private val KEY_HIDE_IO_SCHEDULER_ALERTS = booleanPreferencesKey("key_hide_io_scheduler_alerts")
+        private val KEY_SELECTED_EVENT_FILTER = stringPreferencesKey("key_selected_event_filter")
         private val KEY_GQ_YEAR = stringPreferencesKey("key_gq_year")
         private val KEY_RACE_CLASS = stringPreferencesKey("key_race_class")
 

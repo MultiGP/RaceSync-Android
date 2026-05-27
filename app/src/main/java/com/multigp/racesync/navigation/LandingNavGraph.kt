@@ -11,6 +11,8 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
+import com.multigp.racesync.screens.io.IoScheduleScreen
+import com.multigp.racesync.screens.io.IoSessionDetailScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
@@ -226,6 +228,30 @@ fun LandingNavGraph(
                         }
                     )
                 }
+        }
+
+        composable(route = IoSchedule.route) {
+            IoScheduleScreen(
+                onSessionClick = { session ->
+                    navController.navigate("${IoSessionDetails.route}/${session.id}")
+                }
+            )
+        }
+
+        composable(
+            route = IoSessionDetails.routeWithArgs,
+            arguments = IoSessionDetails.arguments,
+            deepLinks = listOf(navDeepLink {
+                uriPattern = "racesync://io_session/{${IoSessionDetails.sessionIdArg}}"
+            })
+        ) { navBackStackEntry ->
+            val sessionId = navBackStackEntry.arguments?.getString(IoSessionDetails.sessionIdArg)
+            if (sessionId != null) {
+                IoSessionDetailScreen(
+                    sessionId = sessionId,
+                    onGoBack = { navController.popBackStack() }
+                )
+            }
         }
     }
 }

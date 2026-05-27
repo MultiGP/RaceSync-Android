@@ -15,6 +15,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Layers
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Layers
@@ -52,6 +53,11 @@ enum class HomeTab(
         titleRes = R.string.tab_standings,
         selectedIcon = Icons.Filled.EmojiEvents,
         unselectedIcon = Icons.Outlined.EmojiEvents
+    ),
+    Io(
+        titleRes = R.string.tab_io,
+        selectedIcon = Icons.Outlined.CalendarMonth,
+        unselectedIcon = Icons.Outlined.CalendarMonth
     )
 }
 
@@ -59,8 +65,10 @@ enum class HomeTab(
 fun HomeBottomBar(
     selectedTab: HomeTab,
     onTabSelected: (HomeTab) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    visibleTabs: Set<HomeTab> = HomeTab.entries.toSet(),
 ) {
+    val tabs = HomeTab.entries.filter { it in visibleTabs }
     Surface(
         modifier = modifier.fillMaxWidth(),
         color = MaterialTheme.colorScheme.surface
@@ -77,7 +85,7 @@ fun HomeBottomBar(
                 horizontalArrangement = Arrangement.SpaceEvenly,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                HomeTab.entries.forEach { tab ->
+                tabs.forEach { tab ->
                     val selected = selectedTab == tab
                     val color = when {
                         !tab.enabled -> Color.LightGray

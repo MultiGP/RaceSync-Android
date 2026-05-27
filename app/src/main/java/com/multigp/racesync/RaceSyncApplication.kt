@@ -7,6 +7,7 @@ import android.os.Build
 
 import android.app.Application
 import com.multigp.racesync.services.RaceSynceMessagingService
+import com.multigp.racesync.services.io.IoNotificationChannel
 import dagger.hilt.android.HiltAndroidApp
 
 @HiltAndroidApp
@@ -21,5 +22,6 @@ class RaceSyncApplication : Application() {
             val manager = getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
             manager.createNotificationChannel(channel)
         }
+        IoNotificationChannel.ensure(this)
     }
 }

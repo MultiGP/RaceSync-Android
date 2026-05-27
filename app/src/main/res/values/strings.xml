@@ -96,6 +96,33 @@
     <string name="tab_races">Races</string>
     <string name="tab_series">Series</string>
     <string name="tab_standings">Standings</string>
+    <string name="tab_io">IO 2026</string>
+
+    <!-- IO 2026 notifications -->
+    <string name="io_notification_channel_name">IO Event Reminders</string>
+    <string name="io_notification_channel_description">Reminders one hour before sessions you\'ve bookmarked.</string>
+    <string name="io_notification_title">IO 2026: Your next event is up!</string>
+    <string name="io_notification_body_with_time">\'%1$s\' starts at %2$s.</string>
+    <string name="io_notification_body_no_time">\'%1$s\' starts in 1 hour.</string>
+    <string name="io_scheduler_alert_added_title">Added to your bucket list</string>
+    <string name="io_scheduler_alert_added_message">We will notify you one hour before \'%1$s\' starts.</string>
+    <string name="io_scheduler_alert_dont_show_again">Don\'t Show Again</string>
+    <string name="io_empty_title">No Sessions</string>
+    <string name="io_empty_message_all">There are no events scheduled this day.</string>
+    <string name="io_empty_message_my_schedule">Browse the schedule and tap the star on sessions you want to attend.</string>
+    <string name="io_empty_message_filter">There are no events scheduled this day for %1$s.</string>
+    <string name="io_error_title_loading">Couldn\'t load IO schedule</string>
+    <string name="io_star_add">Add to my schedule</string>
+    <string name="io_star_remove">Remove from my schedule</string>
+    <string name="io_session_detail_title">Session</string>
+    <string name="io_action_back">Back</string>
+    <string name="io_session_not_found">Session not found.</string>
+    <string name="io_detail_label_day">Day</string>
+    <string name="io_detail_label_time">Time</string>
+    <string name="io_detail_label_track">Track</string>
+    <string name="io_detail_label_duration">Duration</string>
+    <string name="io_detail_button_im_going">I\'m Going</string>
+    <string name="io_detail_button_going">Going</string>
 
     <!-- Series -->
     <string name="placeholder_title_no_series">No Series Found</string>
