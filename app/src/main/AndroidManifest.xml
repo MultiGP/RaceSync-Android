@@ -26,6 +26,7 @@
             android:exported="true"
             android:theme="@style/Theme.RaceSync.Splash"
             android:launchMode="singleTop"
+            android:screenOrientation="portrait"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
