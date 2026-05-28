@@ -1,5 +1,6 @@
 package com.multigp.racesync.composables.bottombars
 
+import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -10,12 +11,12 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.windowInsetsBottomHeight
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.EmojiEvents
 import androidx.compose.material.icons.filled.Flag
 import androidx.compose.material.icons.filled.Layers
-import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.EmojiEvents
 import androidx.compose.material.icons.outlined.Flag
 import androidx.compose.material.icons.outlined.Layers
@@ -29,14 +30,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
 
+/**
+ * One tab in the home bottom bar. Most tabs carry a pair of Material `ImageVector`s
+ * (outline-when-unselected, filled-when-selected, tinted to the theme). A tab may
+ * instead provide a [drawableRes] — used for branded/multi-color logos like the IO
+ * mark — in which case the drawable renders without tint and ignores selection state.
+ */
 enum class HomeTab(
     @StringRes val titleRes: Int,
-    val selectedIcon: ImageVector,
-    val unselectedIcon: ImageVector,
+    val selectedIcon: ImageVector? = null,
+    val unselectedIcon: ImageVector? = null,
+    @DrawableRes val drawableRes: Int? = null,
     val enabled: Boolean = true
 ) {
     Races(
@@ -56,8 +65,7 @@ enum class HomeTab(
     ),
     Io(
         titleRes = R.string.tab_io,
-        selectedIcon = Icons.Outlined.CalendarMonth,
-        unselectedIcon = Icons.Outlined.CalendarMonth
+        drawableRes = R.drawable.ic_international_open
     )
 }
 
@@ -87,7 +95,7 @@ fun HomeBottomBar(
             ) {
                 tabs.forEach { tab ->
                     val selected = selectedTab == tab
-                    val color = when {
+                    val labelColor = when {
                         !tab.enabled -> Color.LightGray
                         selected -> MaterialTheme.colorScheme.primary
                         else -> MaterialTheme.colorScheme.onSurfaceVariant
@@ -99,15 +107,26 @@ fun HomeBottomBar(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center
                     ) {
-                        Icon(
-                            imageVector = if (selected) tab.selectedIcon else tab.unselectedIcon,
-                            contentDescription = stringResource(tab.titleRes),
-                            tint = color
-                        )
+                        if (tab.drawableRes != null) {
+                            // Branded/multi-color drawable — render at native colors,
+                            // not tinted to selected/unselected state.
+                            Icon(
+                                painter = painterResource(id = tab.drawableRes),
+                                contentDescription = stringResource(tab.titleRes),
+                                tint = Color.Unspecified,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        } else {
+                            Icon(
+                                imageVector = if (selected) tab.selectedIcon!! else tab.unselectedIcon!!,
+                                contentDescription = stringResource(tab.titleRes),
+                                tint = labelColor
+                            )
+                        }
                         Text(
                             text = stringResource(tab.titleRes),
                             style = MaterialTheme.typography.labelSmall,
-                            color = color
+                            color = labelColor
                         )
                     }
                 }
