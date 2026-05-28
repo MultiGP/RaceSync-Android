@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocationOn
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.outlined.StarBorder
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -51,7 +52,6 @@ import com.multigp.racesync.domain.model.io.EventSession
 import com.multigp.racesync.domain.model.io.MGP_EVENT_TIMEZONE_ID
 import com.multigp.racesync.domain.model.io.endInstant
 import com.multigp.racesync.domain.model.io.startInstant
-import com.multigp.racesync.extensions.shimmerLoadingAnimation
 import com.multigp.racesync.viewmodels.IoScheduleViewModel
 import com.multigp.racesync.viewmodels.UiState
 import java.text.SimpleDateFormat
@@ -73,7 +73,9 @@ fun IoScheduleScreen(
     val sessions by viewModel.displayedSessions.collectAsState()
     val bucketedIds by viewModel.bucketedIds.collectAsState()
     val pendingAlertActivity by viewModel.pendingAlertActivity.collectAsState()
-    val tracks = (eventState as? UiState.Success)?.data?.tracks.orEmpty()
+    val tracks = remember(eventState) {
+        (eventState as? UiState.Success)?.data?.tracks.orEmpty()
+    }
 
     val pullState = rememberPullToRefreshState()
     var isRefreshing by remember { mutableStateOf(false) }
@@ -82,49 +84,64 @@ fun IoScheduleScreen(
         if (eventState !is UiState.Loading) isRefreshing = false
     }
 
-    PullToRefreshBox(
-        isRefreshing = isRefreshing,
-        onRefresh = {
-            isRefreshing = true
-            viewModel.load()
-        },
-        state = pullState,
-        modifier = modifier.fillMaxSize(),
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            EventScheduleHeader(
-                dates = dates,
-                selectedDate = selectedDate,
-                selectedCategory = selectedCategory,
-                tracks = tracks,
-                selectedTrackIds = selectedTrackIds,
-                onDateSelected = viewModel::selectDate,
-                onCategorySelected = viewModel::selectCategory,
-                onToggleTrack = viewModel::toggleTrack,
-                onClearTracks = viewModel::clearTracks,
-                enabled = eventState is UiState.Success,
+    // While we're still pulling the event payload OR running the first combine pass,
+    // render a cheap centered spinner instead of the full schedule UI. Keeps the tab
+    // transition snappy; the heavy composition only happens once everything's settled.
+    val event = (eventState as? UiState.Success)?.data
+    val readySessions = sessions
+    val isError = eventState is UiState.Error
+
+    when {
+        isError -> {
+            PlaceholderScreen(
+                title = stringResource(R.string.io_error_title_loading),
+                message = (eventState as UiState.Error).message,
+                buttonTitle = stringResource(R.string.error_btn_title_retry),
+                isError = true,
+                canRetry = true,
+                onButtonClick = { viewModel.load() }
             )
+        }
 
-            when (val state = eventState) {
-                is UiState.Loading, UiState.None -> SessionListSkeleton()
+        event == null || readySessions == null -> {
+            Box(
+                modifier = modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center,
+            ) { CircularProgressIndicator() }
+        }
 
-                is UiState.Error -> PlaceholderScreen(
-                    title = stringResource(R.string.io_error_title_loading),
-                    message = state.message,
-                    buttonTitle = stringResource(R.string.error_btn_title_retry),
-                    isError = true,
-                    canRetry = true,
-                    onButtonClick = { viewModel.load() }
-                )
-
-                is UiState.Success -> {
-                    val event = state.data
-                    if (sessions.isEmpty()) {
-                        EmptyView(category = selectedCategory, trackFilterActive = selectedTrackIds.isNotEmpty())
+        else -> {
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = {
+                    isRefreshing = true
+                    viewModel.load()
+                },
+                state = pullState,
+                modifier = modifier.fillMaxSize(),
+            ) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    EventScheduleHeader(
+                        dates = dates,
+                        selectedDate = selectedDate,
+                        selectedCategory = selectedCategory,
+                        tracks = tracks,
+                        selectedTrackIds = selectedTrackIds,
+                        onDateSelected = viewModel::selectDate,
+                        onCategorySelected = viewModel::selectCategory,
+                        onToggleTrack = viewModel::toggleTrack,
+                        onClearTracks = viewModel::clearTracks,
+                        enabled = true,
+                    )
+                    if (readySessions.isEmpty()) {
+                        EmptyView(
+                            category = selectedCategory,
+                            trackFilterActive = selectedTrackIds.isNotEmpty()
+                        )
                     } else {
                         SessionList(
                             event = event,
-                            sessions = sessions,
+                            sessions = readySessions,
                             bucketedIds = bucketedIds,
                             onRaceSelected = onRaceSelected,
                             onToggleStar = viewModel::toggleBucket,
@@ -271,75 +288,6 @@ private fun SessionRow(
     }
 }
 
-@Composable
-private fun SessionListSkeleton() {
-    LazyColumn(modifier = Modifier.fillMaxSize()) {
-        items(8) {
-            SessionRowSkeleton()
-            HorizontalDivider(
-                thickness = 1.dp,
-                color = MaterialTheme.colorScheme.surfaceVariant
-            )
-        }
-    }
-}
-
-@Composable
-private fun SessionRowSkeleton() {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(90.dp),
-        verticalAlignment = Alignment.CenterVertically,
-    ) {
-        Box(
-            modifier = Modifier
-                .width(4.dp)
-                .fillMaxHeight()
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-        )
-        Spacer(Modifier.width(12.dp))
-        Column(modifier = Modifier.width(60.dp)) {
-            Box(
-                Modifier
-                    .height(12.dp).width(48.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .shimmerLoadingAnimation()
-            )
-            Spacer(Modifier.height(6.dp))
-            Box(
-                Modifier
-                    .height(12.dp).width(48.dp)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .shimmerLoadingAnimation()
-            )
-        }
-        Spacer(Modifier.width(16.dp))
-        Column(modifier = Modifier.weight(1f)) {
-            Box(
-                Modifier
-                    .height(16.dp).fillMaxWidth(0.7f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .shimmerLoadingAnimation()
-            )
-            Spacer(Modifier.height(8.dp))
-            Box(
-                Modifier
-                    .height(12.dp).fillMaxWidth(0.4f)
-                    .background(MaterialTheme.colorScheme.surfaceVariant)
-                    .shimmerLoadingAnimation()
-            )
-        }
-        Spacer(Modifier.width(16.dp))
-        Box(
-            Modifier
-                .size(24.dp)
-                .background(MaterialTheme.colorScheme.surfaceVariant)
-                .shimmerLoadingAnimation()
-        )
-        Spacer(Modifier.width(16.dp))
-    }
-}
 
 @Composable
 private fun EmptyView(category: EventActivityCategory, trackFilterActive: Boolean) {

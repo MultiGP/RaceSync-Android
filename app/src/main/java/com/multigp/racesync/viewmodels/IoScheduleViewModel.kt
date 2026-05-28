@@ -18,12 +18,14 @@ import com.multigp.racesync.domain.model.io.withActivity
 import com.multigp.racesync.domain.repositories.EventSessionBucketlist
 import com.multigp.racesync.domain.repositories.IoScheduleRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -64,23 +66,33 @@ class IoScheduleViewModel @Inject constructor(
         .map { state -> if (state is UiState.Success) io26Dates(EVENT_START, EVENT_END) else emptyList() }
         .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /** Sessions for the selected day, merged then filtered by category AND track. */
-    val displayedSessions: StateFlow<List<EventSession>> = combine(
+    /**
+     * Sessions for the selected day, merged then filtered by category AND track.
+     *
+     * Pipeline runs on [Dispatchers.Default] (off the main thread). The StateFlow's
+     * initial value is `null`, which the screen uses as a "not yet computed" signal so
+     * it can keep the cheap loader on screen until the first real emission lands.
+     * `WhileSubscribed(5s)` defers the work to when the screen actually subscribes and
+     * keeps it warm for short tab-out-and-back hops.
+     */
+    val displayedSessions: StateFlow<List<EventSession>?> = combine(
         _eventUiState,
         _selectedDate,
         _selectedCategory,
         _selectedTrackIds,
         bucketedIds,
     ) { state, date, category, trackIds, ids ->
-        val event = (state as? UiState.Success)?.data ?: return@combine emptyList()
-        val day = date ?: return@combine emptyList()
+        val event = (state as? UiState.Success)?.data ?: return@combine null
+        val day = date ?: return@combine null
         event.sessions
             .forDay(day, eventZone)
             .withActivity()
             .merged()
             .byCategory(category, ids)
             .byTracks(trackIds)
-    }.stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+    }
+        .flowOn(Dispatchers.Default)
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), null)
 
     init {
         viewModelScope.launch {
@@ -95,8 +107,11 @@ class IoScheduleViewModel @Inject constructor(
 
     fun load() {
         if (_eventUiState.value is UiState.Loading) return
+        // On pull-to-refresh we already have a Success — don't downgrade to Loading,
+        // it would tear down the schedule UI and trigger the full-screen loader.
+        val alreadyLoaded = _eventUiState.value is UiState.Success
         viewModelScope.launch {
-            _eventUiState.value = UiState.Loading
+            if (!alreadyLoaded) _eventUiState.value = UiState.Loading
             try {
                 repository.fetchEvent().collect { event ->
                     _eventUiState.value = UiState.Success(event)
