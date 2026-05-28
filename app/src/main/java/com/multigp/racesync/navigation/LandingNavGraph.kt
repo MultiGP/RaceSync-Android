@@ -95,6 +95,14 @@ fun LandingNavGraph(
             )
         }
 
+        composable(route = IoRaceFormats.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = IoRaceFormats.webUrl,
+                title = IoRaceFormats.title
+            )
+        }
+
         composable(route = RulesRegulation.route) {
             DesignGenericWebViewScreen(
                 onMenuClicked = onMenuClicked,

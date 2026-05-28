@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -320,6 +321,8 @@ fun DrawerContent(
                             Icon(
                                 painter = painterResource(resId),
                                 contentDescription = null,
+                                // Keep multi-color brand drawables (e.g. the IO mark) in their native palette.
+                                tint = if (it.iconTintable) LocalContentColor.current else Color.Unspecified,
                                 modifier = Modifier.size(24.dp)
                             )
                         } ?: run {
