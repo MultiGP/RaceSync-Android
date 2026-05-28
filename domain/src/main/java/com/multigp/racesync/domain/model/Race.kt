@@ -128,6 +128,17 @@ data class Race(
     @SerializedName("finalized")
     var finalizedRaw: String? = null
 
+    /**
+     * URL of the LiveFPV (or similar) results page for this race, when MultiGP has
+     * one configured. Comes through the `race/view` payload but isn't part of the
+     * cached race list, so it lives outside the primary constructor and is `@Ignore`d
+     * for Room — same pattern as the approver fields above. Drives the "Results on"
+     * row at the bottom of the race detail screen.
+     */
+    @Ignore
+    @SerializedName("liveTimeEventUrl")
+    var liveTimeEventUrl: String? = null
+
 
     val location: LatLng
         get() = LatLng(latitude ?: 0.0, longitude ?: 0.0)

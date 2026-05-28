@@ -16,6 +16,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.multigp.racesync.R
 import com.multigp.racesync.ui.theme.RaceSyncTheme
@@ -31,6 +32,7 @@ fun RaceDetailsCell(
     value: String,
     modifier: Modifier = Modifier,
     @DrawableRes badgeImageRes: Int? = null,
+    badgeMaxHeight: Dp = 32.dp,
     onClick: (() -> Unit)? = null
 ) {
     Row(
@@ -52,7 +54,7 @@ fun RaceDetailsCell(
                 contentDescription = value,
                 modifier = modifier
                     .weight(0.7f)
-                    .height(32.dp),
+                    .height(badgeMaxHeight),
                 alignment = Alignment.CenterStart
             )
         } else {

@@ -1,6 +1,11 @@
 package com.multigp.racesync.screens.racedetails
 
+import android.util.Log
 import android.webkit.WebChromeClient
+import android.webkit.WebResourceError
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.compose.foundation.Image
@@ -80,6 +85,7 @@ fun RaceDetailsScreen(
     var showRaceMap by remember { mutableStateOf(false) }
     var showMapOptionsSheet by remember { mutableStateOf(false) }
     var showZippyQ by remember { mutableStateOf(false) }
+    var showResultsWebView by remember { mutableStateOf(false) }
     var selectedRace by remember { mutableStateOf<Race?>(null) }
 
     val (profile, race, raceView) = data
@@ -119,7 +125,8 @@ fun RaceDetailsScreen(
         participantCount = participantCount,
         onJoinRace = onJoinRace,
         onShowMap = { showRaceMap = true },
-        onZippyQClick = { showZippyQ = true }
+        onZippyQClick = { showZippyQ = true },
+        onResultsClick = { showResultsWebView = true },
     )
 
     // In-app ZippyQ WebView (full-screen dialog)
@@ -128,6 +135,17 @@ fun RaceDetailsScreen(
             raceId = race.id,
             onDismiss = { showZippyQ = false }
         )
+    }
+
+    // In-app LiveFPV WebView for the "Results on" row
+    if (showResultsWebView) {
+        race.liveTimeEventUrl?.let { url ->
+            SimpleWebViewDialog(
+                url = url,
+                title = "Results",
+                onDismiss = { showResultsWebView = false }
+            )
+        }
     }
 
     if (showRaceMap) {
@@ -204,7 +222,8 @@ fun RaceDetailsActions(
     race: Race,
     raceView: RaceView? = null,
     modifier: Modifier = Modifier,
-    onZippyQClick: () -> Unit = {}
+    onZippyQClick: () -> Unit = {},
+    onResultsClick: () -> Unit = {},
 ) {
     Column(modifier = modifier.padding(top = 8.dp)) {
         HorizontalDivider(color = Color.LightGray)
@@ -229,6 +248,20 @@ fun RaceDetailsActions(
             )
             HorizontalDivider(color = Color.LightGray)
         }
+        // Results-on-LiveFPV row — only shown when the race carries a results URL
+        // (mirrors iOS `case .results, let url = race.liveTimeEventUrl`).
+        if (!race.liveTimeEventUrl.isNullOrBlank()) {
+            RaceDetailsCell(
+                label = "Results on",
+                value = "livefpv.com",
+                badgeImageRes = R.drawable.logo_livefpv,
+                // The LiveFPV mark is wide (4.5:1) — keep it visually proportionate to
+                // the row instead of using the default 32 dp meant for the class badge.
+                badgeMaxHeight = 18.dp,
+                onClick = onResultsClick,
+            )
+            HorizontalDivider(color = Color.LightGray)
+        }
     }
 }
 
@@ -243,6 +276,7 @@ fun RaceContentsScreen(
     onJoinRace: (Race) -> Unit = {},
     onShowMap: () -> Unit = {},
     onZippyQClick: () -> Unit = {},
+    onResultsClick: () -> Unit = {},
 ) {
     val state = rememberScrollState()
     val screenHeight = LocalConfiguration.current.screenHeightDp.dp
@@ -367,7 +401,8 @@ fun RaceContentsScreen(
             RaceDetailsActions(
                 race = race,
                 raceView = raceView,
-                onZippyQClick = onZippyQClick
+                onZippyQClick = onZippyQClick,
+                onResultsClick = onResultsClick,
             )
         }
     }
@@ -594,6 +629,121 @@ private fun ZippyQWebViewDialog(
         }
     }
 }
+
+/**
+ * Plain in-app WebView dialog for opening a public URL (no login). Used by the
+ * "Results on LiveFPV" row at the bottom of the race detail screen. Mirrors iOS's
+ * `WebViewController.open(url)` pattern — the user stays inside the app.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SimpleWebViewDialog(
+    url: String,
+    title: String,
+    onDismiss: () -> Unit,
+) {
+    var pageStatus by remember { mutableStateOf<String?>(null) }
+    Dialog(
+        onDismissRequest = onDismiss,
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    ) {
+        Scaffold(
+            topBar = {
+                TopAppBar(
+                    title = {
+                        Column {
+                            Text(title)
+                            pageStatus?.let {
+                                Text(
+                                    text = it,
+                                    style = MaterialTheme.typography.labelSmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                )
+                            }
+                        }
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onDismiss) {
+                            Icon(
+                                imageVector = Icons.Default.Close,
+                                contentDescription = "Close"
+                            )
+                        }
+                    }
+                )
+            }
+        ) { paddingValues ->
+            AndroidView(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues),
+                factory = { context ->
+                    WebView(context).apply {
+                        with(settings) {
+                            javaScriptEnabled = true
+                            domStorageEnabled = true
+                            // Render desktop-width pages legibly on a phone viewport.
+                            loadWithOverviewMode = true
+                            useWideViewPort = true
+                            // Some FPV result pages are served over HTTPS but pull
+                            // assets from HTTP — let the WebView load both.
+                            mixedContentMode = WebSettings.MIXED_CONTENT_COMPATIBILITY_MODE
+                            // Some sites refuse to serve content to the bare
+                            // "; wv" WebView UA — present a regular Chrome UA instead.
+                            userAgentString = userAgentString
+                                ?.replace(Regex("; wv\\)"), ")")
+                        }
+                        webChromeClient = WebChromeClient()
+                        webViewClient = object : WebViewClient() {
+                            override fun onPageStarted(
+                                view: WebView?,
+                                requestedUrl: String?,
+                                favicon: android.graphics.Bitmap?
+                            ) {
+                                Log.d(WEB_TAG, "page started: $requestedUrl")
+                                pageStatus = "Loading…"
+                            }
+
+                            override fun onPageFinished(view: WebView?, finishedUrl: String?) {
+                                Log.d(WEB_TAG, "page finished: $finishedUrl")
+                                pageStatus = null
+                            }
+
+                            override fun onReceivedError(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                                error: WebResourceError?
+                            ) {
+                                Log.w(
+                                    WEB_TAG,
+                                    "error ${error?.errorCode}: ${error?.description} for ${request?.url}"
+                                )
+                                if (request?.isForMainFrame == true) {
+                                    pageStatus = "Couldn't load page"
+                                }
+                            }
+
+                            override fun onReceivedHttpError(
+                                view: WebView?,
+                                request: WebResourceRequest?,
+                                errorResponse: WebResourceResponse?
+                            ) {
+                                Log.w(
+                                    WEB_TAG,
+                                    "http ${errorResponse?.statusCode} ${errorResponse?.reasonPhrase} for ${request?.url}"
+                                )
+                            }
+                        }
+                        Log.d(WEB_TAG, "loading: $url")
+                        loadUrl(url)
+                    }
+                }
+            )
+        }
+    }
+}
+
+private const val WEB_TAG = "RaceSyncWebView"
 
 @Preview
 @Composable
