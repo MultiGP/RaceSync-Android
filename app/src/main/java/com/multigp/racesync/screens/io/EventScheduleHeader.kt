@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Place
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.outlined.StarBorder
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
@@ -219,6 +221,16 @@ private fun FilterRow(
     onCategorySelected: (EventActivityCategory) -> Unit,
     onTracksClicked: () -> Unit,
 ) {
+    val chipColors = FilterChipDefaults.filterChipColors(
+        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+        selectedLabelColor = MaterialTheme.colorScheme.primary,
+        selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
+    )
+    // Activity categories minus MySchedule (which lives in the "orthogonal" group at the left).
+    val categories = remember {
+        EventActivityCategory.entries.filter { it != EventActivityCategory.MySchedule }
+    }
+
     LazyRow(
         modifier = Modifier
             .fillMaxWidth()
@@ -227,18 +239,6 @@ private fun FilterRow(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        items(EventActivityCategory.entries.toList(), key = { it.name }) { category ->
-            FilterChip(
-                selected = selectedCategory == category,
-                onClick = { onCategorySelected(category) },
-                enabled = enabled,
-                label = { Text(category.title) },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                    selectedLabelColor = MaterialTheme.colorScheme.primary,
-                )
-            )
-        }
         item(key = "__tracks__") {
             FilterChip(
                 selected = trackFilterCount > 0,
@@ -252,16 +252,44 @@ private fun FilterRow(
                     )
                 },
                 label = {
-                    Text(
-                        if (trackFilterCount == 0) "Tracks"
-                        else "Tracks · $trackFilterCount"
+                    Text(if (trackFilterCount == 0) "Tracks" else "Tracks · $trackFilterCount")
+                },
+                colors = chipColors,
+            )
+        }
+        item(key = "__my_schedule__") {
+            val isMine = selectedCategory == EventActivityCategory.MySchedule
+            FilterChip(
+                selected = isMine,
+                onClick = { onCategorySelected(EventActivityCategory.MySchedule) },
+                enabled = enabled,
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (isMine) Icons.Filled.Star else Icons.Outlined.StarBorder,
+                        contentDescription = null,
+                        modifier = Modifier.size(16.dp),
                     )
                 },
-                colors = FilterChipDefaults.filterChipColors(
-                    selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                    selectedLabelColor = MaterialTheme.colorScheme.primary,
-                    selectedLeadingIconColor = MaterialTheme.colorScheme.primary,
-                )
+                label = { Text("My Schedule") },
+                colors = chipColors,
+            )
+        }
+        item(key = "__divider__") {
+            Box(
+                modifier = Modifier
+                    .padding(horizontal = 4.dp)
+                    .width(1.dp)
+                    .height(24.dp)
+                    .background(MaterialTheme.colorScheme.outlineVariant)
+            )
+        }
+        items(categories, key = { it.name }) { category ->
+            FilterChip(
+                selected = selectedCategory == category,
+                onClick = { onCategorySelected(category) },
+                enabled = enabled,
+                label = { Text(category.title) },
+                colors = chipColors,
             )
         }
     }

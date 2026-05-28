@@ -79,6 +79,13 @@ fun List<EventSession>.forDay(
 }
 
 /**
+ * Drops empty / placeholder slots (null or blank activity). The upstream payload uses these
+ * to represent closed time blocks (e.g. 8-10 AM every day); they aren't useful as schedule rows.
+ */
+fun List<EventSession>.withActivity(): List<EventSession> =
+    filter { !it.activity.isNullOrBlank() }
+
+/**
  * Collapses consecutive same-activity / same-track sessions whose gap is ≤ [gapMinutes]
  * into a single row that spans from the first start to the last end. Matches iOS's
  * `EventsController.mergedSessions` so a long qualifier isn't displayed as N short rows.

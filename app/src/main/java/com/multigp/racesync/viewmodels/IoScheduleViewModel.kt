@@ -14,6 +14,7 @@ import com.multigp.racesync.domain.model.io.initialDate
 import com.multigp.racesync.domain.model.io.io26Dates
 import com.multigp.racesync.domain.model.io.merged
 import com.multigp.racesync.domain.model.io.parsedDate
+import com.multigp.racesync.domain.model.io.withActivity
 import com.multigp.racesync.domain.repositories.EventSessionBucketlist
 import com.multigp.racesync.domain.repositories.IoScheduleRepository
 import com.multigp.racesync.services.io.IoSessionNotifier
@@ -77,6 +78,7 @@ class IoScheduleViewModel @Inject constructor(
         val day = date ?: return@combine emptyList()
         event.sessions
             .forDay(day, eventZone)
+            .withActivity()
             .merged()
             .byCategory(category, ids)
             .byTracks(trackIds)

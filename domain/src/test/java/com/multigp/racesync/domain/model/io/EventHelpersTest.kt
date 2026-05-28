@@ -284,6 +284,18 @@ class EventHelpersTest {
     }
 
     @Test
+    fun `withActivity drops null and blank activity sessions`() {
+        val sessions = listOf(
+            session("nullact", activity = null),
+            session("blank", activity = "   "),
+            session("real", activity = "World Cup Qualifying"),
+            session("emptystr", activity = ""),
+        )
+        val ids = sessions.withActivity().map { it.id }
+        assertEquals(listOf("real"), ids)
+    }
+
+    @Test
     fun `byTracks with empty set is the unfiltered default`() {
         val sessions = listOf(
             session("a", trackId = "main_stage"),
