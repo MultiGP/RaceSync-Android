@@ -163,14 +163,6 @@ class IoScheduleViewModel @Inject constructor(
         viewModelScope.launch { prefs.setHideIoSchedulerAlerts(true) }
     }
 
-    /** Returns the session with [sessionId] if the event has loaded; else null. */
-    fun findSession(sessionId: String): EventSession? =
-        (eventUiState.value as? UiState.Success)?.data?.sessions?.firstOrNull { it.id == sessionId }
-
-    /** Returns the track for [trackId] from the loaded event, if any. */
-    fun findTrack(trackId: String): com.multigp.racesync.domain.model.io.EventTrack? =
-        (eventUiState.value as? UiState.Success)?.data?.tracks?.firstOrNull { it.id == trackId }
-
     private val eventZone: TimeZone = TimeZone.getTimeZone(MGP_EVENT_TIMEZONE_ID)
 
     companion object {

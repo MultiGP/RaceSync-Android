@@ -209,18 +209,6 @@ object IoSchedule : NavDestination {
     override val webUrl = null
 }
 
-object IoSessionDetails : NavDestination {
-    override val icon = null
-    override val title = "IO Session"
-    override val route = "io_session"
-    override val webUrl = null
-    const val sessionIdArg = "sessionId"
-    val routeWithArgs = "$route/{$sessionIdArg}"
-    val arguments = listOf(
-        navArgument(sessionIdArg) { type = NavType.StringType }
-    )
-}
-
 object VisitMultiGP : NavDestination {
     override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"

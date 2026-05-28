@@ -34,7 +34,11 @@ data class EventSession(
     @SerializedName("status")    val statusRaw: String? = null,
     @SerializedName("date")      val rawDate: String? = null,
     @SerializedName("startTime") val rawStartTime: String? = null,
-    @SerializedName("endTime")   val rawEndTime: String? = null
+    @SerializedName("endTime")   val rawEndTime: String? = null,
+    // Populated by the Apps Script from a hand-curated session→race map.
+    // Null when no corresponding MultiGP race exists (closed slots, one-off
+    // sessions like Movie Night, contingency days, etc.).
+    @SerializedName("raceId")    val raceId: String? = null,
 ) {
     val status: EventStatus get() = EventStatus.from(statusRaw)
 }

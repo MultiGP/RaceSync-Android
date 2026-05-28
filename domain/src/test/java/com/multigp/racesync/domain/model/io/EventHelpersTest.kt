@@ -111,7 +111,8 @@ class EventHelpersTest {
                   "status": "scheduled",
                   "date": "2026-06-10",
                   "startTime": "10:00",
-                  "endTime": "11:00"
+                  "endTime": "11:00",
+                  "raceId": "32075"
                 }
               ]
             }
@@ -125,8 +126,17 @@ class EventHelpersTest {
         assertEquals("s1", s.id)
         assertEquals(EventStatus.Scheduled, s.status)
         assertEquals("Open Fly", s.activity)
+        assertEquals("32075", s.raceId)
         assertNotNull(s.startInstant())
         assertNotNull(s.endInstant())
+    }
+
+    @Test
+    fun `Gson tolerates raceId being absent or null`() {
+        val absent = """{"id":"x","activity":"X","trackId":"t","status":"scheduled"}"""
+        val asNull = """{"id":"x","activity":"X","trackId":"t","status":"scheduled","raceId":null}"""
+        assertNull(Gson().fromJson(absent, EventSession::class.java).raceId)
+        assertNull(Gson().fromJson(asNull, EventSession::class.java).raceId)
     }
 
     @Test

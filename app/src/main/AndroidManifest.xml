@@ -41,14 +41,6 @@
                     android:scheme="racesync"
                     android:host="notification_race_details" />
             </intent-filter>
-            <intent-filter android:label="@string/io_session_detail_title">
-                <action android:name="android.intent.action.VIEW" />
-                <category android:name="android.intent.category.DEFAULT" />
-                <category android:name="android.intent.category.BROWSABLE" />
-                <data
-                    android:scheme="racesync"
-                    android:host="io_session" />
-            </intent-filter>
         </activity>
 
         <service

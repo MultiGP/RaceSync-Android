@@ -115,15 +115,6 @@
     <string name="io_error_title_loading">Couldn\'t load IO schedule</string>
     <string name="io_star_add">Add to my schedule</string>
     <string name="io_star_remove">Remove from my schedule</string>
-    <string name="io_session_detail_title">Session</string>
-    <string name="io_action_back">Back</string>
-    <string name="io_session_not_found">Session not found.</string>
-    <string name="io_detail_label_day">Day</string>
-    <string name="io_detail_label_time">Time</string>
-    <string name="io_detail_label_track">Track</string>
-    <string name="io_detail_label_duration">Duration</string>
-    <string name="io_detail_button_im_going">I\'m Going</string>
-    <string name="io_detail_button_going">Going</string>
 
     <!-- Series -->
     <string name="placeholder_title_no_series">No Series Found</string>

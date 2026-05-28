@@ -31,16 +31,24 @@ class IoSessionAlarmReceiver : BroadcastReceiver() {
         val body = bodyFor(context, session)
         val notifId = session.id.hashCode()
 
-        val deepLink = Intent(
-            Intent.ACTION_VIEW,
-            "racesync://io_session/${session.id}".toUri(),
-            context,
-            OnboardingActivity::class.java
-        ).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP }
+        // If the bucketed session links to a MultiGP race, jump straight to the
+        // existing race-notification deep link (same UX as FCM race pushes). If
+        // not, just launch the app.
+        val raceId = session.raceId
+        val tapIntent = if (!raceId.isNullOrBlank()) {
+            Intent(
+                Intent.ACTION_VIEW,
+                "racesync://notification_race_details/$raceId".toUri(),
+                context,
+                OnboardingActivity::class.java
+            )
+        } else {
+            Intent(context, OnboardingActivity::class.java)
+        }.apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP }
         val contentIntent = PendingIntent.getActivity(
             context,
             notifId,
-            deepLink,
+            tapIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
 

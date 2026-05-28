@@ -63,7 +63,7 @@ import java.util.TimeZone
 fun IoScheduleScreen(
     modifier: Modifier = Modifier,
     viewModel: IoScheduleViewModel = hiltViewModel(),
-    onSessionClick: (EventSession) -> Unit = {},
+    onRaceSelected: (raceId: String) -> Unit = {},
 ) {
     val eventState by viewModel.eventUiState.collectAsState()
     val dates by viewModel.dates.collectAsState()
@@ -126,7 +126,7 @@ fun IoScheduleScreen(
                             event = event,
                             sessions = sessions,
                             bucketedIds = bucketedIds,
-                            onClick = onSessionClick,
+                            onRaceSelected = onRaceSelected,
                             onToggleStar = viewModel::toggleBucket,
                         )
                     }
@@ -149,7 +149,7 @@ private fun SessionList(
     event: Event,
     sessions: List<EventSession>,
     bucketedIds: Set<String>,
-    onClick: (EventSession) -> Unit,
+    onRaceSelected: (raceId: String) -> Unit,
     onToggleStar: (EventSession) -> Unit,
 ) {
     val trackById = remember(event) {
@@ -164,7 +164,7 @@ private fun SessionList(
                 session = session,
                 trackName = trackById[session.trackId]?.name.orEmpty().ifEmpty { session.trackId.orEmpty() },
                 isAttending = session.id in bucketedIds,
-                onClick = { onClick(session) },
+                onClick = { session.raceId?.let(onRaceSelected) },
                 onToggleStar = { onToggleStar(session) },
             )
             HorizontalDivider(
@@ -194,7 +194,8 @@ private fun SessionRow(
         modifier = Modifier
             .fillMaxWidth()
             .height(90.dp)
-            .clickable(onClick = onClick),
+            // Only the rows that actually link to a MultiGP race are tappable.
+            .clickable(enabled = session.raceId != null, onClick = onClick),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 4 dp colored rail — strong visual anchor for "all the X-track rows".
