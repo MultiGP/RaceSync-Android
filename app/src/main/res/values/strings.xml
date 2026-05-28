@@ -98,14 +98,9 @@
     <string name="tab_standings">Standings</string>
     <string name="tab_io">IO 2026</string>
 
-    <!-- IO 2026 notifications -->
-    <string name="io_notification_channel_name">IO Event Reminders</string>
-    <string name="io_notification_channel_description">Reminders one hour before sessions you\'ve bookmarked.</string>
-    <string name="io_notification_title">IO 2026: Your next event is up!</string>
-    <string name="io_notification_body_with_time">\'%1$s\' starts at %2$s.</string>
-    <string name="io_notification_body_no_time">\'%1$s\' starts in 1 hour.</string>
-    <string name="io_scheduler_alert_added_title">Added to your bucket list</string>
-    <string name="io_scheduler_alert_added_message">We will notify you one hour before \'%1$s\' starts.</string>
+    <!-- IO 2026 "added to my schedule" alert -->
+    <string name="io_scheduler_alert_added_title">Added to My Schedule</string>
+    <string name="io_scheduler_alert_added_message">See you at \'%1$s\'!</string>
     <string name="io_scheduler_alert_dont_show_again">Don\'t Show Again</string>
     <string name="io_empty_title">No Sessions</string>
     <string name="io_empty_message_all">There are no events scheduled this day.</string>

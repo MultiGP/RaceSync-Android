@@ -33,6 +33,10 @@ class EventSessionBucketlistImpl(
     private val _bucketedIds = MutableStateFlow<Set<String>>(emptySet())
     override val bucketedIds: StateFlow<Set<String>> = _bucketedIds.asStateFlow()
 
+    override suspend fun warmUp() = withContext(Dispatchers.IO) {
+        mutex.withLock { ensureLoadedLocked() }
+    }
+
     override suspend fun add(session: EventSession, day: Date) = mutate {
         val list = buckets.getOrPut(dayKey(day)) { mutableListOf() }
         if (list.none { it.id == session.id }) list.add(session)

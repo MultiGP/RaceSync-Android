@@ -17,7 +17,6 @@ import com.multigp.racesync.domain.model.io.parsedDate
 import com.multigp.racesync.domain.model.io.withActivity
 import com.multigp.racesync.domain.repositories.EventSessionBucketlist
 import com.multigp.racesync.domain.repositories.IoScheduleRepository
-import com.multigp.racesync.services.io.IoSessionNotifier
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,7 +35,6 @@ import javax.inject.Inject
 class IoScheduleViewModel @Inject constructor(
     private val repository: IoScheduleRepository,
     private val bucketlist: EventSessionBucketlist,
-    private val notifier: IoSessionNotifier,
     private val prefs: DataStoreManager,
 ) : ViewModel() {
 
@@ -86,6 +84,9 @@ class IoScheduleViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            // Load the persisted bucket first so the schedule's star state is correct
+            // on the very first render, not just after the user toggles something.
+            bucketlist.warmUp()
             _selectedCategory.value = prefs.getSelectedIoCategory.first()
             _selectedTrackIds.value = prefs.getSelectedIoTrackIds.first()
         }
@@ -136,17 +137,15 @@ class IoScheduleViewModel @Inject constructor(
         viewModelScope.launch { prefs.setSelectedIoTrackIds(emptySet()) }
     }
 
-    /** Toggles bucket membership for [session] and schedules / cancels the 1-hour-before alarm. */
+    /** Toggles bucket membership for [session]. Shows the "see you at" alert on add. */
     fun toggleBucket(session: EventSession) {
         val day = session.parsedDate() ?: return
         val wasAttending = session.id in bucketedIds.value
         viewModelScope.launch {
             if (wasAttending) {
                 bucketlist.remove(session, day)
-                notifier.cancel(session.id)
             } else {
                 bucketlist.add(session, day)
-                notifier.schedule(session)
                 if (!hideSchedulerAlerts.value) {
                     _pendingAlertActivity.value = session.activity.orEmpty()
                 }

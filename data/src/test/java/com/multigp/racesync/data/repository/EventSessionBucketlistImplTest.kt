@@ -75,6 +75,19 @@ class EventSessionBucketlistImplTest {
     }
 
     @Test
+    fun `warmUp populates bucketedIds before any other call`() = runBlocking {
+        // Persist a bucket using one instance.
+        EventSessionBucketlistImpl(storeFile).add(session("s1"), day10)
+
+        // A second instance starts empty until something prompts the lazy load.
+        val cold = EventSessionBucketlistImpl(storeFile)
+        assertEquals(emptySet<String>(), cold.bucketedIds.value)
+
+        cold.warmUp()
+        assertEquals(setOf("s1"), cold.bucketedIds.value)
+    }
+
+    @Test
     fun `state survives a fresh instance pointing at the same file`() = runBlocking {
         val first = EventSessionBucketlistImpl(storeFile)
         first.add(session("s1", activity = "Cached"), day10)

@@ -22,8 +22,6 @@ import com.multigp.racesync.domain.repositories.ProfileRepository
 import com.multigp.racesync.domain.repositories.RacesRepository
 import com.multigp.racesync.domain.repositories.SeriesRepository
 import com.multigp.racesync.domain.repositories.StandingsRepository
-import com.multigp.racesync.services.io.IoSessionNotifier
-import com.multigp.racesync.services.io.IoSessionNotifierImpl
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -91,10 +89,4 @@ object RepositoryModule {
     fun provideEventSessionBucketlist(
         @ApplicationContext context: Context,
     ): EventSessionBucketlist = EventSessionBucketlistImpl.fromContext(context)
-
-    @Provides
-    @Singleton
-    fun provideIoSessionNotifier(
-        @ApplicationContext context: Context,
-    ): IoSessionNotifier = IoSessionNotifierImpl(context)
 }

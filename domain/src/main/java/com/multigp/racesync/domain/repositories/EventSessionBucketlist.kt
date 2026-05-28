@@ -13,6 +13,14 @@ interface EventSessionBucketlist {
     /** All currently-bucketed session ids across every day. Hot stream for UI star-state. */
     val bucketedIds: StateFlow<Set<String>>
 
+    /**
+     * Forces the on-disk bucket file to be read into memory and pushed through [bucketedIds].
+     * Call this from a UI-layer init coroutine so the schedule's star state reflects the
+     * persisted bucket on cold launch, before any add/remove call would otherwise trigger
+     * the lazy load.
+     */
+    suspend fun warmUp()
+
     /** Add a session to the bucket for [day]. No-op if a session with the same id is already there. */
     suspend fun add(session: EventSession, day: Date)
 
