@@ -35,7 +35,8 @@ interface NavDestination {
     val route: String
     val webUrl: String?
     val iconPainterId: Int? get() = null
-
+    /** Set false for multi-color brand drawables that should render in their native palette. */
+    val iconTintable: Boolean get() = true
 }
 
 object Login : NavDestination {
@@ -202,6 +203,21 @@ object StandingsDetail : NavDestination {
     )
 }
 
+object IoSchedule : NavDestination {
+    override val icon = Icons.Outlined.CalendarMonth
+    override val title = "IO 2026"
+    override val route = "io_schedule"
+    override val webUrl = null
+}
+
+object IoRaceFormats : NavDestination {
+    override val iconPainterId = R.drawable.ic_international_open
+    override val iconTintable = false   // multi-color MultiGP IO mark — keep native palette
+    override val title = "IO 2026 Race Formats"
+    override val route = "io_race_formats"
+    override val webUrl = "https://www.multigp.com/io26/race-formats/"
+}
+
 object VisitMultiGP : NavDestination {
     override val icon = Icons.Outlined.Flag
     override val title = "Go to MultiGP.com"
@@ -226,6 +242,7 @@ object SendFeedback : NavDestination {
 
 val drawerMenu = listOf(
     Landing,
+    IoRaceFormats,
     ObstaclesBuildGuide,
     RulesRegulation,
     VisitMultiGPShop,

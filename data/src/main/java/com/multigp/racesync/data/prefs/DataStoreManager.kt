@@ -5,10 +5,12 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
+import androidx.datastore.preferences.core.stringSetPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.multigp.racesync.domain.model.UserInfo
+import com.multigp.racesync.domain.model.io.EventActivityCategory
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -66,6 +68,35 @@ class DataStoreManager(val context: Context) {
             preferences[KEY_NOTIFICATION_PREFERENCE] ?: false
         }
 
+    suspend fun setHideIoSchedulerAlerts(hide: Boolean) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_HIDE_IO_SCHEDULER_ALERTS] = hide
+        }
+    }
+
+    val getHideIoSchedulerAlerts: Flow<Boolean> = context.dataStore.data
+        .map { preferences ->
+            preferences[KEY_HIDE_IO_SCHEDULER_ALERTS] ?: false
+        }
+
+    suspend fun setSelectedIoCategory(category: EventActivityCategory) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_SELECTED_IO_CATEGORY] = category.title
+        }
+    }
+
+    val getSelectedIoCategory: Flow<EventActivityCategory> = context.dataStore.data
+        .map { preferences -> EventActivityCategory.fromTitle(preferences[KEY_SELECTED_IO_CATEGORY]) }
+
+    suspend fun setSelectedIoTrackIds(trackIds: Set<String>) {
+        context.dataStore.edit { preferences ->
+            preferences[KEY_SELECTED_IO_TRACK_IDS] = trackIds
+        }
+    }
+
+    val getSelectedIoTrackIds: Flow<Set<String>> = context.dataStore.data
+        .map { preferences -> preferences[KEY_SELECTED_IO_TRACK_IDS] ?: emptySet() }
+
     suspend fun saveGqYear(year: String) {
         context.dataStore.edit { preferences ->
             preferences[KEY_GQ_YEAR] = year
@@ -106,6 +137,9 @@ class DataStoreManager(val context: Context) {
         private val KEY_RADIUS_UNIT = stringPreferencesKey("key_radius_unit")
         private val KEY_RADIUS_VALUE = doublePreferencesKey("key_radius_value")
         private val KEY_NOTIFICATION_PREFERENCE = booleanPreferencesKey("key_notification_preference")
+        private val KEY_HIDE_IO_SCHEDULER_ALERTS = booleanPreferencesKey("key_hide_io_scheduler_alerts")
+        private val KEY_SELECTED_IO_CATEGORY = stringPreferencesKey("key_selected_io_category")
+        private val KEY_SELECTED_IO_TRACK_IDS = stringSetPreferencesKey("key_selected_io_track_ids")
         private val KEY_GQ_YEAR = stringPreferencesKey("key_gq_year")
         private val KEY_RACE_CLASS = stringPreferencesKey("key_race_class")
 

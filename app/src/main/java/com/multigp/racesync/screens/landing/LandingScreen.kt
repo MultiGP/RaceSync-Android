@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.DrawerState
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -68,12 +69,14 @@ import com.multigp.racesync.composables.RationaleDialog
 import com.multigp.racesync.composables.bottombars.HomeBottomBar
 import com.multigp.racesync.composables.bottombars.HomeTab
 import com.multigp.racesync.navigation.GqRanking
+import com.multigp.racesync.navigation.IoSchedule
 import com.multigp.racesync.navigation.Landing
 import com.multigp.racesync.navigation.LandingNavGraph
 import com.multigp.racesync.navigation.Logout
 import com.multigp.racesync.navigation.NavDestination
 import com.multigp.racesync.navigation.Series
 import com.multigp.racesync.navigation.drawerMenu
+import com.multigp.racesync.screens.io.isIoTabVisible
 import com.multigp.racesync.viewmodels.DrawerContentViewModel
 import com.multigp.racesync.viewmodels.LandingViewModel
 import com.multigp.racesync.viewmodels.UiState
@@ -81,7 +84,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 
 /** Top-level routes where the bottom tab bar should be visible. */
-private val bottomBarRoutes = setOf(Landing.route, GqRanking.route, Series.route)
+private val bottomBarRoutes = setOf(Landing.route, GqRanking.route, Series.route, IoSchedule.route)
 
 @Composable
 fun LandingScreen(
@@ -110,7 +113,14 @@ fun LandingScreen(
             Landing.route -> selectedTab = HomeTab.Races
             Series.route -> selectedTab = HomeTab.Series
             GqRanking.route -> selectedTab = HomeTab.Standings
+            IoSchedule.route -> selectedTab = HomeTab.Io
         }
+    }
+
+    // The IO tab only appears near the event window.
+    val visibleTabs = remember {
+        if (isIoTabVisible()) HomeTab.entries.toSet()
+        else HomeTab.entries.toSet() - HomeTab.Io
     }
 
     BackHandler(onBack = {
@@ -175,12 +185,14 @@ fun LandingScreen(
             if (showBottomBar) {
                 HomeBottomBar(
                     selectedTab = selectedTab,
+                    visibleTabs = visibleTabs,
                     onTabSelected = { tab ->
                         selectedTab = tab
                         val route = when (tab) {
                             HomeTab.Races -> Landing.route
                             HomeTab.Series -> Series.route
                             HomeTab.Standings -> GqRanking.route
+                            HomeTab.Io -> IoSchedule.route
                         }
                         navController.navigate(route) {
                             popUpTo(Series.route) { saveState = true }
@@ -309,6 +321,8 @@ fun DrawerContent(
                             Icon(
                                 painter = painterResource(resId),
                                 contentDescription = null,
+                                // Keep multi-color brand drawables (e.g. the IO mark) in their native palette.
+                                tint = if (it.iconTintable) LocalContentColor.current else Color.Unspecified,
                                 modifier = Modifier.size(24.dp)
                             )
                         } ?: run {

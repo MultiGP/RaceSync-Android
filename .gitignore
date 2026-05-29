@@ -16,10 +16,12 @@ local.properties
 .idea/.name
 .idea/compiler.xml
 .idea/deploymentTargetDropDown.xml
+.idea/deploymentTargetSelector.xml
 .idea/gradle.xml
 .idea/kotlinc.xml
 .idea/migrations.xml
 .idea/misc.xml
+.idea/other.xml
 .idea/vcs.xml
 /.idea/inspectionProfiles/Project_Default.xml
 app/production/release/app-production-release.aab

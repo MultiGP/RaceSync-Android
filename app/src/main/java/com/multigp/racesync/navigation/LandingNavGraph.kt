@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navDeepLink
 import com.multigp.racesync.screens.allaircraft.AllAircraftScreen
+import com.multigp.racesync.screens.io.IoScheduleScreen
 import com.multigp.racesync.screens.landing.AircraftDetailsScreen
 import com.multigp.racesync.screens.landing.ChapterDetailsScreen
 import com.multigp.racesync.screens.landing.DesignGenericWebViewScreen
@@ -91,6 +92,14 @@ fun LandingNavGraph(
                 onMenuClicked = onMenuClicked,
                 statWebUrl = ObstaclesBuildGuide.webUrl,
                 title = ObstaclesBuildGuide.title
+            )
+        }
+
+        composable(route = IoRaceFormats.route) {
+            DesignGenericWebViewScreen(
+                onMenuClicked = onMenuClicked,
+                statWebUrl = IoRaceFormats.webUrl,
+                title = IoRaceFormats.title
             )
         }
 
@@ -226,6 +235,14 @@ fun LandingNavGraph(
                         }
                     )
                 }
+        }
+
+        composable(route = IoSchedule.route) {
+            IoScheduleScreen(
+                onRaceSelected = { raceId ->
+                    navController.navigate("${RaceDetails.route}/$raceId")
+                }
+            )
         }
     }
 }
